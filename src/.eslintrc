@@ -1,0 +1,6 @@
+{
+  "rules": {
+    "sonarjs/no-nested-template-literals": 0,
+    "unicorn/filename-case": 0
+  }
+}

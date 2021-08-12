@@ -1,0 +1,9 @@
+{
+  "settings": {
+    "listItemIndent": 1,
+    "tightDefinitions": true
+  },
+  "plugins": [
+    "@1stg/remark-config"
+  ]
+}

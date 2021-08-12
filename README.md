@@ -33,7 +33,7 @@ before_script: yarn --frozen-lockfile
 release:
   image: node:lts-alpine
   only: main
-  script: changesets-gitlab
+  script: yarn changesets-gitlab
 ```
 
 #### With Publishing
@@ -49,7 +49,7 @@ before_script: yarn --frozen-lockfile
 release:
   image: node:lts-alpine
   only: main
-  script: changesets-gitlab
+  script: yarn changesets-gitlab
   variables:
     INPUT_PUBLISH: yarn release
 ```
@@ -86,7 +86,7 @@ before_script: yarn --frozen-lockfile
 release:
   image: node:lts-alpine
   only: main
-  script: changesets-gitlab
+  script: yarn changesets-gitlab
   variables:
     INPUT_VERSION: yarn version
 ```
@@ -104,7 +104,7 @@ before_script: yarn --frozen-lockfile
 release:
   image: node:lts-alpine
   only: main
-  script: changesets-gitlab
+  script: yarn changesets-gitlab
   variables:
     INPUT_VERSION: yarn changeset version
 ```

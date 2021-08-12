@@ -59,6 +59,9 @@
   "resolutions": {
     "prettier": "^2.3.2"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "typeCoverage": {
     "atLeast": 100,
     "cache": true,

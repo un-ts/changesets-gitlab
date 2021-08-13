@@ -9,7 +9,7 @@
     "node": ">=12"
   },
   "bin": {
-    "changesets-gitlab": "bin/cli.js"
+    "changesets-gitlab": "lib/cli.js"
   },
   "exports": {
     "import": "./lib/index.js",

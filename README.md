@@ -18,6 +18,21 @@ GitLab CI cli for [changesets](https://github.com/atlassian/changesets) like its
 - published - A boolean value to indicate whether a publishing is happened or not
 - publishedPackages - A JSON array to present the published packages. The format is `[{"name": "@xx/xx", "version": "1.2.0"}, {"name": "@xx/xy", "version": "0.8.9"}]`
 
+### Environment Variables
+
+```sh
+GLOBAL_AGENT_HTTP_PROXY  # optional, if you're using custom GitLab service under proxy
+GLOBAL_AGENT_HTTPS_PROXY # As above but for https requests
+GLOBAL_AGENT_NO_PROXY    # Like above but for no proxied requests
+
+# http_proxy, https_proxy, no_proxy environment variables are supported at the same time
+
+GITLAB_HOST # optional, if you're using custom GitLab host
+
+GITLAB_TOKEN     # required, token with accessibility to push
+GITLAB_USER_NAME # required, username with accessibility to push, used in pairs of the above token
+```
+
 ### Example workflow
 
 #### Without Publishing

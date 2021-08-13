@@ -2,8 +2,11 @@
 
 import './env.js'
 
+import { URL } from 'url'
+
 import { getInput, setFailed, setOutput } from '@actions/core'
 import fs from 'fs-extra'
+import { exec } from '@actions/exec'
 
 import { setupUser } from './gitUtils.js'
 import readChangesetState from './readChangesetState.js'
@@ -12,14 +15,18 @@ import { runPublish, runVersion } from './run.js'
 const main = async () => {
   const {
     CI,
+    CI_PROJECT_PATH,
     GITLAB_HOST = 'https://gitlab.com',
     GITLAB_TOKEN,
+    GITLAB_USER_NAME,
     HOME,
     NPM_TOKEN,
   } = process.env
 
-  if (!GITLAB_TOKEN) {
-    setFailed('Please add the GITLAB_TOKEN to the changesets action')
+  if (!GITLAB_TOKEN || !GITLAB_USER_NAME) {
+    setFailed(
+      'Please add the `GITLAB_TOKEN` and `GITLAB_USER_NAME` to the changesets action',
+    )
     return
   }
 
@@ -30,14 +37,18 @@ const main = async () => {
     console.log('setting git user')
     await setupUser()
 
-    console.log('setting GitHub credentials')
-    await fs.writeFile(
-      `${HOME!}/.netrc`,
-      `machine ${GITLAB_HOST.replace(
-        /^https?:\/\//,
-        '',
-      )}\nlogin gitlab[bot]\npassword ${GITLAB_TOKEN}`,
-    )
+    console.log('setting GitLab credentials')
+
+    const url = new URL(GITLAB_HOST)
+
+    await exec('git', [
+      'remote',
+      'set-url',
+      'origin',
+      `${url.protocol}//${GITLAB_USER_NAME}:${GITLAB_TOKEN}@${
+        url.host
+      }/${CI_PROJECT_PATH!}.git`,
+    ])
   }
 
   const { changesets } = await readChangesetState()

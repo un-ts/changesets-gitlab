@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.1.2
+
+### Patch Changes
+
+- [`44d561d`](https://github.com/rx-ts/changesets-gitlab/commit/44d561d48efbeaca14c1625da9c2db94badfe9d9) Thanks [@JounQin](https://github.com/JounQin)! - fix: gitlab authentication with username and token
+
 ## 0.1.1
 
 ### Patch Changes

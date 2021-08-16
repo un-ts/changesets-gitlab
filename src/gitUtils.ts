@@ -13,7 +13,8 @@ export const setupUser = async () => {
     'config',
     '--global',
     'user.email',
-    process.env.GITLAB_USER_EMAIL || '"gitlab[bot]@users.noreply.gitlab.com"',
+    process.env.GITLAB_CI_USER_EMAIL ||
+      '"gitlab[bot]@users.noreply.gitlab.com"',
   ])
 }
 

@@ -1,6 +1,6 @@
 # changesets-gitlab
 
-GitLab CI cli for [changesets](https://github.com/atlassian/changesets) like its [GitHub Action](https://github.com/changesets/action), it creates a pull request with all of the package versions updated and changelogs updated and when there are new changesets on master, the PR will be updated. When you're ready, you can merge the pull request and you can either publish the packages to npm manually or setup the action to do it for you.
+GitLab CI cli for [changesets](https://github.com/atlassian/changesets) like its [GitHub Action](https://github.com/changesets/action), it creates a merge request with all of the package versions updated and changelogs updated and when there are new changesets on master, the MR will be updated. When you're ready, you can merge the merge request and you can either publish the packages to npm manually or setup the action to do it for you.
 
 ## Usage
 
@@ -11,7 +11,7 @@ GitLab CI cli for [changesets](https://github.com/atlassian/changesets) like its
 - publish - The command to use to build and publish packages
 - version - The command to update version, edit CHANGELOG, read and delete changesets. Default to `changeset version` if not provided
 - commit - The commit message to use. Default to `Version Packages`
-- title - The pull request title. Default to `Version Packages`
+- title - The merge request title. Default to `Version Packages`
 
 ### Outputs
 
@@ -29,8 +29,9 @@ GLOBAL_AGENT_NO_PROXY    # Like above but for no proxied requests
 
 GITLAB_HOST # optional, if you're using custom GitLab host
 
-GITLAB_TOKEN     # required, token with accessibility to push
-GITLAB_USER_NAME # required, username with accessibility to push, used in pairs of the above token
+GITLAB_TOKEN         # required, token with accessibility to push
+GITLAB_CI_USER_NAME  # required, username with accessibility to push, used in pairs of the above token
+GITLAB_CI_USER_EMAIL # optional, default `gitlab[bot]@users.noreply.gitlab.com`
 ```
 
 ### Example workflow
@@ -41,9 +42,16 @@ Create a file at `.gitlab-ci.yml` with the following content.
 
 ```yml
 stages:
+  - comment
   - release
 
 before_script: yarn --frozen-lockfile
+
+comment:
+  image: node:lts-alpine
+  stage: comment
+  only: merge_requests
+  script: yarn changesets-gitlab -c # comment automatically like https://github.com/changesets/bot
 
 release:
   image: node:lts-alpine
@@ -53,13 +61,20 @@ release:
 
 #### With Publishing
 
-Before you can setup this action with publishing, you'll need to have an [npm token](https://docs.npmjs.com/creating-and-viewing-authentication-tokens) that can publish the packages in the repo you're setting up the action for and doesn't have 2FA on publish enabled ([2FA on auth can be enabled](https://docs.npmjs.com/about-two-factor-authentication)). You'll also need to [add it as a secret on your GitHub repo](https://help.github.com/en/articles/virtual-environments-for-github-actions#creating-and-using-secrets-encrypted-variables) with the name `NPM_TOKEN`. Once you've done that, you can create a file at `.github/workflows/release.yml` with the following content.
+Before you can setup this action with publishing, you'll need to have an [npm token](https://docs.npmjs.com/creating-and-viewing-authentication-tokens) that can publish the packages in the repo you're setting up the action for and doesn't have 2FA on publish enabled ([2FA on auth can be enabled](https://docs.npmjs.com/about-two-factor-authentication)). You'll also need to [add it as a custom environment variable on your GitLab repo](https://docs.gitlab.com/ee/ci/variables/#custom-cicd-variables) with the name `NPM_TOKEN`. Once you've done that, you can create a file at `.gitlab-ci.yml` with the following content.
 
 ```yml
 stages:
+  - comment
   - release
 
 before_script: yarn --frozen-lockfile
+
+comment:
+  image: node:lts-alpine
+  stage: comment
+  only: merge_requests
+  script: yarn changesets-gitlab -c
 
 release:
   image: node:lts-alpine
@@ -69,14 +84,14 @@ release:
     INPUT_PUBLISH: yarn release
 ```
 
-By default the GitHub Action creates a `.npmrc` file with the following content:
+By default the GitLab CI cli creates a `.npmrc` file with the following content:
 
 ```sh
 //registry.npmjs.org/:_authToken=${process.env.NPM_TOKEN}
 ```
 
-However, if a `.npmrc` file is found, the GitHub Action does not recreate the file. This is useful if you need to configure the `.npmrc` file on your own.
-For example, you can add a step before running the Changesets GitHub Action:
+However, if a `.npmrc` file is found, the GitLab CI cli does not recreate the file. This is useful if you need to configure the `.npmrc` file on your own.
+For example, you can add a step before running the Changesets GitLab CI cli:
 
 ```yml
 script: |
@@ -90,13 +105,21 @@ script: |
 
 If you need to add additional logic to the version command, you can do so by using a version script.
 
-If the version script is present, this action will run that script instead of `changeset version`, so please make sure that your script calls `changeset version` at some point. All the changes made by the script will be included in the PR.
+If the version script is present, this action will run that script instead of `changeset version`, so please make sure that your script calls `changeset version` at some point. All the changes made by the script will be included in the MR.
 
 ```yml
 stages:
+  - comment
   - release
 
 before_script: yarn --frozen-lockfile
+
+comment:
+  image: node:lts-alpine
+  stage: comment
+  only:
+    - merge_requests
+  script: yarn changesets-gitlab -c
 
 release:
   image: node:lts-alpine
@@ -112,9 +135,17 @@ If you are using [Yarn Plug'n'Play](https://yarnpkg.com/features/pnp), you shoul
 
 ```yml
 stages:
+  - comment
   - release
 
 before_script: yarn --frozen-lockfile
+
+comment:
+  image: node:lts-alpine
+  stage: comment
+  only:
+    - merge_requests
+  script: yarn changesets-gitlab -c
 
 release:
   image: node:lts-alpine

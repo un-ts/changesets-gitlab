@@ -22,7 +22,7 @@ import {
 import { createApi } from './index.js'
 
 const createRelease = async (
-  api: Gitlab<true>,
+  api: Gitlab,
   { pkg, tagName }: { pkg: Package; tagName: string },
 ) => {
   try {

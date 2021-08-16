@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.2.0
+
+### Minor Changes
+
+- [#5](https://github.com/rx-ts/changesets-gitlab/pull/5) [`1308462`](https://github.com/rx-ts/changesets-gitlab/commit/130846299026cd685e1e0f0fdbbadb7dca5572cb) Thanks [@JounQin](https://github.com/JounQin)! - feat: support comment on MR automatically
+
 ## 0.1.2
 
 ### Patch Changes

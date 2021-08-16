@@ -1,5 +1,20 @@
 # changesets-gitlab
 
+[![GitHub Actions](https://github.com/rx-ts/changesets-gitlab/workflows/CI/badge.svg)](https://github.com/rx-ts/changesets-gitlab/actions/workflows/ci.yml)
+[![Codacy Grade](https://img.shields.io/codacy/grade/bb554fe914d64b4b87cadb8a48b2a97b)](https://www.codacy.com/gh/rx-ts/changesets-gitlab)
+[![npm](https://img.shields.io/npm/v/changesets-gitlab.svg)](https://www.npmjs.com/package/changesets-gitlab)
+[![GitHub Release](https://img.shields.io/github/release/rx-ts/changesets-gitlab)](https://github.com/rx-ts/changesets-gitlab/releases)
+
+[![David Peer](https://img.shields.io/david/peer/rx-ts/changesets-gitlab.svg)](https://david-dm.org/rx-ts/changesets-gitlab?type=peer)
+[![David](https://img.shields.io/david/rx-ts/changesets-gitlab.svg)](https://david-dm.org/rx-ts/changesets-gitlab)
+[![David Dev](https://img.shields.io/david/dev/rx-ts/changesets-gitlab.svg)](https://david-dm.org/rx-ts/changesets-gitlab?type=dev)
+
+[![Conventional Commits](https://img.shields.io/badge/conventional%20commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
+[![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+[![Code Style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
+[![changesets](https://img.shields.io/badge/maintained%20with-changesets-176de3.svg)](https://github.com/atlassian/changesets)
+
 GitLab CI cli for [changesets](https://github.com/atlassian/changesets) like its [GitHub Action](https://github.com/changesets/action), it creates a merge request with all of the package versions updated and changelogs updated and when there are new changesets on master, the MR will be updated. When you're ready, you can merge the merge request and you can either publish the packages to npm manually or setup the action to do it for you.
 
 ## Usage

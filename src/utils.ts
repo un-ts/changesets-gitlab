@@ -1,3 +1,6 @@
+import fs from 'fs'
+import path from 'path'
+
 import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkStringify from 'remark-stringify'
@@ -126,3 +129,16 @@ export const identify = <T>(
   T,
   '' | (T extends boolean ? false : boolean) | null | undefined
 > => !!_
+
+export async function getAllFiles(dir: string, base = dir): Promise<string[]> {
+  const direntList = await fs.promises.readdir(dir, { withFileTypes: true })
+  const files = await Promise.all(
+    direntList.map(dirent => {
+      const res = path.resolve(dir, dirent.name)
+      return dirent.isDirectory()
+        ? getAllFiles(res, base)
+        : [path.relative(base, res)]
+    }),
+  )
+  return files.flat()
+}

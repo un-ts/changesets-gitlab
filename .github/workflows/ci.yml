@@ -45,6 +45,7 @@ jobs:
         run: |
           yarn build
           yarn lint
+          yarn test
           yarn typecov
         env:
           EFF_NO_LINK_RULES: true

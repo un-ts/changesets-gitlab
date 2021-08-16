@@ -23,7 +23,6 @@ export const createApi = (gitlabToken?: string) => {
   }
 
   return new Gitlab({
-    camelize: true,
     host: process.env.GITLAB_HOST,
     token: gitlabToken || process.env.GITLAB_TOKEN,
   })

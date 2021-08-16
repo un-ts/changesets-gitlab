@@ -2,109 +2,25 @@
 
 import './env.js'
 
-import { URL } from 'url'
+import { setFailed } from '@actions/core'
 
-import { getInput, setFailed, setOutput } from '@actions/core'
-import fs from 'fs-extra'
-import { exec } from '@actions/exec'
+import { comment } from './comment.js'
+import { main } from './main.js'
 
-import { setupUser } from './gitUtils.js'
-import readChangesetState from './readChangesetState.js'
-import { runPublish, runVersion } from './run.js'
+const cli = async () => {
+  const { GITLAB_CI_USER_NAME, GITLAB_TOKEN } = process.env
 
-const main = async () => {
-  const {
-    CI,
-    CI_PROJECT_PATH,
-    GITLAB_HOST = 'https://gitlab.com',
-    GITLAB_TOKEN,
-    GITLAB_USER_NAME,
-    HOME,
-    NPM_TOKEN,
-  } = process.env
-
-  if (!GITLAB_TOKEN || !GITLAB_USER_NAME) {
+  if (!GITLAB_TOKEN || !GITLAB_CI_USER_NAME) {
     setFailed(
-      'Please add the `GITLAB_TOKEN` and `GITLAB_USER_NAME` to the changesets action',
+      'Please add the `GITLAB_TOKEN` and `GITLAB_CI_USER_NAME` to the changesets action',
     )
     return
   }
 
-  setOutput('published', false)
-  setOutput('publishedPackages', [])
-
-  if (CI) {
-    console.log('setting git user')
-    await setupUser()
-
-    console.log('setting GitLab credentials')
-
-    const url = new URL(GITLAB_HOST)
-
-    await exec('git', [
-      'remote',
-      'set-url',
-      'origin',
-      `${url.protocol}//${GITLAB_USER_NAME}:${GITLAB_TOKEN}@${
-        url.host
-      }/${CI_PROJECT_PATH!}.git`,
-    ])
-  }
-
-  const { changesets } = await readChangesetState()
-
-  const publishScript = getInput('publish')
-  const hasChangesets = changesets.length > 0
-  const hasPublishScript = !!publishScript
-
-  switch (true) {
-    case !hasChangesets && !hasPublishScript:
-      console.log('No changesets found')
-      return
-    case !hasChangesets && hasPublishScript: {
-      console.log(
-        'No changesets found, attempting to publish any unpublished packages to npm',
-      )
-
-      const npmrcPath = `${HOME!}/.npmrc`
-      if (fs.existsSync(npmrcPath)) {
-        console.log('Found existing .npmrc file')
-      } else if (NPM_TOKEN) {
-        console.log('No .npmrc file found, creating one')
-        fs.writeFileSync(
-          npmrcPath,
-          `//registry.npmjs.org/:_authToken=${NPM_TOKEN}`,
-        )
-      } else {
-        setFailed(
-          'No `.npmrc` found nor `NPM_TOKEN` provided, unable to publish packages',
-        )
-        return
-      }
-
-      const result = await runPublish({
-        script: publishScript,
-        gitlabToken: GITLAB_TOKEN,
-      })
-
-      if (result.published) {
-        setOutput('published', true)
-        setOutput('publishedPackages', result.publishedPackages)
-      }
-      return
-    }
-    case hasChangesets:
-      await runVersion({
-        script: getInput('version'),
-        gitlabToken: GITLAB_TOKEN,
-        prTitle: getInput('title'),
-        commitMessage: getInput('commit'),
-        hasPublishScript,
-      })
-  }
+  return ['-c', '--comment'].includes(process.argv[2]) ? comment() : main()
 }
 
-main().catch((err: Error) => {
+cli().catch((err: Error) => {
   console.error(err)
   process.exit(1)
 })

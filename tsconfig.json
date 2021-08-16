@@ -1,7 +1,6 @@
 {
-  "extends": "@1stg/tsconfig",
+  "extends": "@1stg/tsconfig/lib",
   "compilerOptions": {
-    "outDir": "lib",
     "target": "ES2019"
   }
 }

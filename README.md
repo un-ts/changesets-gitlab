@@ -42,9 +42,16 @@ Create a file at `.gitlab-ci.yml` with the following content.
 
 ```yml
 stages:
+  - comment
   - release
 
 before_script: yarn --frozen-lockfile
+
+comment:
+  image: node:lts-alpine
+  stage: comment
+  only: merge_requests
+  script: yarn changesets-gitlab -c # comment automatically like https://github.com/changesets/bot
 
 release:
   image: node:lts-alpine
@@ -54,13 +61,20 @@ release:
 
 #### With Publishing
 
-Before you can setup this action with publishing, you'll need to have an [npm token](https://docs.npmjs.com/creating-and-viewing-authentication-tokens) that can publish the packages in the repo you're setting up the action for and doesn't have 2FA on publish enabled ([2FA on auth can be enabled](https://docs.npmjs.com/about-two-factor-authentication)). You'll also need to [add it as a secret on your GitHub repo](https://help.github.com/en/articles/virtual-environments-for-github-actions#creating-and-using-secrets-encrypted-variables) with the name `NPM_TOKEN`. Once you've done that, you can create a file at `.github/workflows/release.yml` with the following content.
+Before you can setup this action with publishing, you'll need to have an [npm token](https://docs.npmjs.com/creating-and-viewing-authentication-tokens) that can publish the packages in the repo you're setting up the action for and doesn't have 2FA on publish enabled ([2FA on auth can be enabled](https://docs.npmjs.com/about-two-factor-authentication)). You'll also need to [add it as a custom environment variable on your GitLab repo](https://docs.gitlab.com/ee/ci/variables/#custom-cicd-variables) with the name `NPM_TOKEN`. Once you've done that, you can create a file at `.gitlab-ci.yml` with the following content.
 
 ```yml
 stages:
+  - comment
   - release
 
 before_script: yarn --frozen-lockfile
+
+comment:
+  image: node:lts-alpine
+  stage: comment
+  only: merge_requests
+  script: yarn changesets-gitlab -c
 
 release:
   image: node:lts-alpine
@@ -70,14 +84,14 @@ release:
     INPUT_PUBLISH: yarn release
 ```
 
-By default the GitHub Action creates a `.npmrc` file with the following content:
+By default the GitLab CI cli creates a `.npmrc` file with the following content:
 
 ```sh
 //registry.npmjs.org/:_authToken=${process.env.NPM_TOKEN}
 ```
 
-However, if a `.npmrc` file is found, the GitHub Action does not recreate the file. This is useful if you need to configure the `.npmrc` file on your own.
-For example, you can add a step before running the Changesets GitHub Action:
+However, if a `.npmrc` file is found, the GitLab CI cli does not recreate the file. This is useful if you need to configure the `.npmrc` file on your own.
+For example, you can add a step before running the Changesets GitLab CI cli:
 
 ```yml
 script: |
@@ -95,9 +109,17 @@ If the version script is present, this action will run that script instead of `c
 
 ```yml
 stages:
+  - comment
   - release
 
 before_script: yarn --frozen-lockfile
+
+comment:
+  image: node:lts-alpine
+  stage: comment
+  only:
+    - merge_requests
+  script: yarn changesets-gitlab -c
 
 release:
   image: node:lts-alpine
@@ -113,9 +135,17 @@ If you are using [Yarn Plug'n'Play](https://yarnpkg.com/features/pnp), you shoul
 
 ```yml
 stages:
+  - comment
   - release
 
 before_script: yarn --frozen-lockfile
+
+comment:
+  image: node:lts-alpine
+  stage: comment
+  only:
+    - merge_requests
+  script: yarn changesets-gitlab -c
 
 release:
   image: node:lts-alpine

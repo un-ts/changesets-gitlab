@@ -16,8 +16,7 @@
     "require": "./lib/index.cjs"
   },
   "files": [
-    "lib",
-    "!lib/*.tsbuildinfo"
+    "lib"
   ],
   "scripts": {
     "build": "run-p build:*",

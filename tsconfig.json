@@ -2,5 +2,6 @@
   "extends": "@1stg/tsconfig/lib",
   "compilerOptions": {
     "target": "ES2019"
-  }
+  },
+  "exclude": ["lib"]
 }

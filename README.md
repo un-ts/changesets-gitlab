@@ -1,6 +1,6 @@
 # changesets-gitlab
 
-GitLab CI cli for [changesets](https://github.com/atlassian/changesets) like its [GitHub Action](https://github.com/changesets/action), it creates a pull request with all of the package versions updated and changelogs updated and when there are new changesets on master, the PR will be updated. When you're ready, you can merge the pull request and you can either publish the packages to npm manually or setup the action to do it for you.
+GitLab CI cli for [changesets](https://github.com/atlassian/changesets) like its [GitHub Action](https://github.com/changesets/action), it creates a merge request with all of the package versions updated and changelogs updated and when there are new changesets on master, the MR will be updated. When you're ready, you can merge the merge request and you can either publish the packages to npm manually or setup the action to do it for you.
 
 ## Usage
 
@@ -11,7 +11,7 @@ GitLab CI cli for [changesets](https://github.com/atlassian/changesets) like its
 - publish - The command to use to build and publish packages
 - version - The command to update version, edit CHANGELOG, read and delete changesets. Default to `changeset version` if not provided
 - commit - The commit message to use. Default to `Version Packages`
-- title - The pull request title. Default to `Version Packages`
+- title - The merge request title. Default to `Version Packages`
 
 ### Outputs
 
@@ -105,7 +105,7 @@ script: |
 
 If you need to add additional logic to the version command, you can do so by using a version script.
 
-If the version script is present, this action will run that script instead of `changeset version`, so please make sure that your script calls `changeset version` at some point. All the changes made by the script will be included in the PR.
+If the version script is present, this action will run that script instead of `changeset version`, so please make sure that your script calls `changeset version` at some point. All the changes made by the script will be included in the MR.
 
 ```yml
 stages:

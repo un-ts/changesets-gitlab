@@ -268,7 +268,7 @@ ${
       .map(x => x.content)
       .join('\n '))()
 
-  const finalPrTitle = `${prTitle}${preState ? ` (${preState.tag})` : ''}`
+  const finalMrTitle = `${prTitle}${preState ? ` (${preState.tag})` : ''}`
 
   // project with `commit: true` setting could have already committed files
   if (!(await gitUtils.checkIfClean())) {
@@ -290,21 +290,21 @@ ${
   })
   console.log(JSON.stringify(searchResult, null, 2))
   if (searchResult.length === 0) {
-    console.log('creating pull request')
+    console.log('creating merge request')
     await api.MergeRequests.create(
       context.projectId,
       versionBranch,
       branch,
-      finalPrTitle,
+      finalMrTitle,
       {
         description: await prBodyPromise,
       },
     )
   } else {
     await api.MergeRequests.edit(context.projectId, searchResult[0].iid, {
-      title: finalPrTitle,
+      title: finalMrTitle,
       description: await prBodyPromise,
     })
-    console.log('pull request found')
+    console.log('merge request found')
   }
 }

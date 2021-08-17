@@ -10,6 +10,8 @@ import { runPublish, runVersion } from './run.js'
 import { MainCommandOptions } from './types.js'
 import { execSync } from './utils.js'
 
+const getOptionalInput = (name: string) => getInput(name) || undefined
+
 export const main = async ({
   published,
   onlyChangesets,
@@ -93,10 +95,10 @@ export const main = async ({
     }
     case hasChangesets: {
       await runVersion({
-        script: getInput('version'),
+        script: getOptionalInput('version'),
         gitlabToken: GITLAB_TOKEN!,
-        prTitle: getInput('title'),
-        commitMessage: getInput('commit'),
+        prTitle: getOptionalInput('title'),
+        commitMessage: getOptionalInput('commit'),
         hasPublishScript,
       })
       if (onlyChangesets) {

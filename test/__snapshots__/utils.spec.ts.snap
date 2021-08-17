@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`utils 1`] = `
+exports[`utils getAllFiles 1`] = `
 Array [
   ".gitkeep",
   "dir/.gitkeep",

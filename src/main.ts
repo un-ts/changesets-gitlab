@@ -7,8 +7,13 @@ import { exec } from '@actions/exec'
 import { setupUser } from './gitUtils.js'
 import readChangesetState from './readChangesetState.js'
 import { runPublish, runVersion } from './run.js'
+import { MainCommandOptions } from './types.js'
+import { execSync } from './utils.js'
 
-export const main = async () => {
+export const main = async ({
+  published,
+  onlyChangesets,
+}: MainCommandOptions = {}) => {
   const {
     CI,
     CI_PROJECT_PATH,
@@ -47,9 +52,10 @@ export const main = async () => {
   const hasPublishScript = !!publishScript
 
   switch (true) {
-    case !hasChangesets && !hasPublishScript:
+    case !hasChangesets && !hasPublishScript: {
       console.log('No changesets found')
       return
+    }
     case !hasChangesets && hasPublishScript: {
       console.log(
         'No changesets found, attempting to publish any unpublished packages to npm',
@@ -79,10 +85,13 @@ export const main = async () => {
       if (result.published) {
         setOutput('published', true)
         setOutput('publishedPackages', result.publishedPackages)
+        if (published) {
+          execSync(published)
+        }
       }
       return
     }
-    case hasChangesets:
+    case hasChangesets: {
       await runVersion({
         script: getInput('version'),
         gitlabToken: GITLAB_TOKEN!,
@@ -90,5 +99,9 @@ export const main = async () => {
         commitMessage: getInput('commit'),
         hasPublishScript,
       })
+      if (onlyChangesets) {
+        execSync(onlyChangesets)
+      }
+    }
   }
 }

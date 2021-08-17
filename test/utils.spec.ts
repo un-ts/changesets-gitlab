@@ -1,5 +1,7 @@
 import { getAllFiles } from '../src/utils'
 
-test('utils', async () => {
-  expect(await getAllFiles('test/fixtures')).toMatchSnapshot()
+describe('utils', () => {
+  test('getAllFiles', async () => {
+    expect(await getAllFiles('test/fixtures')).toMatchSnapshot()
+  })
 })

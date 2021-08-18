@@ -46,7 +46,7 @@ const run = async () => {
   return program.showHelpAfterError().parseAsync()
 }
 
-run().catch(err => {
+run().catch((err: Error) => {
   console.error(err)
   process.exit(1)
 })

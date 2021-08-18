@@ -95,7 +95,7 @@ export const main = async ({
       await runVersion({
         script: getOptionalInput('version'),
         gitlabToken: GITLAB_TOKEN!,
-        prTitle: getOptionalInput('title'),
+        mrTitle: getOptionalInput('title'),
         commitMessage: getOptionalInput('commit'),
         hasPublishScript,
       })

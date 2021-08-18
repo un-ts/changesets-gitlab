@@ -34,7 +34,7 @@ const getReleasePlanMessage = (releasePlan: ReleasePlan | null) => {
     ]),
   ])
 
-  return `<details><summary>This PR includes ${
+  return `<details><summary>This MR includes ${
     releasePlan.changesets.length > 0
       ? `changesets to release ${
           publishableReleases.length === 1
@@ -47,7 +47,7 @@ const getReleasePlanMessage = (releasePlan: ReleasePlan | null) => {
   ${
     publishableReleases.length > 0
       ? table
-      : "When changesets are added to this PR, you'll see the packages that this PR includes changesets for and the associated semver types"
+      : "When changesets are added to this MR, you'll see the packages that this MR includes changesets for and the associated semver types"
   }
 
 </details>`
@@ -61,13 +61,13 @@ const getAbsentMessage = (
 
 Latest commit: ${commitSha}
 
-Merging this PR will not cause a version bump for any packages. If these changes should not result in a new version, you're good to go. **If these changes should result in a version bump, you need to add a changeset.**
+Merging this MR will not cause a version bump for any packages. If these changes should not result in a new version, you're good to go. **If these changes should result in a version bump, you need to add a changeset.**
 
 ${getReleasePlanMessage(releasePlan)}
 
 [Click here to learn what changesets are, and how to add one](https://github.com/changesets/changesets/blob/master/docs/adding-a-changeset.md).
 
-[Click here if you're a maintainer who wants to add a changeset to this PR](${addChangesetUrl})
+[Click here if you're a maintainer who wants to add a changeset to this MR](${addChangesetUrl})
 
 `
 
@@ -79,13 +79,13 @@ const getApproveMessage = (
 
 Latest commit: ${commitSha}
 
-**The changes in this PR will be included in the next version bump.**
+**The changes in this MR will be included in the next version bump.**
 
 ${getReleasePlanMessage(releasePlan)}
 
 Not sure what this means? [Click here  to learn what changesets are](https://github.com/changesets/changesets/blob/master/docs/adding-a-changeset.md).
 
-[Click here if you're a maintainer who wants to add another changeset to this PR](${addChangesetUrl})
+[Click here if you're a maintainer who wants to add another changeset to this MR](${addChangesetUrl})
 
 `
 
@@ -159,7 +159,7 @@ export const comment = async () => {
           api,
         }).catch((err: unknown) => {
           if (err instanceof ValidationError) {
-            errFromFetchingChangedFiles = `<details><summary>💥 An error occurred when fetching the changed packages and changesets in this PR</summary>\n\n\`\`\`\n${err.message}\n\`\`\`\n\n</details>\n`
+            errFromFetchingChangedFiles = `<details><summary>💥 An error occurred when fetching the changed packages and changesets in this MR</summary>\n\n\`\`\`\n${err.message}\n\`\`\`\n\n</details>\n`
           } else {
             console.error(err)
             captureException(err)

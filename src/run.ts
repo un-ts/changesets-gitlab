@@ -182,7 +182,7 @@ interface VersionOptions {
   script?: string
   gitlabToken: string
   cwd?: string
-  prTitle?: string
+  mrTitle?: string
   commitMessage?: string
   hasPublishScript?: boolean
 }
@@ -191,7 +191,7 @@ export async function runVersion({
   script,
   gitlabToken,
   cwd = process.cwd(),
-  prTitle = 'Version Packages',
+  mrTitle = 'Version Packages',
   commitMessage = 'Version Packages',
   hasPublishScript = false,
 }: VersionOptions) {
@@ -221,12 +221,12 @@ export async function runVersion({
 
   const changedPackages = await getChangedPackages(cwd, versionsByDirectory)
 
-  const prBodyPromise = (async () =>
-    `This PR was opened by the [changesets-gitlab](https://github.com/rx-ts/changesets-gitlab) GitLab CI script. When you're ready to do a release, you can merge this and ${
+  const mrBodyPromise = (async () =>
+    `This MR was opened by the [changesets-gitlab](https://github.com/rx-ts/changesets-gitlab) GitLab CI script. When you're ready to do a release, you can merge this and ${
       hasPublishScript
         ? 'the packages will be published to npm automatically'
         : 'publish to npm yourself or [setup this action to publish automatically](https://github.com/rx-ts/changesets-gitlab#with-publishing)'
-    }. If you're not ready to do a release yet, that's fine, whenever you add more changesets to ${branch}, this PR will be updated.
+    }. If you're not ready to do a release yet, that's fine, whenever you add more changesets to ${branch}, this MR will be updated.
 ${
   preState
     ? `
@@ -268,7 +268,7 @@ ${
       .map(x => x.content)
       .join('\n '))()
 
-  const finalMrTitle = `${prTitle}${preState ? ` (${preState.tag})` : ''}`
+  const finalMrTitle = `${mrTitle}${preState ? ` (${preState.tag})` : ''}`
 
   // project with `commit: true` setting could have already committed files
   if (!(await gitUtils.checkIfClean())) {
@@ -297,13 +297,13 @@ ${
       branch,
       finalMrTitle,
       {
-        description: await prBodyPromise,
+        description: await mrBodyPromise,
       },
     )
   } else {
     await api.MergeRequests.edit(context.projectId, searchResult[0].iid, {
       title: finalMrTitle,
-      description: await prBodyPromise,
+      description: await mrBodyPromise,
     })
     console.log('merge request found')
   }

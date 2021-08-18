@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.3.0
+
+### Minor Changes
+
+- [#7](https://github.com/rx-ts/changesets-gitlab/pull/7) [`74f1c72`](https://github.com/rx-ts/changesets-gitlab/commit/74f1c72a2a7aa7861de7d85503a005bf22557e09) Thanks [@JounQin](https://github.com/JounQin)! - feat: support command on published/only-changesets
+
 ## 0.2.0
 
 ### Minor Changes

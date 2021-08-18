@@ -1,12 +1,14 @@
+import { execSync as _execSync } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 
-import { unified } from 'unified'
-import remarkParse from 'remark-parse'
-import remarkStringify from 'remark-stringify'
-import { toString as mdastToString } from 'mdast-util-to-string'
+import { getInput } from '@actions/core'
 import { exec } from '@actions/exec'
 import { getPackages, Package } from '@manypkg/get-packages'
+import { toString as mdastToString } from 'mdast-util-to-string'
+import remarkParse from 'remark-parse'
+import remarkStringify from 'remark-stringify'
+import { unified } from 'unified'
 
 export const BumpLevels = {
   dep: 0,
@@ -142,3 +144,10 @@ export async function getAllFiles(dir: string, base = dir): Promise<string[]> {
   )
   return files.flat()
 }
+
+export const execSync = (command: string) =>
+  _execSync(command, {
+    stdio: 'inherit',
+  })
+
+export const getOptionalInput = (name: string) => getInput(name) || undefined

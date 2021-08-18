@@ -71,7 +71,7 @@ comment:
   image: node:lts-alpine
   stage: comment
   only: merge_requests
-  script: yarn changesets-gitlab -c # comment automatically like https://github.com/changesets/bot
+  script: yarn changesets-gitlab comment # comment automatically like https://github.com/changesets/bot
 
 release:
   image: node:lts-alpine
@@ -94,7 +94,7 @@ comment:
   image: node:lts-alpine
   stage: comment
   only: merge_requests
-  script: yarn changesets-gitlab -c
+  script: yarn changesets-gitlab comment
 
 release:
   image: node:lts-alpine
@@ -139,7 +139,7 @@ comment:
   stage: comment
   only:
     - merge_requests
-  script: yarn changesets-gitlab -c
+  script: yarn changesets-gitlab comment
 
 release:
   image: node:lts-alpine
@@ -165,7 +165,7 @@ comment:
   stage: comment
   only:
     - merge_requests
-  script: yarn changesets-gitlab -c
+  script: yarn changesets-gitlab comment
 
 release:
   image: node:lts-alpine

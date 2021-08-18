@@ -2,6 +2,7 @@ import { execSync as _execSync } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 
+import { getInput } from '@actions/core'
 import { exec } from '@actions/exec'
 import { getPackages, Package } from '@manypkg/get-packages'
 import { toString as mdastToString } from 'mdast-util-to-string'
@@ -148,3 +149,5 @@ export const execSync = (command: string) =>
   _execSync(command, {
     stdio: 'inherit',
   })
+
+export const getOptionalInput = (name: string) => getInput(name) || undefined

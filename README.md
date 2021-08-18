@@ -28,6 +28,11 @@ GitLab CI cli for [changesets](https://github.com/atlassian/changesets) like its
 - commit - The commit message to use. Default to `Version Packages`
 - title - The merge request title. Default to `Version Packages`
 
+#### Only available in `changesets-gitlab`
+
+- published - Command executed after published
+- only_changesets - Command executed on only changesets detected
+
 ### Outputs
 
 - published - A boolean value to indicate whether a publishing is happened or not

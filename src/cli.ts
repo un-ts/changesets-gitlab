@@ -9,11 +9,12 @@ import { program } from 'commander'
 
 import { comment } from './comment.js'
 import { main } from './main.js'
+import { getOptionalInput } from './utils.js'
 
 const cjsRequire =
   typeof require === 'undefined' ? _.createRequire(import.meta.url) : require
 
-const run = () => {
+const run = async () => {
   const { GITLAB_CI_USER_NAME, GITLAB_TOKEN } = process.env
 
   if (!GITLAB_TOKEN || !GITLAB_CI_USER_NAME) {
@@ -35,14 +36,17 @@ const run = () => {
     .command('main', {
       isDefault: true,
     })
-    .option('-p, --published <command>', 'Command executed after published')
-    .option(
-      '-oc, --only-changesets <command>',
-      'Command executed on only changesets detected',
+    .action(() =>
+      main({
+        published: getOptionalInput('published'),
+        onlyChangesets: getOptionalInput('only_changesets'),
+      }),
     )
-    .action(main)
 
-  program.parse()
+  return program.showHelpAfterError().parseAsync()
 }
 
-run()
+run().catch(err => {
+  console.error(err)
+  process.exit(1)
+})

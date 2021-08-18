@@ -8,9 +8,7 @@ import { setupUser } from './gitUtils.js'
 import readChangesetState from './readChangesetState.js'
 import { runPublish, runVersion } from './run.js'
 import { MainCommandOptions } from './types.js'
-import { execSync } from './utils.js'
-
-const getOptionalInput = (name: string) => getInput(name) || undefined
+import { execSync, getOptionalInput } from './utils.js'
 
 export const main = async ({
   published,

@@ -70,7 +70,7 @@
     "postcss": "^8.3.6",
     "ts-jest": "^27.0.5",
     "ts-node": "^10.2.1",
-    "type-coverage": "^2.18.0",
+    "type-coverage": "^2.18.2",
     "typescript": "^4.3.5"
   },
   "resolutions": {

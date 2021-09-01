@@ -68,7 +68,7 @@
     "@types/micromatch": "^4.0.2",
     "jest": "^27.0.6",
     "postcss": "^8.3.6",
-    "ts-jest": "^27.0.4",
+    "ts-jest": "^27.0.5",
     "ts-node": "^10.2.0",
     "type-coverage": "^2.18.0",
     "typescript": "^4.3.5"

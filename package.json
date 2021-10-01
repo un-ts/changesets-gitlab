@@ -61,7 +61,7 @@
     "@1stg/common-config": "^2.3.1",
     "@changesets/changelog-github": "^0.4.1",
     "@changesets/cli": "^2.16.0",
-    "@pkgr/rollup": "^2.0.0",
+    "@pkgr/rollup": "^2.0.1",
     "@types/global-agent": "^2.1.1",
     "@types/jest": "^27.0.1",
     "@types/js-yaml": "^4.0.3",

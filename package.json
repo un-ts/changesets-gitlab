@@ -67,7 +67,7 @@
     "@types/js-yaml": "^4.0.4",
     "@types/micromatch": "^4.0.2",
     "jest": "^27.0.6",
-    "postcss": "^8.3.6",
+    "postcss": "^8.3.11",
     "ts-jest": "^27.0.5",
     "ts-node": "^10.2.1",
     "type-coverage": "^2.18.2",

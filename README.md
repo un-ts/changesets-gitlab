@@ -50,7 +50,8 @@ GLOBAL_AGENT_NO_PROXY    # Like above but for no proxied requests
 GITLAB_HOST # optional, if you're using custom GitLab host
 
 GITLAB_TOKEN         # required, token with accessibility to push
-GITLAB_CI_USER_NAME  # required, username with accessibility to push, used in pairs of the above token
+GITLAB_TOKEN_TYPE    # optional, type of the provided token in GITLAB_TOKEN. defaults to personal access token. can be `job` if you provide the Gitlab CI_JOB_TOKEN or `oauth` if you use Gitlab Oauth token
+GITLAB_CI_USER_NAME  # required, username with accessibility to push, used in pairs of the above token (if it was personal access token)
 GITLAB_CI_USER_EMAIL # optional, default `gitlab[bot]@users.noreply.gitlab.com`
 ```
 

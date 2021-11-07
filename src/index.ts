@@ -11,6 +11,9 @@ declare global {
   }
 }
 
+type ConstructorArgs<T> = T extends new (...args: infer U) => any ? U : never
+type GitlabConfig = ConstructorArgs<typeof Gitlab>[0]
+
 export const createApi = (gitlabToken?: string) => {
   bootstrap()
 
@@ -22,8 +25,23 @@ export const createApi = (gitlabToken?: string) => {
     }
   }
 
-  return new Gitlab({
+  const config: GitlabConfig = {
     host: process.env.GITLAB_HOST,
-    token: gitlabToken || process.env.GITLAB_TOKEN,
-  })
+  }
+
+  const token = gitlabToken || process.env.GITLAB_TOKEN
+
+  switch (process.env.GITLAB_TOKEN_TYPE) {
+    case 'job':
+      config.jobToken = token
+      break
+    case 'oauth':
+      config.oauthToken = token
+      break
+    default:
+      config.token = token
+      break
+  }
+
+  return new Gitlab(config)
 }

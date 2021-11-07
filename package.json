@@ -29,6 +29,7 @@
     "lint": "run-p lint:*",
     "lint:es": "eslint . --cache -f friendly",
     "lint:tsc": "tsc --noEmit",
+    "prepack": "yarn build:ts",
     "prepare": "simple-git-hooks && yarn-deduplicate --strategy fewer || exit 0",
     "prerelease": "yarn build",
     "release": "changeset publish",

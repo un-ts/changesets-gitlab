@@ -152,7 +152,7 @@ release:
 
 #### With Yarn 2 / Plug'n'Play
 
-If you are using [Yarn Plug'n'Play](https://yarnpkg.com/features/pnp), you should use a custom `version` command so that the action can resolve the `changeset` CLI:
+If you are using [Yarn Plug'n'Play](https://yarnpkg.com/features/pnp), you should use a custom `version` command so that the action can resolve the `changeset` CLI.
 
 ```yml
 stages:
@@ -174,4 +174,24 @@ release:
   script: yarn changesets-gitlab
   variables:
     INPUT_VERSION: yarn changeset version
+```
+
+You may also want to run `yarn install` after the `changeset verion` command to update the yarn.lock in the version MR. You need to disable immutable lock file setting using an env variable.
+
+```yml
+release:
+  image: node:lts-alpine
+  only: main
+  script: yarn changesets-gitlab
+  variables:
+    YARN_ENABLE_IMMUTABLE_INSTALLS: 'false'
+    INPUT_VERSION: yarn update-versions
+```
+
+And your `update-versions` script would be:
+
+```json
+{
+  "update-versions": "changeset version && yarn install"
+}
 ```

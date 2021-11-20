@@ -298,12 +298,14 @@ ${
       finalMrTitle,
       {
         description: await mrBodyPromise,
+        removeSourceBranch: true,
       },
     )
   } else {
     await api.MergeRequests.edit(context.projectId, searchResult[0].iid, {
       title: finalMrTitle,
       description: await mrBodyPromise,
+      removeSourceBranch: true,
     })
     console.log('merge request found')
   }

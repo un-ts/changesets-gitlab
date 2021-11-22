@@ -1,8 +1,8 @@
 import { URL } from 'url'
 
 import { getInput, setFailed, setOutput } from '@actions/core'
-import fs from 'fs-extra'
 import { exec } from '@actions/exec'
+import fs from 'fs-extra'
 
 import { setupUser } from './gitUtils.js'
 import readChangesetState from './readChangesetState.js'

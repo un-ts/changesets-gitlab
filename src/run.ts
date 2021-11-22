@@ -1,5 +1,5 @@
-import path from 'path'
 import _ from 'module'
+import path from 'path'
 
 import { exec } from '@actions/exec'
 import { Gitlab } from '@gitbeaker/core'

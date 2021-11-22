@@ -1,6 +1,6 @@
-import { PreState, NewChangeset } from '@changesets/types'
 import { readPreState } from '@changesets/pre'
 import _readChangesets from '@changesets/read'
+import { PreState, NewChangeset } from '@changesets/types'
 
 export interface ChangesetState {
   preState: PreState | undefined
@@ -20,7 +20,7 @@ export default async function readChangesetState(
   let changesets = await readChangesets(cwd)
 
   if (isInPreMode) {
-    const changesetsToFilter = new Set(preState!.changesets)
+    const changesetsToFilter = new Set(preState.changesets)
     changesets = changesets.filter(x => !changesetsToFilter.has(x.id))
   }
 

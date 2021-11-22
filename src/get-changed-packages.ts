@@ -2,18 +2,18 @@ import nodePath from 'path'
 
 import _assembleReleasePlan from '@changesets/assemble-release-plan'
 import { parse as parseConfig } from '@changesets/config'
+import _parseChangeset from '@changesets/parse'
 import {
   PackageJSON,
   PreState,
   NewChangeset,
   WrittenConfig,
 } from '@changesets/types'
-import _parseChangeset from '@changesets/parse'
 import { Gitlab } from '@gitbeaker/core'
 import { Packages, Tool } from '@manypkg/get-packages'
 import fs from 'fs-extra'
-import micromatch from 'micromatch'
 import { load } from 'js-yaml'
+import micromatch from 'micromatch'
 
 import { getAllFiles } from './utils.js'
 

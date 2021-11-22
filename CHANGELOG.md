@@ -1,5 +1,17 @@
 # changesets-gitlab
 
+## 0.4.0
+
+### Minor Changes
+
+- [#23](https://github.com/rx-ts/changesets-gitlab/pull/23) [`9e6cb95`](https://github.com/rx-ts/changesets-gitlab/commit/9e6cb95f22532eb18df7f95747140ffef5e4c80a) Thanks [@HosseinAgha](https://github.com/HosseinAgha)! - Add support for job tokens and oauth tokens (via GITLAB_TOKEN_TYPE config), The Gitlab job tokens have limited access only to Gitlab package registry so we cannot use it until [this Epic](https://gitlab.com/groups/gitlab-org/-/epics/3559) gets implemented.
+
+### Patch Changes
+
+- [#23](https://github.com/rx-ts/changesets-gitlab/pull/23) [`9e6cb95`](https://github.com/rx-ts/changesets-gitlab/commit/9e6cb95f22532eb18df7f95747140ffef5e4c80a) Thanks [@HosseinAgha](https://github.com/HosseinAgha)! - Add missing dependencies to the package.json
+
+- [`1b3ec8e`](https://github.com/rx-ts/changesets-gitlab/commit/1b3ec8eafaa9fb58ac444e1c873d2cb832f24e76) Thanks [@JounQin](https://github.com/JounQin)! - feat: add main and module entries for compatibility
+
 ## 0.3.0
 
 ### Minor Changes

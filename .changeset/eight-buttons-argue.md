@@ -2,4 +2,4 @@
 "changesets-gitlab": minor
 ---
 
-feat: use discussion instead of comment
+feat: create comment with discussion instead of note

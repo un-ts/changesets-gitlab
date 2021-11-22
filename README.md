@@ -176,7 +176,7 @@ release:
     INPUT_VERSION: yarn changeset version
 ```
 
-You may also want to run `yarn install` after the `changeset verion` command to update the yarn.lock in the version MR. You need to disable immutable lock file setting using an env variable:
+You may also want to run `yarn install` after the `changeset verion` command to update the `yarn.lock` in the version MR. You need to disable immutable lock file setting using an env variable:
 
 ```yml
 release:

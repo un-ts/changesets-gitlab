@@ -37,16 +37,11 @@ export const pushTags = async () => {
 }
 
 export const switchToMaybeExistingBranch = async (branch: string) => {
-  const { stdout, stderr } = await execWithOutput('git', ['checkout', branch], {
+  const { stderr } = await execWithOutput('git', ['checkout', branch], {
     ignoreReturnCode: true,
   })
-
-  const shouldCreateBranch = !(
-    stderr.toString().includes(`Switched to`) ||
-    stdout.toString().includes(`Switched to`)
-  )
-
-  if (shouldCreateBranch) {
+  const isCreatingBranch = !stderr.includes(`Switched to branch '${branch}'`)
+  if (isCreatingBranch) {
     await exec('git', ['checkout', '-b', branch])
   }
 }

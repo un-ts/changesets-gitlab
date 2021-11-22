@@ -22,8 +22,21 @@ export const createApi = (gitlabToken?: string) => {
     }
   }
 
+  const token = gitlabToken || process.env.GITLAB_TOKEN
+
+  let tokenType: 'jobToken' | 'oauthToken' | 'token' = 'token'
+
+  switch (process.env.GITLAB_TOKEN_TYPE) {
+    case 'job':
+      tokenType = 'jobToken'
+      break
+    case 'oauth':
+      tokenType = 'oauthToken'
+      break
+  }
+
   return new Gitlab({
     host: process.env.GITLAB_HOST,
-    token: gitlabToken || process.env.GITLAB_TOKEN,
+    [tokenType]: token,
   })
 }

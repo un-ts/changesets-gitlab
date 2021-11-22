@@ -402,7 +402,7 @@
   dependencies:
     "@babel/types" "^7.16.0"
 
-"@babel/helper-hoist-variables@^7.16.0":
+"@babel/helper-hoist-variables@^7.14.5", "@babel/helper-hoist-variables@^7.16.0":
   version "7.16.0"
   resolved "https://registry.yarnpkg.com/@babel/helper-hoist-variables/-/helper-hoist-variables-7.16.0.tgz#4c9023c2f1def7e28ff46fc1dbcd36a39beaa81a"
   integrity sha512-1AZlpazjUR0EQZQv3sgRNfM9mEVWPK3M6vlalczA+EECcPz3XPh6VplbErL5UoMpChhSck5wAJHthlj1bYpcmg==
@@ -554,13 +554,13 @@
     "@babel/plugin-proposal-optional-chaining" "^7.16.0"
 
 "@babel/plugin-proposal-async-do-expressions@^7.14.0":
-  version "7.16.0"
-  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-async-do-expressions/-/plugin-proposal-async-do-expressions-7.16.0.tgz#c747dc2696cf4018578ee441e2cd60d6585d4e33"
-  integrity sha512-nrAVI0MW6N+voMBE0MbfscU/vnIGxdhaLU0KgkuGA26hLi+rmrEAdJ/HAXVCx0WOmBXTfhbSP1FlL6lZSIWrTg==
+  version "7.14.5"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-async-do-expressions/-/plugin-proposal-async-do-expressions-7.14.5.tgz#0aadb8806809246d64682be1b82a6956015e2077"
+  integrity sha512-AP38yW7vyOzBY/SS0477k/ddmwpLO3x5rYu5bc+wLpLhfjr+lISt0woizugqQvHdzY4K50rBE+h6JXFQh41TGw==
   dependencies:
-    "@babel/helper-hoist-variables" "^7.16.0"
+    "@babel/helper-hoist-variables" "^7.14.5"
     "@babel/helper-plugin-utils" "^7.14.5"
-    "@babel/plugin-syntax-async-do-expressions" "^7.16.0"
+    "@babel/plugin-syntax-async-do-expressions" "^7.14.5"
 
 "@babel/plugin-proposal-async-generator-functions@^7.16.4":
   version "7.16.4"
@@ -767,7 +767,7 @@
     "@babel/helper-create-regexp-features-plugin" "^7.16.0"
     "@babel/helper-plugin-utils" "^7.14.5"
 
-"@babel/plugin-syntax-async-do-expressions@^7.16.0":
+"@babel/plugin-syntax-async-do-expressions@^7.14.5":
   version "7.16.0"
   resolved "https://registry.yarnpkg.com/@babel/plugin-syntax-async-do-expressions/-/plugin-syntax-async-do-expressions-7.16.0.tgz#5fc7e4bca519979a92fd9596d07baee681e37a01"
   integrity sha512-3p9KuwOHUXSx/a52S349DKjnfYWtyims8d8kT7MsTI59HmnTaO4MWT159Nc0e1m8773h/8cG44nVtH2V8dDtJg==
@@ -1593,7 +1593,7 @@
     "@manypkg/get-packages" "^1.0.1"
     fs-extra "^7.0.1"
 
-"@changesets/read@^0.5.1":
+"@changesets/read@^0.5.0", "@changesets/read@^0.5.1":
   version "0.5.1"
   resolved "https://registry.yarnpkg.com/@changesets/read/-/read-0.5.1.tgz#89635bf2b84e5fd5d49e1d685adb9c47b5e679a1"
   integrity sha512-QJ3rVS+L0Y3yLk3cAOglNh4tuMUfQl8cJjyAnNnJHS9nCXZUiZjYiJc+34XpZT5vUb+4+0FY1wWtzlkAKuLR2g==
@@ -3057,9 +3057,9 @@ acorn@^7.1.1, acorn@^7.4.0:
   integrity sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==
 
 acorn@^8.2.4, acorn@^8.4.1:
-  version "8.6.0"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.6.0.tgz#e3692ba0eb1a0c83eaa4f37f5fa7368dd7142895"
-  integrity sha512-U1riIR+lBSNi3IbxtaHOIKdH8sLFv3NYfNv8sg7ZsNhcfl4HF2++BfqqrNAxoCLQW1iiylOj76ecnaUxz+z9yw==
+  version "8.5.0"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.5.0.tgz#4512ccb99b3698c752591e9bb4472e38ad43cee2"
+  integrity sha512-yXbYeFy+jUuYd3/CDcg2NkIYE991XYX/bje7LmjJigUciaeO1JR4XxXgCIV1/Zc/dRuFEyw1L0pbA+qynJkW5Q==
 
 agent-base@6:
   version "6.0.2"

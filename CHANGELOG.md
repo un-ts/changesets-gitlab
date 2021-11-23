@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.5.0
+
+### Minor Changes
+
+- [#27](https://github.com/rx-ts/changesets-gitlab/pull/27) [`7538fa1`](https://github.com/rx-ts/changesets-gitlab/commit/7538fa10a241f3d979c16f481164694e3d57473b) Thanks [@JounQin](https://github.com/JounQin)! - feat: create comment with discussion instead of note
+
 ## 0.4.0
 
 ### Minor Changes

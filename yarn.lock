@@ -1510,19 +1510,6 @@
     term-size "^2.1.0"
     tty-table "^2.8.10"
 
-"@changesets/config@^1.6.2":
-  version "1.6.2"
-  resolved "https://registry.yarnpkg.com/@changesets/config/-/config-1.6.2.tgz#42ade5ec516560e33698f207804b3560223ea334"
-  integrity sha512-CJV71tDz/A4TmpyYRIdT4pwGg0GWuem7ahNR01VnOHhmXoXFbXrISX1TYGYo611N7vO9RQHmV8cnhmlHU0LlNA==
-  dependencies:
-    "@changesets/errors" "^0.1.4"
-    "@changesets/get-dependents-graph" "^1.2.3"
-    "@changesets/logger" "^0.0.5"
-    "@changesets/types" "^4.0.1"
-    "@manypkg/get-packages" "^1.0.1"
-    fs-extra "^7.0.1"
-    micromatch "^4.0.2"
-
 "@changesets/config@^1.6.3":
   version "1.6.3"
   resolved "https://registry.yarnpkg.com/@changesets/config/-/config-1.6.3.tgz#f33f040b2b01cebbb5aacf040ff0e78698e38350"

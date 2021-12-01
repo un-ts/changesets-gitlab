@@ -41,7 +41,7 @@
     "@changesets/assemble-release-plan": "^5.0.2",
     "@changesets/config": "^1.6.3",
     "@changesets/errors": "^0.1.4",
-    "@changesets/parse": "^0.3.9",
+    "@changesets/parse": "^0.3.10",
     "@changesets/pre": "^1.0.7",
     "@changesets/read": "^0.5.0",
     "@changesets/types": "^4.0.0",

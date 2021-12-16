@@ -22,6 +22,7 @@ export const main = async ({
     GITLAB_TOKEN,
     HOME,
     NPM_TOKEN,
+    DEBUG_GITLAB_CREDENTIAL = 'false',
   } = process.env
 
   setOutput('published', false)
@@ -35,14 +36,18 @@ export const main = async ({
 
     const url = new URL(GITLAB_HOST)
 
-    await exec('git', [
-      'remote',
-      'set-url',
-      'origin',
-      `${url.protocol}//${GITLAB_CI_USER_NAME!}:${GITLAB_TOKEN!}@${
-        url.host
-      }/${CI_PROJECT_PATH!}.git`,
-    ])
+    await exec(
+      'git',
+      [
+        'remote',
+        'set-url',
+        'origin',
+        `${url.protocol}//${GITLAB_CI_USER_NAME!}:${GITLAB_TOKEN!}@${
+          url.host
+        }/${CI_PROJECT_PATH!}.git`,
+      ],
+      { silent: !['true', '1'].includes(DEBUG_GITLAB_CREDENTIAL) },
+    )
   }
 
   const { changesets } = await readChangesetState()

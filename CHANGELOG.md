@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.5.1
+
+### Patch Changes
+
+- [#34](https://github.com/rx-ts/changesets-gitlab/pull/34) [`4eb189c`](https://github.com/rx-ts/changesets-gitlab/commit/4eb189c370dec72cb4ce1babe1b89e2d32420436) Thanks [@pmjhonwang](https://github.com/pmjhonwang)! - slience @action/exec to execute settting GitLab credentials
+
 ## 0.5.0
 
 ### Minor Changes

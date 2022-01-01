@@ -1605,10 +1605,21 @@
     "@changesets/types" "^4.0.2"
     js-yaml "^3.13.1"
 
-"@changesets/pre@^1.0.7", "@changesets/pre@^1.0.8":
+"@changesets/pre@^1.0.8":
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/@changesets/pre/-/pre-1.0.8.tgz#c1b64dc916de6916fde157d7ea1b8c9a73e21297"
   integrity sha512-QLMSo0awYU6k2FqepGaizcraDit+lJpHoCdRXQdP9Bdn4ejf6PLzq4pi+uhb0aXM5XzDOVSROle+k4gO8v7slw==
+  dependencies:
+    "@babel/runtime" "^7.10.4"
+    "@changesets/errors" "^0.1.4"
+    "@changesets/types" "^4.0.2"
+    "@manypkg/get-packages" "^1.1.3"
+    fs-extra "^7.0.1"
+
+"@changesets/pre@^1.0.9":
+  version "1.0.9"
+  resolved "https://registry.yarnpkg.com/@changesets/pre/-/pre-1.0.9.tgz#f1a0efea42733c25ef4a782377b2ac61023bd1b7"
+  integrity sha512-F3+qMun89KlynecBD15fEpwGT/KxbYb3WGeut6w1xhZb0u7V/jdcPy9b+kJ2xmBqFZLn1WteWIP96IjxS57H7A==
   dependencies:
     "@babel/runtime" "^7.10.4"
     "@changesets/errors" "^0.1.4"

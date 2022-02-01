@@ -39,7 +39,7 @@
     "@actions/core": "^1.6.0",
     "@actions/exec": "^1.1.0",
     "@changesets/assemble-release-plan": "^5.0.5",
-    "@changesets/config": "^1.6.3",
+    "@changesets/config": "^1.6.4",
     "@changesets/errors": "^0.1.4",
     "@changesets/parse": "^0.3.10",
     "@changesets/pre": "^1.0.9",

@@ -1534,6 +1534,19 @@
     fs-extra "^7.0.1"
     micromatch "^4.0.2"
 
+"@changesets/config@^1.6.4":
+  version "1.6.4"
+  resolved "https://registry.yarnpkg.com/@changesets/config/-/config-1.6.4.tgz#c904c84f067b49c09b378618b751089dd29ed0b7"
+  integrity sha512-WWa8eR8GzS/p2atLc/+5UEDn7fsRCZ+/sShLkB/3efVbTkSTB1PwoKwQRXLYXM1DY289T7UnJT4HLZA3Gcreww==
+  dependencies:
+    "@changesets/errors" "^0.1.4"
+    "@changesets/get-dependents-graph" "^1.3.0"
+    "@changesets/logger" "^0.0.5"
+    "@changesets/types" "^4.0.2"
+    "@manypkg/get-packages" "^1.1.3"
+    fs-extra "^7.0.1"
+    micromatch "^4.0.2"
+
 "@changesets/errors@^0.1.4":
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/@changesets/errors/-/errors-0.1.4.tgz#f79851746c43679a66b383fdff4c012f480f480d"

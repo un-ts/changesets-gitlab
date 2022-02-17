@@ -54,7 +54,7 @@ export const reset = async (
 }
 
 export const commitAll = async (message: string) => {
-  await exec('git', ['add', '.'])
+  await exec('git', ['add', '-A', '.'])
   await exec('git', ['commit', '-m', message])
 }
 

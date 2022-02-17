@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.5.2
+
+### Patch Changes
+
+- [#42](https://github.com/rx-ts/changesets-gitlab/pull/42) [`a6f751a`](https://github.com/rx-ts/changesets-gitlab/commit/a6f751a76725c317625555fef315e1380d9a81f6) Thanks [@pmjhonwang](https://github.com/pmjhonwang)! - some system git version old, `git add -a .` not working at dot prefix dir (such as .changeset), use `git add -A .` instead
+
 ## 0.5.1
 
 ### Patch Changes

@@ -1629,6 +1629,14 @@
     "@changesets/types" "^4.0.2"
     js-yaml "^3.13.1"
 
+"@changesets/parse@^0.3.12":
+  version "0.3.12"
+  resolved "https://registry.yarnpkg.com/@changesets/parse/-/parse-0.3.12.tgz#60569bb39ad4ffe47fc01d431613ce5c42e6590f"
+  integrity sha512-FOBz2L1dT9PcvyQU1Qp2sQ0B4Jw7EgRDAKFVzAQwhzXqCq03TcE7vgKU6VSksCJAioMYDowdVVHNnv/Uak6yZQ==
+  dependencies:
+    "@changesets/types" "^4.1.0"
+    js-yaml "^3.13.1"
+
 "@changesets/pre@^1.0.8":
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/@changesets/pre/-/pre-1.0.8.tgz#c1b64dc916de6916fde157d7ea1b8c9a73e21297"

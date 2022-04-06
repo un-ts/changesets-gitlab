@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.5.3
+
+### Patch Changes
+
+- [`00ec9e2`](https://github.com/rx-ts/changesets-gitlab/commit/00ec9e2325ffebc267991f0deed9b9628029616d) Thanks [@JounQin](https://github.com/JounQin)! - fix: check isCreatingBranch logic
+
 ## 0.5.2
 
 ### Patch Changes

@@ -2,8 +2,9 @@ import _ from 'module'
 import path from 'path'
 
 import { exec } from '@actions/exec'
-import { Gitlab } from '@gitbeaker/core'
-import { getPackages, Package } from '@manypkg/get-packages'
+import type { Gitlab } from '@gitbeaker/core'
+import type { Package } from '@manypkg/get-packages'
+import { getPackages } from '@manypkg/get-packages'
 import fs from 'fs-extra'
 import resolveFrom from 'resolve-from'
 import semver from 'semver'
@@ -262,8 +263,8 @@ ${
         }),
       )
     )
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      .filter(x => x)
+      // eslint-disable-next-line unicorn/no-await-expression-member
+      .filter(Boolean)
       .sort(sortTheThings)
       .map(x => x.content)
       .join('\n '))()

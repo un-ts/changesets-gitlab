@@ -1,6 +1,6 @@
 import { readPreState } from '@changesets/pre'
 import _readChangesets from '@changesets/read'
-import { PreState, NewChangeset } from '@changesets/types'
+import type { PreState, NewChangeset } from '@changesets/types'
 
 export interface ChangesetState {
   preState: PreState | undefined

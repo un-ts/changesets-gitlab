@@ -4,6 +4,6 @@
     "tightDefinitions": true
   },
   "plugins": [
-    "@1stg/remark-config"
+    "@1stg/config"
   ]
 }

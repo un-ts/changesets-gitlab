@@ -1,7 +1,7 @@
 # changesets-gitlab
 
 [![GitHub Actions](https://github.com/rx-ts/changesets-gitlab/workflows/CI/badge.svg)](https://github.com/rx-ts/changesets-gitlab/actions/workflows/ci.yml)
-[![Codacy Grade](https://img.shields.io/codacy/grade/bb554fe914d64b4b87cadb8a48b2a97b)](https://www.codacy.com/gh/rx-ts/changesets-gitlab)
+[![Codacy Grade](https://img.shields.io/codacy/grade/b8b2b61c3da34601865a86d22d48d9e5)](https://app.codacy.com/gh/rx-ts/changesets-gitlab)
 [![npm](https://img.shields.io/npm/v/changesets-gitlab.svg)](https://www.npmjs.com/package/changesets-gitlab)
 [![GitHub Release](https://img.shields.io/github/release/rx-ts/changesets-gitlab)](https://github.com/rx-ts/changesets-gitlab/releases)
 

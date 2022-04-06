@@ -1,10 +1,10 @@
 import { ValidationError } from '@changesets/errors'
-import {
+import type {
   ReleasePlan,
   ComprehensiveRelease,
   VersionType,
 } from '@changesets/types'
-import { Gitlab, MergeRequests } from '@gitbeaker/core'
+import type { Gitlab, MergeRequests } from '@gitbeaker/core'
 import { captureException } from '@sentry/node'
 import { humanId } from 'human-id'
 import { markdownTable } from 'markdown-table'

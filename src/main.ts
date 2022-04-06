@@ -7,7 +7,7 @@ import fs from 'fs-extra'
 import { setupUser } from './gitUtils.js'
 import readChangesetState from './readChangesetState.js'
 import { runPublish, runVersion } from './run.js'
-import { MainCommandOptions } from './types.js'
+import type { MainCommandOptions } from './types.js'
 import { execSync, getOptionalInput } from './utils.js'
 
 export const main = async ({

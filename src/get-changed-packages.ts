@@ -3,14 +3,14 @@ import nodePath from 'path'
 import _assembleReleasePlan from '@changesets/assemble-release-plan'
 import { parse as parseConfig } from '@changesets/config'
 import _parseChangeset from '@changesets/parse'
-import {
+import type {
   PackageJSON,
   PreState,
   NewChangeset,
   WrittenConfig,
 } from '@changesets/types'
-import { Gitlab } from '@gitbeaker/core'
-import { Packages, Tool } from '@manypkg/get-packages'
+import type { Gitlab } from '@gitbeaker/core'
+import type { Packages, Tool } from '@manypkg/get-packages'
 import fs from 'fs-extra'
 import { load } from 'js-yaml'
 import micromatch from 'micromatch'
@@ -43,7 +43,7 @@ export const getChangedPackages = async ({
       .catch((err: unknown) => {
         hasErrored = true
         console.error(err)
-        return {} as T
+        return {} as unknown as T
       })
   }
 

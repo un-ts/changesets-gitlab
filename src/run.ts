@@ -1,5 +1,5 @@
-import _ from 'module'
-import path from 'path'
+import _ from 'node:module'
+import path from 'node:path'
 
 import { exec } from '@actions/exec'
 import type { Gitlab } from '@gitbeaker/core'

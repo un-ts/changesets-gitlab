@@ -2,7 +2,7 @@
 
 import './env.js'
 
-import _ from 'module'
+import _ from 'node:module'
 
 import { setFailed } from '@actions/core'
 import { program } from 'commander'
@@ -48,5 +48,5 @@ const run = async () => {
 
 run().catch((err: Error) => {
   console.error(err)
-  process.exit(1)
+  process.exitCode = 1
 })

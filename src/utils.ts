@@ -1,6 +1,6 @@
-import { execSync as _execSync } from 'child_process'
-import fs from 'fs'
-import path from 'path'
+import { execSync as _execSync } from 'node:child_process'
+import fs from 'node:fs'
+import path from 'node:path'
 
 import { getInput } from '@actions/core'
 import { exec } from '@actions/exec'

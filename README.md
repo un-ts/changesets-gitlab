@@ -1,13 +1,9 @@
 # changesets-gitlab
 
 [![GitHub Actions](https://github.com/rx-ts/changesets-gitlab/workflows/CI/badge.svg)](https://github.com/rx-ts/changesets-gitlab/actions/workflows/ci.yml)
-[![Codacy Grade](https://img.shields.io/codacy/grade/b8b2b61c3da34601865a86d22d48d9e5)](https://app.codacy.com/gh/rx-ts/changesets-gitlab)
+[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/un-ts/changesets-gitlab.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/un-ts/changesets-gitlab/context:javascript)
 [![npm](https://img.shields.io/npm/v/changesets-gitlab.svg)](https://www.npmjs.com/package/changesets-gitlab)
 [![GitHub Release](https://img.shields.io/github/release/rx-ts/changesets-gitlab)](https://github.com/rx-ts/changesets-gitlab/releases)
-
-[![David Peer](https://img.shields.io/david/peer/rx-ts/changesets-gitlab.svg)](https://david-dm.org/rx-ts/changesets-gitlab?type=peer)
-[![David](https://img.shields.io/david/rx-ts/changesets-gitlab.svg)](https://david-dm.org/rx-ts/changesets-gitlab)
-[![David Dev](https://img.shields.io/david/dev/rx-ts/changesets-gitlab.svg)](https://david-dm.org/rx-ts/changesets-gitlab?type=dev)
 
 [![Conventional Commits](https://img.shields.io/badge/conventional%20commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com)
@@ -196,3 +192,28 @@ And your `update-versions` script would be:
   "update-versions": "changeset version && yarn install"
 }
 ```
+
+## Sponsors
+
+| 1stG                                                                                                                               | RxTS                                                                                                                               | UnTS                                                                                                                               |
+| ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| [![1stG Open Collective backers and sponsors](https://opencollective.com/1stG/organizations.svg)](https://opencollective.com/1stG) | [![RxTS Open Collective backers and sponsors](https://opencollective.com/rxts/organizations.svg)](https://opencollective.com/rxts) | [![UnTS Open Collective backers and sponsors](https://opencollective.com/unts/organizations.svg)](https://opencollective.com/unts) |
+
+## Backers
+
+| 1stG                                                                                                                             | RxTS                                                                                                                             | UnTS                                                                                                                             |
+| -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| [![1stG Open Collective backers and sponsors](https://opencollective.com/1stG/individuals.svg)](https://opencollective.com/1stG) | [![RxTS Open Collective backers and sponsors](https://opencollective.com/rxts/individuals.svg)](https://opencollective.com/rxts) | [![UnTS Open Collective backers and sponsors](https://opencollective.com/unts/individuals.svg)](https://opencollective.com/unts) |
+| n Collective backers and sponsors](https://opencollective.com/unts/individuals.svg)](https://opencollective.com/unts)            |
+
+## Changelog
+
+Detailed changes for each release are documented in [CHANGELOG.md](./CHANGELOG.md).
+
+## License
+
+[MIT][] © [JounQin][]@[1stG.me][]
+
+[1stg.me]: https://www.1stg.me
+[jounqin]: https://GitHub.com/JounQin
+[mit]: http://opensource.org/licenses/MIT

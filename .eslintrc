@@ -1,4 +1,5 @@
 {
+  "root": true,
   "extends": "@1stg",
   "rules": {
     "@typescript-eslint/consistent-type-imports": 2

@@ -1,4 +1,4 @@
-import nodePath from 'path'
+import nodePath from 'node:path'
 
 import _assembleReleasePlan from '@changesets/assemble-release-plan'
 import { parse as parseConfig } from '@changesets/config'

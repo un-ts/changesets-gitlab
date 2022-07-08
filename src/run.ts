@@ -97,6 +97,7 @@ export async function runPublish({
 
   // eslint-disable-next-line no-negated-condition -- do not change original source code logic
   if (tool !== 'root') {
+    // eslint-disable-next-line regexp/no-super-linear-backtracking
     const newTagRegex = /New tag:\s+(@[^/]+\/[^@]+|[^/]+)@(\S+)/
     const packagesByName = new Map(packages.map(x => [x.packageJson.name, x]))
 

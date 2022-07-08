@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.5.4
+
+### Patch Changes
+
+- [`7fb2d56`](https://github.com/un-ts/changesets-gitlab/commit/7fb2d56cfbf0e81b7f8f3af0e1a0fc8555e3d216) Thanks [@JounQin](https://github.com/JounQin)! - chore: add donate and funding fields
+
 ## 0.5.3
 
 ### Patch Changes

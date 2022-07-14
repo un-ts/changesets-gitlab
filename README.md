@@ -1,9 +1,9 @@
 # changesets-gitlab
 
-[![GitHub Actions](https://github.com/rx-ts/changesets-gitlab/workflows/CI/badge.svg)](https://github.com/rx-ts/changesets-gitlab/actions/workflows/ci.yml)
+[![GitHub Actions](https://github.com/un-ts/changesets-gitlab/workflows/CI/badge.svg)](https://github.com/un-ts/changesets-gitlab/actions/workflows/ci.yml)
 [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/un-ts/changesets-gitlab.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/un-ts/changesets-gitlab/context:javascript)
 [![npm](https://img.shields.io/npm/v/changesets-gitlab.svg)](https://www.npmjs.com/package/changesets-gitlab)
-[![GitHub Release](https://img.shields.io/github/release/rx-ts/changesets-gitlab)](https://github.com/rx-ts/changesets-gitlab/releases)
+[![GitHub Release](https://img.shields.io/github/release/un-ts/changesets-gitlab)](https://github.com/un-ts/changesets-gitlab/releases)
 
 [![Conventional Commits](https://img.shields.io/badge/conventional%20commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com)

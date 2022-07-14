@@ -3,13 +3,13 @@
   "changelog": [
     "@changesets/changelog-github",
     {
-      "repo": "rx-ts/changesets-gitlab"
+      "repo": "un-ts/changesets-gitlab"
     }
   ],
   "commit": false,
   "linked": [],
   "access": "restricted",
   "baseBranch": "main",
-  "updateInternalDependencies": "minor",
+  "updateInternalDependencies": "patch",
   "ignore": []
 }

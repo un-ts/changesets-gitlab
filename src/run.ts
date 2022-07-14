@@ -224,10 +224,10 @@ export async function runVersion({
   const changedPackages = await getChangedPackages(cwd, versionsByDirectory)
 
   const mrBodyPromise = (async () =>
-    `This MR was opened by the [changesets-gitlab](https://github.com/rx-ts/changesets-gitlab) GitLab CI script. When you're ready to do a release, you can merge this and ${
+    `This MR was opened by the [changesets-gitlab](https://github.com/un-ts/changesets-gitlab) GitLab CI script. When you're ready to do a release, you can merge this and ${
       hasPublishScript
         ? 'the packages will be published to npm automatically'
-        : 'publish to npm yourself or [setup this action to publish automatically](https://github.com/rx-ts/changesets-gitlab#with-publishing)'
+        : 'publish to npm yourself or [setup this action to publish automatically](https://github.com/un-ts/changesets-gitlab#with-publishing)'
     }. If you're not ready to do a release yet, that's fine, whenever you add more changesets to ${branch}, this MR will be updated.
 ${
   preState

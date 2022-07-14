@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.5.5
+
+### Patch Changes
+
+- [#56](https://github.com/un-ts/changesets-gitlab/pull/56) [`27b9985`](https://github.com/un-ts/changesets-gitlab/commit/27b9985b1c9efcff387a51d0a67f50b73fa2399d) Thanks [@JounQin](https://github.com/JounQin)! - chore: update repository links
+
 ## 0.5.4
 
 ### Patch Changes

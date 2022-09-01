@@ -100,7 +100,7 @@
     "@changesets/changelog-github": "^0.4.6",
     "@changesets/cli": "^2.23.2",
     "@types/global-agent": "^2.1.1",
-    "@types/jest": "^28.1.6",
+    "@types/jest": "^28.1.8",
     "@types/js-yaml": "^4.0.5",
     "@types/micromatch": "^4.0.2",
     "jest": "^28.1.3",

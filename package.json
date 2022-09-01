@@ -104,7 +104,7 @@
     "@types/js-yaml": "^4.0.5",
     "@types/micromatch": "^4.0.2",
     "jest": "^28.1.3",
-    "ts-jest": "^28.0.6",
+    "ts-jest": "^28.0.8",
     "ts-node": "^10.9.1",
     "type-coverage": "^2.22.0",
     "typescript": "^4.7.4",

@@ -1573,12 +1573,12 @@
   dependencies:
     chalk "^2.1.0"
 
-"@changesets/parse@^0.3.13":
-  version "0.3.13"
-  resolved "https://registry.yarnpkg.com/@changesets/parse/-/parse-0.3.13.tgz#82788c1fc18da4750b07357a7a06142d0d975aa1"
-  integrity sha512-wh9Ifa0dungY6d2nMz6XxF6FZ/1I7j+mEgPAqrIyKS64nifTh1Ua82qKKMMK05CL7i4wiB2NYc3SfnnCX3RVeA==
+"@changesets/parse@^0.3.13", "@changesets/parse@^0.3.14":
+  version "0.3.14"
+  resolved "https://registry.yarnpkg.com/@changesets/parse/-/parse-0.3.14.tgz#97321604206db2572c17a12ed37671d9ee6d5e14"
+  integrity sha512-SWnNVyC9vz61ueTbuxvA6b4HXcSx2iaWr2VEa37lPg1Vw+cEyQp7lOB219P7uow1xFfdtIEEsxbzXnqLAAaY8w==
   dependencies:
-    "@changesets/types" "^5.0.0"
+    "@changesets/types" "^5.1.0"
     js-yaml "^3.13.1"
 
 "@changesets/pre@^1.0.11":

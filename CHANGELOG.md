@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.5.6
+
+### Patch Changes
+
+- [#66](https://github.com/un-ts/changesets-gitlab/pull/66) [`1edd410`](https://github.com/un-ts/changesets-gitlab/commit/1edd4105f00780a014060827db972447e9f2fdb7) Thanks [@awxalbert](https://github.com/awxalbert)! - remove --global flag when setting user
+
 ## 0.5.5
 
 ### Patch Changes

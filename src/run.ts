@@ -201,6 +201,9 @@ export async function runVersion({
 }: VersionOptions) {
   const currentBranch = context.ref
   const versionBranch = `changeset-release/${currentBranch}`
+
+  console.log({ currentBranch, versionBranch, mrTargetBranch })
+
   const api = createApi(gitlabToken)
   const { preState } = await readChangesetState(cwd)
 
@@ -294,7 +297,9 @@ ${
   })
   console.log(JSON.stringify(searchResult, null, 2))
   if (searchResult.length === 0) {
-    console.log('creating merge request')
+    console.log(
+      `Creating merge request from ${versionBranch} to ${mrTargetBranch}.`,
+    )
     await api.MergeRequests.create(
       context.projectId,
       versionBranch,
@@ -305,10 +310,10 @@ ${
       },
     )
   } else {
+    console.log('Found existing merge request, updating.')
     await api.MergeRequests.edit(context.projectId, searchResult[0].iid, {
       title: finalMrTitle,
       description: await mrBodyPromise,
     })
-    console.log('merge request found')
   }
 }

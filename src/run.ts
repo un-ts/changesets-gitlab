@@ -296,7 +296,7 @@ ${
   console.log(JSON.stringify(searchResult, null, 2))
   if (searchResult.length === 0) {
     console.log(
-      `Creating merge request from ${versionBranch} to ${mrTargetBranch}.`,
+      `creating merge request from ${versionBranch} to ${mrTargetBranch}.`,
     )
     await api.MergeRequests.create(
       context.projectId,
@@ -308,7 +308,7 @@ ${
       },
     )
   } else {
-    console.log('Found existing merge request, updating.')
+    console.log(`updating found merge request !${searchResult[0].iid}`)
     await api.MergeRequests.edit(context.projectId, searchResult[0].iid, {
       title: finalMrTitle,
       description: await mrBodyPromise,

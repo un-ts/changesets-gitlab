@@ -102,6 +102,7 @@ export const main = async ({
         gitlabToken: GITLAB_TOKEN!,
         mrTitle: getOptionalInput('title'),
         commitMessage: getOptionalInput('commit'),
+        removeSourceBranch: getInput('remove_source_branch') === 'true',
         hasPublishScript,
       })
       if (onlyChangesets) {

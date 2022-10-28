@@ -185,6 +185,7 @@ interface VersionOptions {
   gitlabToken: string
   cwd?: string
   mrTitle?: string
+  removeSourceBranch?: boolean
   commitMessage?: string
   hasPublishScript?: boolean
 }
@@ -195,6 +196,7 @@ export async function runVersion({
   cwd = process.cwd(),
   mrTitle = 'Version Packages',
   commitMessage = 'Version Packages',
+  removeSourceBranch = false,
   hasPublishScript = false,
 }: VersionOptions) {
   const branch = context.ref
@@ -300,12 +302,14 @@ ${
       finalMrTitle,
       {
         description: await mrBodyPromise,
+        removeSourceBranch,
       },
     )
   } else {
     await api.MergeRequests.edit(context.projectId, searchResult[0].iid, {
       title: finalMrTitle,
       description: await mrBodyPromise,
+      removeSourceBranch,
     })
     console.log('merge request found')
   }

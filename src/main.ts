@@ -101,6 +101,7 @@ export const main = async ({
         script: getOptionalInput('version'),
         gitlabToken: GITLAB_TOKEN!,
         mrTitle: getOptionalInput('title'),
+        mrTargetBranch: getOptionalInput('target_branch'),
         commitMessage: getOptionalInput('commit'),
         hasPublishScript,
       })

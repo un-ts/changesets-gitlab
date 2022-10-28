@@ -185,6 +185,7 @@ interface VersionOptions {
   gitlabToken: string
   cwd?: string
   mrTitle?: string
+  mrTargetBranch?: string
   commitMessage?: string
   hasPublishScript?: boolean
 }
@@ -194,17 +195,18 @@ export async function runVersion({
   gitlabToken,
   cwd = process.cwd(),
   mrTitle = 'Version Packages',
+  mrTargetBranch = context.ref,
   commitMessage = 'Version Packages',
   hasPublishScript = false,
 }: VersionOptions) {
-  const branch = context.ref
-  const versionBranch = `changeset-release/${branch}`
+  const currentBranch = context.ref
+  const versionBranch = `changeset-release/${currentBranch}`
   const api = createApi(gitlabToken)
   const { preState } = await readChangesetState(cwd)
 
   await gitUtils.switchToMaybeExistingBranch(versionBranch)
-  await exec('git', ['fetch', 'origin', branch])
-  await gitUtils.reset(`origin/${branch}`)
+  await exec('git', ['fetch', 'origin', currentBranch])
+  await gitUtils.reset(`origin/${currentBranch}`)
 
   const versionsByDirectory = await getVersionsByDirectory(cwd)
 
@@ -228,13 +230,13 @@ export async function runVersion({
       hasPublishScript
         ? 'the packages will be published to npm automatically'
         : 'publish to npm yourself or [setup this action to publish automatically](https://github.com/un-ts/changesets-gitlab#with-publishing)'
-    }. If you're not ready to do a release yet, that's fine, whenever you add more changesets to ${branch}, this MR will be updated.
+    }. If you're not ready to do a release yet, that's fine, whenever you add more changesets to ${currentBranch}, this MR will be updated.
 ${
   preState
     ? `
 ⚠️⚠️⚠️⚠️⚠️⚠️
 
-\`${branch}\` is currently in **pre mode** so this branch has prereleases rather than normal releases. If you want to exit prereleases, run \`changeset pre exit\` on \`${branch}\`.
+\`${currentBranch}\` is currently in **pre mode** so this branch has prereleases rather than normal releases. If you want to exit prereleases, run \`changeset pre exit\` on \`${currentBranch}\`.
 
 ⚠️⚠️⚠️⚠️⚠️⚠️
 `
@@ -286,7 +288,7 @@ ${
     projectId: context.projectId,
     state: 'opened',
     sourceBranch: versionBranch,
-    target_branch: branch,
+    target_branch: mrTargetBranch,
     maxPages: 1,
     perPage: 1,
   })
@@ -296,7 +298,7 @@ ${
     await api.MergeRequests.create(
       context.projectId,
       versionBranch,
-      branch,
+      mrTargetBranch,
       finalMrTitle,
       {
         description: await mrBodyPromise,

@@ -202,8 +202,6 @@ export async function runVersion({
   const currentBranch = context.ref
   const versionBranch = `changeset-release/${currentBranch}`
 
-  console.log({ currentBranch, versionBranch, mrTargetBranch })
-
   const api = createApi(gitlabToken)
   const { preState } = await readChangesetState(cwd)
 

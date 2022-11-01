@@ -1573,12 +1573,12 @@
   dependencies:
     chalk "^2.1.0"
 
-"@changesets/parse@^0.3.13", "@changesets/parse@^0.3.14":
-  version "0.3.14"
-  resolved "https://registry.yarnpkg.com/@changesets/parse/-/parse-0.3.14.tgz#97321604206db2572c17a12ed37671d9ee6d5e14"
-  integrity sha512-SWnNVyC9vz61ueTbuxvA6b4HXcSx2iaWr2VEa37lPg1Vw+cEyQp7lOB219P7uow1xFfdtIEEsxbzXnqLAAaY8w==
+"@changesets/parse@^0.3.13", "@changesets/parse@^0.3.15":
+  version "0.3.15"
+  resolved "https://registry.yarnpkg.com/@changesets/parse/-/parse-0.3.15.tgz#1bc74f8c43b0861d71f4fccf78950411004ba308"
+  integrity sha512-3eDVqVuBtp63i+BxEWHPFj2P1s3syk0PTrk2d94W9JD30iG+OER0Y6n65TeLlY8T2yB9Fvj6Ev5Gg0+cKe/ZUA==
   dependencies:
-    "@changesets/types" "^5.1.0"
+    "@changesets/types" "^5.2.0"
     js-yaml "^3.13.1"
 
 "@changesets/pre@^1.0.11":
@@ -1611,7 +1611,7 @@
   resolved "https://registry.yarnpkg.com/@changesets/types/-/types-4.1.0.tgz#fb8f7ca2324fd54954824e864f9a61a82cb78fe0"
   integrity sha512-LDQvVDv5Kb50ny2s25Fhm3d9QSZimsoUGBsUioj6MC3qbMUCuC8GPIvk/M6IvXx3lYhAs0lwWUQLb+VIEUCECw==
 
-"@changesets/types@^5.0.0", "@changesets/types@^5.1.0", "@changesets/types@^5.2.0":
+"@changesets/types@^5.0.0", "@changesets/types@^5.2.0":
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/@changesets/types/-/types-5.2.0.tgz#c4927f5bf9668f778c12b4226cfd07a1f5b79c9b"
   integrity sha512-km/66KOqJC+eicZXsm2oq8A8bVTSpkZJ60iPV/Nl5Z5c7p9kk8xxh6XGRTlnludHldxOOfudhnDN2qPxtHmXzA==

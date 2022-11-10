@@ -10,6 +10,8 @@ import { runPublish, runVersion } from './run.js'
 import type { MainCommandOptions } from './types.js'
 import { execSync, getOptionalInput } from './utils.js'
 
+import { createApi } from './index.js'
+
 export const main = async ({
   published,
   onlyChangesets,
@@ -18,7 +20,6 @@ export const main = async ({
     CI,
     CI_PROJECT_PATH,
     GITLAB_HOST = 'https://gitlab.com',
-    GITLAB_CI_USER_NAME,
     GITLAB_TOKEN,
     HOME,
     NPM_TOKEN,
@@ -36,13 +37,18 @@ export const main = async ({
 
     const url = new URL(GITLAB_HOST)
 
+    console.log('setting GitLab credentials')
+
+    const api = createApi()
+    const { username } = await api.Users.current()
+
     await exec(
       'git',
       [
         'remote',
         'set-url',
         'origin',
-        `${url.protocol}//${GITLAB_CI_USER_NAME!}:${GITLAB_TOKEN!}@${
+        `${url.protocol}//${username}:${GITLAB_TOKEN!}@${
           url.host
         }/${CI_PROJECT_PATH!}.git`,
       ],

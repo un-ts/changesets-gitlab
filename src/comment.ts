@@ -11,6 +11,7 @@ import { markdownTable } from 'markdown-table'
 
 import * as context from './context.js'
 import { getChangedPackages } from './get-changed-packages.js'
+import { getUsername } from './utils.js'
 
 import { createApi } from './index.js'
 
@@ -104,13 +105,12 @@ ${title}
 const getNoteInfo = (api: Gitlab, mrIid: number | string) =>
   api.MergeRequestDiscussions.all(context.projectId, mrIid).then(
     async discussions => {
-      const { username } = await api.Users.current()
-
       for (const discussion of discussions) {
         if (!discussion.notes) {
           continue
         }
 
+        const username = await getUsername(api)
         const changesetBotNote = discussion.notes.find(
           note =>
             note.author.username === username &&
@@ -174,8 +174,8 @@ export const comment = async () => {
 
     const [noteInfo, hasChangeset, { changedPackages, releasePlan }] =
       await Promise.all([
-        getNoteInfo(api, mrIid),
-        hasChangesetBeenAdded(changedFilesPromise),
+        await getNoteInfo(api, mrIid),
+        await hasChangesetBeenAdded(changedFilesPromise),
         getChangedPackages({
           changedFiles: changedFilesPromise.then(x =>
             x.changes!.map(x => x.new_path),

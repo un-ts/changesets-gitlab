@@ -8,7 +8,7 @@ import { setupUser } from './gitUtils.js'
 import readChangesetState from './readChangesetState.js'
 import { runPublish, runVersion } from './run.js'
 import type { MainCommandOptions } from './types.js'
-import { execSync, getOptionalInput } from './utils.js'
+import { execSync, getOptionalInput, getUsername } from './utils.js'
 
 import { createApi } from './index.js'
 
@@ -33,14 +33,10 @@ export const main = async ({
     console.log('setting git user')
     await setupUser()
 
-    console.log('setting GitLab credentials')
-
     const url = new URL(GITLAB_HOST)
 
     console.log('setting GitLab credentials')
-
-    const api = createApi()
-    const { username } = await api.Users.current()
+    const username = await getUsername(createApi())
 
     await exec(
       'git',

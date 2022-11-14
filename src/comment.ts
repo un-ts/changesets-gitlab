@@ -174,8 +174,8 @@ export const comment = async () => {
 
     const [noteInfo, hasChangeset, { changedPackages, releasePlan }] =
       await Promise.all([
-        await getNoteInfo(api, mrIid),
-        await hasChangesetBeenAdded(changedFilesPromise),
+        getNoteInfo(api, mrIid),
+        hasChangesetBeenAdded(changedFilesPromise),
         getChangedPackages({
           changedFiles: changedFilesPromise.then(x =>
             x.changes!.map(x => x.new_path),

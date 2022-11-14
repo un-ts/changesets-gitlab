@@ -1,5 +1,13 @@
 # changesets-gitlab
 
+## 0.6.0
+
+### Minor Changes
+
+- [#70](https://github.com/un-ts/changesets-gitlab/pull/70) [`2d8b1e0`](https://github.com/un-ts/changesets-gitlab/commit/2d8b1e0d46986680c068ff71cbcb00c29ae2dfdb) Thanks [@lluiscab](https://github.com/lluiscab)! - feat: merge requests target branch can now be configured through a input environment variable
+
+- [#76](https://github.com/un-ts/changesets-gitlab/pull/76) [`f819185`](https://github.com/un-ts/changesets-gitlab/commit/f819185d8cf3392950ab0eb23e201217490ca38a) Thanks [@devtribe](https://github.com/devtribe)! - get username from api instead usage of env variable
+
 ## 0.5.6
 
 ### Patch Changes

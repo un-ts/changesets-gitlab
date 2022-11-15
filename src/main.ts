@@ -105,6 +105,7 @@ export const main = async ({
         mrTitle: getOptionalInput('title'),
         mrTargetBranch: getOptionalInput('target_branch'),
         commitMessage: getOptionalInput('commit'),
+        removeSourceBranch: getInput('remove_source_branch') === 'true',
         hasPublishScript,
       })
       if (onlyChangesets) {

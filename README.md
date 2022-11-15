@@ -28,6 +28,7 @@ GitLab CI cli for [changesets](https://github.com/atlassian/changesets) like its
 
 - published - Command executed after published
 - only_changesets - Command executed on only changesets detected
+- remove_source_branch - Enables the merge request "Delete source branch" checkbox. Default false.
 - target_branch -> The merge request target branch. Defaults to current branch
 
 ### Outputs

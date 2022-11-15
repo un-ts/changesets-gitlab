@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.7.0
+
+### Minor Changes
+
+- [#71](https://github.com/un-ts/changesets-gitlab/pull/71) [`19466b9`](https://github.com/un-ts/changesets-gitlab/commit/19466b9ed65e9e86e140192a66596d0394be2c88) Thanks [@lluiscab](https://github.com/lluiscab)! - feat: added new input variable controling if the source branch should be automatically deleted or not
+
 ## 0.6.0
 
 ### Minor Changes

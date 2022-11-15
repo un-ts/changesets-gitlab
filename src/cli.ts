@@ -15,12 +15,10 @@ const cjsRequire =
   typeof require === 'undefined' ? _.createRequire(import.meta.url) : require
 
 const run = async () => {
-  const { GITLAB_CI_USER_NAME, GITLAB_TOKEN } = process.env
+  const { GITLAB_TOKEN } = process.env
 
-  if (!GITLAB_TOKEN || !GITLAB_CI_USER_NAME) {
-    setFailed(
-      'Please add the `GITLAB_TOKEN` and `GITLAB_CI_USER_NAME` to the changesets action',
-    )
+  if (!GITLAB_TOKEN) {
+    setFailed('Please add the `GITLAB_TOKEN` to the changesets action')
     return
   }
 

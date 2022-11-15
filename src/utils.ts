@@ -4,6 +4,7 @@ import path from 'node:path'
 
 import { getInput } from '@actions/core'
 import { exec } from '@actions/exec'
+import type { Gitlab } from '@gitbeaker/core'
 import type { Package } from '@manypkg/get-packages'
 import { getPackages } from '@manypkg/get-packages'
 import { toString as mdastToString } from 'mdast-util-to-string'
@@ -152,3 +153,9 @@ export const execSync = (command: string) =>
   })
 
 export const getOptionalInput = (name: string) => getInput(name) || undefined
+
+export const getUsername = async (api: Gitlab) => {
+  return process.env.GITLAB_CI_USER_NAME == null
+    ? await api.Users.current().then(currentUser => currentUser.username)
+    : process.env.GITLAB_CI_USER_NAME
+}

@@ -159,3 +159,26 @@ export const getUsername = async (api: Gitlab) => {
     ? await api.Users.current().then(currentUser => currentUser.username)
     : process.env.GITLAB_CI_USER_NAME
 }
+
+export const checkPublishConfig = (): boolean => {
+  const { HOME, NPM_TOKEN } = process.env
+
+  const projectNpmrcPath = './.npmrc'
+  const userNpmrcPath = `${HOME!}/.npmrc`
+
+  if (fs.existsSync(projectNpmrcPath)) {
+    console.log('Found existing .npmrc file in project directory')
+  } else if (fs.existsSync(userNpmrcPath)) {
+    console.log('Found existing .npmrc file in home directory')
+  } else if (NPM_TOKEN) {
+    console.log('No .npmrc file found, creating one')
+    fs.writeFileSync(
+      projectNpmrcPath,
+      `//registry.npmjs.org/:_authToken=${NPM_TOKEN}`,
+    )
+  } else {
+    return false
+  }
+
+  return true
+}

@@ -76,7 +76,7 @@
     "@changesets/errors": "^0.1.4",
     "@changesets/parse": "^0.3.15",
     "@changesets/pre": "^1.0.13",
-    "@changesets/read": "^0.5.5",
+    "@changesets/read": "^0.5.8",
     "@gitbeaker/node": "^35.7.0",
     "@manypkg/get-packages": "^1.1.3",
     "@sentry/node": "^7.6.0",

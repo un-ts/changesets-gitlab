@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.8.0
+
+### Minor Changes
+
+- [#85](https://github.com/un-ts/changesets-gitlab/pull/85) [`65ecc27`](https://github.com/un-ts/changesets-gitlab/commit/65ecc272205462707e9ed80427ee18b7d15b4a3e) Thanks [@wingnorepeat](https://github.com/wingnorepeat)! - feat: added new input variable to indicate whether to create Gitlab releases after publish or not
+
 ## 0.7.0
 
 ### Minor Changes

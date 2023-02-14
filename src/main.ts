@@ -87,7 +87,7 @@ export const main = async ({
       const result = await runPublish({
         script: publishScript,
         gitlabToken: GITLAB_TOKEN!,
-        createGitlabReleases: getInput('create_gitlab_releases') === 'true',
+        createGitlabReleases: getInput('create_gitlab_releases') !== 'false',
       })
 
       if (result.published) {

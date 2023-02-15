@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.8.1
+
+### Patch Changes
+
+- [#89](https://github.com/un-ts/changesets-gitlab/pull/89) [`12b715f`](https://github.com/un-ts/changesets-gitlab/commit/12b715fed39f1b87b6eea72a11d23ef74b43ea69) Thanks [@godiagonal](https://github.com/godiagonal)! - fix: repair default value for `create_gitlab_releases` variable
+
 ## 0.8.0
 
 ### Minor Changes

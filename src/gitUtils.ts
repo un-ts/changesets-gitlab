@@ -6,7 +6,7 @@ export const setupUser = async () => {
   await exec('git', [
     'config',
     'user.name',
-    process.env.GITLAB_CI_USER_NAME! || process.env.GITLAB_USER_NAME!,
+    process.env.GITLAB_CI_USER_NAME || process.env.GITLAB_USER_NAME!,
   ])
   await exec('git', [
     'config',

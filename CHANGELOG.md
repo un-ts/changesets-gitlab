@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.8.2
+
+### Patch Changes
+
+- [#95](https://github.com/un-ts/changesets-gitlab/pull/95) [`cec113b`](https://github.com/un-ts/changesets-gitlab/commit/cec113bab71dedec03bbfb92a7bf754ea509eb45) Thanks [@AdrielLimanthie](https://github.com/AdrielLimanthie)! - fix: git setup user name should use GITLAB_CI_USER_NAME
+
 ## 0.8.1
 
 ### Patch Changes

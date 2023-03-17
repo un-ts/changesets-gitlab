@@ -141,6 +141,30 @@ const hasChangesetBeenAdded = (
     ),
   )
 
+const getCommentFunctions = (api: Gitlab, commentType: string) => {
+  if (commentType === 'discussion') {
+    return {
+      editComment: api.MergeRequestDiscussions.editNote.bind(
+        api.MergeRequestDiscussions,
+      ),
+      createComment: api.MergeRequestDiscussions.create.bind(
+        api.MergeRequestDiscussions,
+      ),
+    }
+  }
+
+  if (commentType === 'note') {
+    return {
+      editComment: api.MergeRequestNotes.edit.bind(api.MergeRequestNotes),
+      createComment: api.MergeRequestNotes.create.bind(api.MergeRequestNotes),
+    }
+  }
+
+  throw new Error(
+    `Invalid comment type "${commentType}", should be "discussion" or "note"`,
+  )
+}
+
 export const comment = async () => {
   const {
     CI_MERGE_REQUEST_IID,
@@ -148,6 +172,7 @@ export const comment = async () => {
     CI_MERGE_REQUEST_SOURCE_BRANCH_NAME: mrBranch,
     CI_MERGE_REQUEST_SOURCE_BRANCH_SHA,
     CI_MERGE_REQUEST_TITLE,
+    COMMENT_TYPE = 'discussion',
   } = process.env
 
   if (!mrBranch) {
@@ -211,8 +236,13 @@ export const comment = async () => {
         : getAbsentMessage(latestCommitSha, addChangesetUrl, releasePlan)) +
       errFromFetchingChangedFiles
 
+    const { editComment, createComment } = getCommentFunctions(
+      api,
+      COMMENT_TYPE,
+    )
+
     if (noteInfo != null) {
-      return api.MergeRequestDiscussions.editNote(
+      return editComment(
         context.projectId,
         mrIid,
         // @ts-expect-error - https://github.com/jdalrymple/gitbeaker/pull/523#issuecomment-975276068
@@ -223,11 +253,7 @@ export const comment = async () => {
         },
       )
     }
-    return api.MergeRequestDiscussions.create(
-      context.projectId,
-      mrIid,
-      prComment,
-    )
+    return createComment(context.projectId, mrIid, prComment)
   } catch (err: unknown) {
     console.error(err)
     throw err

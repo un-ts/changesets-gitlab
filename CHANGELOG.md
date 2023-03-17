@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.9.0
+
+### Minor Changes
+
+- [#98](https://github.com/un-ts/changesets-gitlab/pull/98) [`d7126ba`](https://github.com/un-ts/changesets-gitlab/commit/d7126bae6e95039a06d6fd3ddfb416011a3721de) Thanks [@QuiiBz](https://github.com/QuiiBz)! - feat: add new `GITLAB_COMMENT_TYPE` environment variable to use discussions or notes
+
 ## 0.8.2
 
 ### Patch Changes

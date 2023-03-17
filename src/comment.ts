@@ -172,7 +172,7 @@ export const comment = async () => {
     CI_MERGE_REQUEST_SOURCE_BRANCH_NAME: mrBranch,
     CI_MERGE_REQUEST_SOURCE_BRANCH_SHA,
     CI_MERGE_REQUEST_TITLE,
-    COMMENT_TYPE = 'discussion',
+    GITLAB_COMMENT_TYPE = 'discussion',
   } = process.env
 
   if (!mrBranch) {
@@ -238,7 +238,7 @@ export const comment = async () => {
 
     const { editComment, createComment } = getCommentFunctions(
       api,
-      COMMENT_TYPE,
+      GITLAB_COMMENT_TYPE,
     )
 
     if (noteInfo != null) {

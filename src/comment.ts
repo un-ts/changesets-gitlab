@@ -141,30 +141,6 @@ const hasChangesetBeenAdded = (
     ),
   )
 
-const getCommentFunctions = (api: Gitlab, commentType: string) => {
-  if (commentType === 'discussion') {
-    return {
-      editComment: api.MergeRequestDiscussions.editNote.bind(
-        api.MergeRequestDiscussions,
-      ),
-      createComment: api.MergeRequestDiscussions.create.bind(
-        api.MergeRequestDiscussions,
-      ),
-    }
-  }
-
-  if (commentType === 'note') {
-    return {
-      editComment: api.MergeRequestNotes.edit.bind(api.MergeRequestNotes),
-      createComment: api.MergeRequestNotes.create.bind(api.MergeRequestNotes),
-    }
-  }
-
-  throw new Error(
-    `Invalid comment type "${commentType}", should be "discussion" or "note"`,
-  )
-}
-
 export const comment = async () => {
   const {
     CI_MERGE_REQUEST_IID,
@@ -236,24 +212,43 @@ export const comment = async () => {
         : getAbsentMessage(latestCommitSha, addChangesetUrl, releasePlan)) +
       errFromFetchingChangedFiles
 
-    const { editComment, createComment } = getCommentFunctions(
-      api,
-      GITLAB_COMMENT_TYPE,
-    )
+    if (GITLAB_COMMENT_TYPE === 'discussion') {
+      if (noteInfo) {
+        return api.MergeRequestDiscussions.editNote(
+          context.projectId,
+          mrIid,
+          // @ts-expect-error - https://github.com/jdalrymple/gitbeaker/pull/523#issuecomment-975276068
+          noteInfo.discussionId,
+          noteInfo.noteId,
+          {
+            body: prComment,
+          },
+        )
+      }
 
-    if (noteInfo != null) {
-      return editComment(
+      return api.MergeRequestDiscussions.create(
         context.projectId,
         mrIid,
-        // @ts-expect-error - https://github.com/jdalrymple/gitbeaker/pull/523#issuecomment-975276068
-        noteInfo.discussionId,
-        noteInfo.noteId,
-        {
-          body: prComment,
-        },
+        prComment,
       )
     }
-    return createComment(context.projectId, mrIid, prComment)
+
+    if (GITLAB_COMMENT_TYPE === 'note') {
+      if (noteInfo) {
+        return api.MergeRequestNotes.edit(
+          context.projectId,
+          mrIid,
+          noteInfo.noteId,
+          prComment,
+        )
+      }
+
+      return api.MergeRequestNotes.create(context.projectId, mrIid, prComment)
+    }
+
+    throw new Error(
+      `Invalid comment type "${GITLAB_COMMENT_TYPE}", should be "discussion" or "note"`,
+    )
   } catch (err: unknown) {
     console.error(err)
     throw err

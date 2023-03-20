@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.9.1
+
+### Patch Changes
+
+- [#100](https://github.com/un-ts/changesets-gitlab/pull/100) [`4498c2f`](https://github.com/un-ts/changesets-gitlab/commit/4498c2fc88f69142a78a3711c29753797f047d67) Thanks [@QuiiBz](https://github.com/QuiiBz)! - fix: editing comment when GITLAB_COMMENT_TYPE is note
+
 ## 0.9.0
 
 ### Minor Changes

@@ -17,20 +17,20 @@ GitLab CI cli for [changesets](https://github.com/atlassian/changesets) like its
 
 ### Inputs
 
-> Environment valuables starts with `INPUT_`, case insensitive
+> Environment valuables starts with `INPUT_`, case-sensitive, uppercase
 
-- publish - The command to use to build and publish packages
-- version - The command to update version, edit CHANGELOG, read and delete changesets. Default to `changeset version` if not provided
-- commit - The commit message to use. Default to `Version Packages`
-- title - The merge request title. Default to `Version Packages`
+- PUBLISH - The command to use to build and publish packages
+- VERSION - The command to update version, edit CHANGELOG, read and delete changesets. Default to `changeset version` if not provided
+- COMMIT - The commit message to use. Default to `Version Packages`
+- TITLE - The merge request title. Default to `Version Packages`
 
 #### Only available in `changesets-gitlab`
 
-- published - Command executed after published
-- only_changesets - Command executed on only changesets detected
-- remove_source_branch - Enables the merge request "Delete source branch" checkbox. Default false.
-- target_branch -> The merge request target branch. Defaults to current branch
-- create_gitlab_releases - A boolean value to indicate whether to create Gitlab releases after publish or not. Default true.
+- PUBLISHED - Command executed after published
+- ONLY_CHANGESETS - Command executed on only changesets detected
+- REMOVE_SOURCE_BRANCH - Enables the merge request "Delete source branch" checkbox. Default false.
+- TARGET_BRANCH -> The merge request target branch. Defaults to current branch
+- CREATE_GITLAB_RELEASES - A boolean value to indicate whether to create Gitlab releases after publish or not. Default true.
 
 ### Outputs
 

@@ -181,10 +181,14 @@ export const getChangedPackages = async ({
     throw new Error('an error occurred when fetching files')
   }
 
+  const config = await configPromise.then(rawConfig =>
+    parseConfig(rawConfig, packages),
+  )
+
   const releasePlan = assembleReleasePlan(
     await Promise.all(changesetPromises),
     packages,
-    await configPromise.then(rawConfig => parseConfig(rawConfig, packages)),
+    config,
     await preStatePromise,
   )
 
@@ -194,7 +198,13 @@ export const getChangedPackages = async ({
       : packages.packages.filter(pkg =>
           changedFiles.some(changedFile => changedFile.includes(pkg.dir)),
         )
-    ).map(x => x.packageJson.name),
+    )
+      .filter(
+        pkg =>
+          pkg.packageJson.private !== true &&
+          !config.ignore.includes(pkg.packageJson.name),
+      )
+      .map(x => x.packageJson.name),
     releasePlan,
   }
 }

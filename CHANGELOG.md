@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.10.0
+
+### Minor Changes
+
+- [#105](https://github.com/un-ts/changesets-gitlab/pull/105) [`6edb926`](https://github.com/un-ts/changesets-gitlab/commit/6edb926ba92bda053bc3fde1c0d7729b5383049b) Thanks [@JounQin](https://github.com/JounQin)! - feat: ignore private or ignored packages for comment
+
 ## 0.9.1
 
 ### Patch Changes

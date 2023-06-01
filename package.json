@@ -89,8 +89,8 @@
     "markdown-table": "^3.0.3",
     "mdast-util-to-string": "^3.1.0",
     "micromatch": "^4.0.5",
-    "remark-parse": "^10.0.1",
-    "remark-stringify": "^10.0.2",
+    "remark-parse": "^10.0.2",
+    "remark-stringify": "^10.0.3",
     "resolve-from": "^5.0.0",
     "semver": "^7.3.7",
     "unified": "^10.1.2"

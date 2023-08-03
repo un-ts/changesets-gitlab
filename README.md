@@ -46,7 +46,7 @@ GLOBAL_AGENT_NO_PROXY    # Like above but for no proxied requests
 
 # http_proxy, https_proxy, no_proxy environment variables are supported at the same time
 
-GITLAB_HOST # optional, if you're using custom GitLab host
+GITLAB_HOST # optional, if you're using custom GitLab host, will fallback to `CI_SERVER_URL` if not provided
 
 GITLAB_TOKEN            # required, token with accessibility to push
 GITLAB_TOKEN_TYPE       # optional, type of the provided token in GITLAB_TOKEN. defaults to personal access token. can be `job` if you provide the Gitlab CI_JOB_TOKEN or `oauth` if you use Gitlab Oauth token

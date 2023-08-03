@@ -37,7 +37,7 @@ export const createApi = (gitlabToken?: string) => {
   }
 
   return new Gitlab({
-    host: process.env.GITLAB_HOST,
+    host: process.env.GITLAB_HOST ?? process.env.CI_SERVER_URL,
     [tokenType]: token,
   })
 }

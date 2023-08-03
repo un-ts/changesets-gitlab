@@ -15,11 +15,13 @@ import { createApi } from './index.js'
 export const main = async ({
   published,
   onlyChangesets,
-}: MainCommandOptions = {}) => {
+}: // eslint-disable-next-line sonarjs/cognitive-complexity
+MainCommandOptions = {}) => {
   const {
     CI,
     CI_PROJECT_PATH,
-    GITLAB_HOST = 'https://gitlab.com',
+    CI_SERVER_URL,
+    GITLAB_HOST,
     GITLAB_TOKEN,
     HOME,
     NPM_TOKEN,
@@ -33,7 +35,7 @@ export const main = async ({
     console.log('setting git user')
     await setupUser()
 
-    const url = new URL(GITLAB_HOST)
+    const url = new URL(GITLAB_HOST ?? CI_SERVER_URL ?? 'https://gitlab.com')
 
     console.log('setting GitLab credentials')
     const username = await getUsername(createApi())

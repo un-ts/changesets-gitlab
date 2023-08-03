@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.10.1
+
+### Patch Changes
+
+- [#113](https://github.com/un-ts/changesets-gitlab/pull/113) [`f8ae011`](https://github.com/un-ts/changesets-gitlab/commit/f8ae011eff359ab9f4b4ac2fa16a86c71cc6357a) Thanks [@Wxh16144](https://github.com/Wxh16144)! - feat: fallback `GITLAB_HOST` to `CI_SERVER_URL` environment
+
 ## 0.10.0
 
 ### Minor Changes

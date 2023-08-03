@@ -23,7 +23,13 @@ export const createApi = (gitlabToken?: string) => {
     }
   }
 
-  const token = gitlabToken || process.env.GITLAB_TOKEN
+  const {
+    GITLAB_TOKEN,
+    CI_SERVER_PROTOCOL,
+    CI_SERVER_HOST,
+  } = process.env
+
+  const token = gitlabToken || GITLAB_TOKEN
 
   let tokenType: 'jobToken' | 'oauthToken' | 'token' = 'token'
 
@@ -36,8 +42,13 @@ export const createApi = (gitlabToken?: string) => {
       break
   }
 
+  const host = process.env.GITLAB_HOST ??
+    (CI_SERVER_PROTOCOL && CI_SERVER_HOST)
+    ? `${CI_SERVER_PROTOCOL}://${CI_SERVER_HOST}`
+    : 'https://gitlab.com'
+
   return new Gitlab({
-    host: process.env.GITLAB_HOST,
+    host,
     [tokenType]: token,
   })
 }

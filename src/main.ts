@@ -15,7 +15,8 @@ import { createApi } from './index.js'
 export const main = async ({
   published,
   onlyChangesets,
-}: MainCommandOptions = {}) => {
+}: // eslint-disable-next-line sonarjs/cognitive-complexity
+MainCommandOptions = {}) => {
   const {
     CI,
     CI_PROJECT_PATH,

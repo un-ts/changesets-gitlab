@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.10.2
+
+### Patch Changes
+
+- [#118](https://github.com/un-ts/changesets-gitlab/pull/118) [`5accb23`](https://github.com/un-ts/changesets-gitlab/commit/5accb230aa98f24fc21c6ca094e3ddc9cf1b7df1) Thanks [@zwaittt](https://github.com/zwaittt)! - expose published outputs as env variables to be accessed dicrectly in `PUBLISHED` command process
+
 ## 0.10.1
 
 ### Patch Changes

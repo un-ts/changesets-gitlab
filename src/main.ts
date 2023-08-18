@@ -1,6 +1,6 @@
 import { URL } from 'node:url'
 
-import { getInput, setFailed, setOutput } from '@actions/core'
+import { getInput, setFailed, setOutput, exportVariable } from '@actions/core'
 import { exec } from '@actions/exec'
 import fs from 'fs-extra'
 
@@ -95,6 +95,8 @@ MainCommandOptions = {}) => {
       if (result.published) {
         setOutput('published', true)
         setOutput('publishedPackages', result.publishedPackages)
+        exportVariable('PUBLISHED', true)
+        exportVariable('PUBLISHED_PACKAGES', result.publishedPackages)
         if (published) {
           execSync(published)
         }

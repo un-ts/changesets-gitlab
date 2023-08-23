@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.10.3
+
+### Patch Changes
+
+- [#120](https://github.com/un-ts/changesets-gitlab/pull/120) [`f35cd64`](https://github.com/un-ts/changesets-gitlab/commit/f35cd64b980c3bdf42b8ad83f6c6f037cd892720) Thanks [@coreymcg](https://github.com/coreymcg)! - Fix issue when the release MRs could not be created when gitlab is not hosted at the root of the of the domain (https://www.company.com/gitlab).
+
 ## 0.10.2
 
 ### Patch Changes

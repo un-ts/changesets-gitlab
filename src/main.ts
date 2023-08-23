@@ -48,7 +48,7 @@ MainCommandOptions = {}) => {
         'origin',
         `${url.protocol}//${username}:${GITLAB_TOKEN!}@${
           url.host
-        }/${CI_PROJECT_PATH!}.git`,
+        }${url.pathname.replace(/\/$/, '')}/${CI_PROJECT_PATH!}.git`,
       ],
       { silent: !['true', '1'].includes(DEBUG_GITLAB_CREDENTIAL) },
     )

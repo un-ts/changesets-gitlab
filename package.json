@@ -72,7 +72,7 @@
     "@actions/core": "^1.9.0",
     "@actions/exec": "^1.1.1",
     "@changesets/assemble-release-plan": "^5.2.4",
-    "@changesets/config": "^2.0.1",
+    "@changesets/config": "^2.3.1",
     "@changesets/errors": "^0.1.4",
     "@changesets/parse": "^0.3.16",
     "@changesets/pre": "^1.0.14",

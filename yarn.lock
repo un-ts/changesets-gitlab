@@ -1497,7 +1497,7 @@
     term-size "^2.1.0"
     tty-table "^4.1.5"
 
-"@changesets/config@^2.0.1", "@changesets/config@^2.3.1":
+"@changesets/config@^2.3.1":
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/@changesets/config/-/config-2.3.1.tgz#3d4a1dc866c3623375180b30f69fccdf0e3efebf"
   integrity sha512-PQXaJl82CfIXddUOppj4zWu+987GCw2M+eQcOepxN5s+kvnsZOwjEJO3DH9eVy+OP6Pg/KFEWdsECFEYTtbg6w==

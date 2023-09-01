@@ -92,7 +92,7 @@
     "remark-parse": "^10.0.2",
     "remark-stringify": "^10.0.3",
     "resolve-from": "^5.0.0",
-    "semver": "^7.3.7",
+    "semver": "^7.5.4",
     "unified": "^10.1.2"
   },
   "devDependencies": {

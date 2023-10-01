@@ -111,7 +111,7 @@
     "yarn-deduplicate": "^5.0.2"
   },
   "resolutions": {
-    "prettier": "^2.7.1"
+    "prettier": "^2.8.8"
   },
   "publishConfig": {
     "access": "public"

@@ -1,9 +1,21 @@
-export const once = <T>(fn: () => T) => {
-  let result: T | undefined
-  return () => {
-    if (result === undefined) {
-      result = fn()
+type OnceResult<T> =
+  | {
+      called: false
     }
-    return result
+  | {
+      data: T
+      called: true
+    }
+
+export const once = <T>(fn: () => T) => {
+  let result: OnceResult<T> = { called: false }
+  return () => {
+    if (!result.called) {
+      result = {
+        data: fn(),
+        called: true,
+      }
+    }
+    return result.data
   }
 }

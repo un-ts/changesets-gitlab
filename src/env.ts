@@ -10,7 +10,7 @@ const gitlabTokenGetter = once(() => {
   if (!process.env.GITLAB_TOKEN) {
     setFailed('Please add the `GITLAB_TOKEN` to the changesets action')
   }
-  return process.env.GITLAB_TOKEN ?? ''
+  return process.env.GITLAB_TOKEN as string
 })
 
 export const env = {

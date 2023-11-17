@@ -23,11 +23,7 @@ export const createApi = (gitlabToken?: string) => {
     }
   }
 
-  const token = gitlabToken || process.env.GITLAB_TOKEN
-  if (!token) {
-    throw new Error('GitLab token is not set')
-  }
-
+  const token = gitlabToken || process.env.GITLAB_TOKEN!
   const host = process.env.GITLAB_HOST ?? process.env.CI_SERVER_URL
 
   // we cannot use { [tokenType]: token } now

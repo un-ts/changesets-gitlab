@@ -155,9 +155,8 @@ export const execSync = (command: string) =>
 export const getOptionalInput = (name: string) => getInput(name) || undefined
 
 export const getUsername = async (api: Gitlab) => {
-  if (process.env.GITLAB_CI_USER_NAME != null) {
-    return process.env.GITLAB_CI_USER_NAME
-  }
-  const currentUser = await api.Users.showCurrentUser()
-  return currentUser.username
+  return (
+    process.env.GITLAB_CI_USER_NAME ??
+    api.Users.showCurrentUser().then(currentUser => currentUser.username)
+  )
 }

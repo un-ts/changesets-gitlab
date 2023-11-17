@@ -1,5 +1,5 @@
 ---
-'changesets-gitlab': patch
+'changesets-gitlab': minor
 ---
 
-Fix deprecation warning of @gitbeaker/node
+Fix deprecation warning of using @gitbeaker/node package

@@ -4,6 +4,7 @@ import { getInput, setFailed, setOutput, exportVariable } from '@actions/core'
 import { exec } from '@actions/exec'
 import fs from 'fs-extra'
 
+import { env } from './env.js'
 import { setupUser } from './gitUtils.js'
 import readChangesetState from './readChangesetState.js'
 import { runPublish, runVersion } from './run.js'
@@ -15,18 +16,15 @@ import { createApi } from './index.js'
 export const main = async ({
   published,
   onlyChangesets,
-}: // eslint-disable-next-line sonarjs/cognitive-complexity
-MainCommandOptions = {}) => {
+}: MainCommandOptions = {}) => {
   const {
     CI,
-    CI_PROJECT_PATH,
-    CI_SERVER_URL,
     GITLAB_HOST,
     GITLAB_TOKEN,
     HOME,
     NPM_TOKEN,
     DEBUG_GITLAB_CREDENTIAL = 'false',
-  } = process.env
+  } = env
 
   setOutput('published', false)
   setOutput('publishedPackages', [])
@@ -35,7 +33,7 @@ MainCommandOptions = {}) => {
     console.log('setting git user')
     await setupUser()
 
-    const url = new URL(GITLAB_HOST ?? CI_SERVER_URL ?? 'https://gitlab.com')
+    const url = new URL(GITLAB_HOST)
 
     console.log('setting GitLab credentials')
     const username = await getUsername(createApi())
@@ -46,9 +44,9 @@ MainCommandOptions = {}) => {
         'remote',
         'set-url',
         'origin',
-        `${url.protocol}//${username}:${GITLAB_TOKEN!}@${
+        `${url.protocol}//${username}:${GITLAB_TOKEN}@${
           url.host
-        }${url.pathname.replace(/\/$/, '')}/${CI_PROJECT_PATH!}.git`,
+        }${url.pathname.replace(/\/$/, '')}/${env.CI_PROJECT_PATH}.git`, // eslint-disable-line unicorn/consistent-destructuring
       ],
       { silent: !['true', '1'].includes(DEBUG_GITLAB_CREDENTIAL) },
     )
@@ -70,7 +68,7 @@ MainCommandOptions = {}) => {
         'No changesets found, attempting to publish any unpublished packages to npm',
       )
 
-      const npmrcPath = `${HOME!}/.npmrc`
+      const npmrcPath = `${HOME}/.npmrc`
       if (fs.existsSync(npmrcPath)) {
         console.log('Found existing .npmrc file')
       } else if (NPM_TOKEN) {
@@ -88,7 +86,7 @@ MainCommandOptions = {}) => {
 
       const result = await runPublish({
         script: publishScript,
-        gitlabToken: GITLAB_TOKEN!,
+        gitlabToken: GITLAB_TOKEN,
         createGitlabReleases: getInput('create_gitlab_releases') !== 'false',
       })
 
@@ -106,7 +104,7 @@ MainCommandOptions = {}) => {
     case hasChangesets: {
       await runVersion({
         script: getOptionalInput('version'),
-        gitlabToken: GITLAB_TOKEN!,
+        gitlabToken: GITLAB_TOKEN,
         mrTitle: getOptionalInput('title'),
         mrTargetBranch: getOptionalInput('target_branch'),
         commitMessage: getOptionalInput('commit'),

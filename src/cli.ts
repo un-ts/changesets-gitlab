@@ -4,7 +4,6 @@ import './env.js'
 
 import _ from 'node:module'
 
-import { setFailed } from '@actions/core'
 import { program } from 'commander'
 
 import { comment } from './comment.js'
@@ -15,13 +14,6 @@ const cjsRequire =
   typeof require === 'undefined' ? _.createRequire(import.meta.url) : require
 
 const run = async () => {
-  const { GITLAB_TOKEN } = process.env
-
-  if (!GITLAB_TOKEN) {
-    setFailed('Please add the `GITLAB_TOKEN` to the changesets action')
-    return
-  }
-
   program.version(
     (cjsRequire('../package.json') as { version: string }).version,
   )

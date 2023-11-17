@@ -1,19 +1,15 @@
 import { exec } from '@actions/exec'
 
+import { env } from './env.js'
 import { execWithOutput, identify } from './utils.js'
 
 export const setupUser = async () => {
   await exec('git', [
     'config',
     'user.name',
-    process.env.GITLAB_CI_USER_NAME || process.env.GITLAB_USER_NAME!,
+    env.GITLAB_CI_USER_NAME || env.GITLAB_USER_NAME,
   ])
-  await exec('git', [
-    'config',
-    'user.email',
-    process.env.GITLAB_CI_USER_EMAIL ||
-      '"gitlab[bot]@users.noreply.gitlab.com"',
-  ])
+  await exec('git', ['config', 'user.email', env.GITLAB_CI_USER_EMAIL])
 }
 
 export const pullBranch = async (branch: string) => {

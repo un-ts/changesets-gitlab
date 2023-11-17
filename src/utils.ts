@@ -12,6 +12,8 @@ import remarkParse from 'remark-parse'
 import remarkStringify from 'remark-stringify'
 import { unified } from 'unified'
 
+import { env } from './env'
+
 export const BumpLevels = {
   dep: 0,
   patch: 1,
@@ -156,7 +158,7 @@ export const getOptionalInput = (name: string) => getInput(name) || undefined
 
 export const getUsername = (api: Gitlab) => {
   return (
-    process.env.GITLAB_CI_USER_NAME ??
+    env.GITLAB_CI_USER_NAME ??
     api.Users.showCurrentUser().then(currentUser => currentUser.username)
   )
 }

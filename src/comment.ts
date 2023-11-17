@@ -10,6 +10,7 @@ import { humanId } from 'human-id'
 import { markdownTable } from 'markdown-table'
 
 import * as context from './context.js'
+import { env } from './env.js'
 import { getChangedPackages } from './get-changed-packages.js'
 import { getUsername } from './utils.js'
 
@@ -145,19 +146,19 @@ const hasChangesetBeenAdded = async (
 }
 
 export const comment = async () => {
-  const {
-    CI_MERGE_REQUEST_IID,
-    CI_MERGE_REQUEST_PROJECT_URL,
-    CI_MERGE_REQUEST_SOURCE_BRANCH_NAME: mrBranch,
-    CI_MERGE_REQUEST_SOURCE_BRANCH_SHA,
-    CI_MERGE_REQUEST_TITLE,
-    GITLAB_COMMENT_TYPE = 'discussion',
-  } = process.env
-
+  const mrBranch = env.CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
   if (!mrBranch) {
     console.warn('[changesets-gitlab:comment] It should only be used on MR')
     return
   }
+
+  const {
+    CI_MERGE_REQUEST_IID: mrIid,
+    CI_MERGE_REQUEST_PROJECT_URL,
+    CI_MERGE_REQUEST_SOURCE_BRANCH_SHA,
+    CI_MERGE_REQUEST_TITLE,
+    GITLAB_COMMENT_TYPE,
+  } = env
 
   if (mrBranch.startsWith('changeset-release')) {
     return
@@ -166,11 +167,8 @@ export const comment = async () => {
   const api = createApi()
 
   let errFromFetchingChangedFiles = ''
-
-  const mrIid = +CI_MERGE_REQUEST_IID!
-
   try {
-    const latestCommitSha = CI_MERGE_REQUEST_SOURCE_BRANCH_SHA!
+    const latestCommitSha = CI_MERGE_REQUEST_SOURCE_BRANCH_SHA
     const changedFilesPromise = api.MergeRequests.showChanges(
       context.projectId,
       mrIid,
@@ -199,14 +197,14 @@ export const comment = async () => {
         }),
       ] as const)
 
-    const addChangesetUrl = `${CI_MERGE_REQUEST_PROJECT_URL!}/-/new/${mrBranch}?file_name=.changeset/${humanId(
+    const addChangesetUrl = `${CI_MERGE_REQUEST_PROJECT_URL}/-/new/${mrBranch}?file_name=.changeset/${humanId(
       {
         separator: '-',
         capitalize: false,
       },
     )}.md&file=${getNewChangesetTemplate(
       changedPackages,
-      CI_MERGE_REQUEST_TITLE!,
+      CI_MERGE_REQUEST_TITLE,
     )}`
 
     const prComment =

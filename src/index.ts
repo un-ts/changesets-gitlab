@@ -1,4 +1,4 @@
-import { Gitlab } from '@gitbeaker/node'
+import { Gitlab } from '@gitbeaker/rest'
 import type { ProxyAgentConfigurationType } from 'global-agent'
 import { bootstrap } from 'global-agent'
 
@@ -24,20 +24,29 @@ export const createApi = (gitlabToken?: string) => {
   }
 
   const token = gitlabToken || process.env.GITLAB_TOKEN
-
-  let tokenType: 'jobToken' | 'oauthToken' | 'token' = 'token'
-
-  switch (process.env.GITLAB_TOKEN_TYPE) {
-    case 'job':
-      tokenType = 'jobToken'
-      break
-    case 'oauth':
-      tokenType = 'oauthToken'
-      break
+  if (!token) {
+    throw new Error('GitLab token is not set')
   }
 
-  return new Gitlab({
-    host: process.env.GITLAB_HOST ?? process.env.CI_SERVER_URL,
-    [tokenType]: token,
-  })
+  const host = process.env.GITLAB_HOST ?? process.env.CI_SERVER_URL
+
+  // we cannot use { [tokenType]: token } now
+  // because it will break the type of the Gitlab constructor
+  switch (process.env.GITLAB_TOKEN_TYPE) {
+    case 'job':
+      return new Gitlab({
+        host,
+        jobToken: token,
+      })
+    case 'oauth':
+      return new Gitlab({
+        host,
+        oauthToken: token,
+      })
+    default:
+      return new Gitlab({
+        host,
+        token,
+      })
+  }
 }

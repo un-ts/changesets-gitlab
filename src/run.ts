@@ -41,7 +41,7 @@ const createRelease = async (
       )
     }
 
-    await api.Releases.create(context.projectId, {
+    await api.ProjectReleases.create(context.projectId, {
       name: tagName,
       tag_name: tagName,
       description: changelogEntry.content,

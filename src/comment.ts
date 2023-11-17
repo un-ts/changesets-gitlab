@@ -129,17 +129,20 @@ const getNoteInfo = (api: Gitlab, mrIid: number | string) =>
     },
   )
 
-const hasChangesetBeenAdded = (
-  changedFilesPromise: ReturnType<MergeRequests['changes']>,
-) =>
-  changedFilesPromise.then(files =>
-    files.changes!.some(
-      file =>
-        file.new_file &&
-        /^\.changeset\/.+\.md$/.test(file.new_path) &&
-        file.new_path !== '.changeset/README.md',
-    ),
-  )
+const hasChangesetBeenAdded = async (
+  changedFilesPromise: ReturnType<MergeRequests['showChanges']>,
+) => {
+  const changedFiles = await changedFilesPromise
+  const changes =
+    'changes' in changedFiles ? changedFiles.changes : changedFiles.data.changes
+  return changes.some(file => {
+    return (
+      file.new_file &&
+      /^\.changeset\/.+\.md$/.test(file.new_path) &&
+      file.new_path !== '.changeset/README.md'
+    )
+  })
+}
 
 export const comment = async () => {
   const {
@@ -168,7 +171,7 @@ export const comment = async () => {
 
   try {
     const latestCommitSha = CI_MERGE_REQUEST_SOURCE_BRANCH_SHA!
-    const changedFilesPromise = api.MergeRequests.changes(
+    const changedFilesPromise = api.MergeRequests.showChanges(
       context.projectId,
       mrIid,
     )
@@ -179,7 +182,7 @@ export const comment = async () => {
         hasChangesetBeenAdded(changedFilesPromise),
         getChangedPackages({
           changedFiles: changedFilesPromise.then(x =>
-            x.changes!.map(x => x.new_path),
+            x.changes.map(x => x.new_path),
           ),
           api,
         }).catch((err: unknown) => {
@@ -217,7 +220,6 @@ export const comment = async () => {
         return api.MergeRequestDiscussions.editNote(
           context.projectId,
           mrIid,
-          // @ts-expect-error - https://github.com/jdalrymple/gitbeaker/pull/523#issuecomment-975276068
           noteInfo.discussionId,
           noteInfo.noteId,
           {
@@ -239,7 +241,7 @@ export const comment = async () => {
           context.projectId,
           mrIid,
           noteInfo.noteId,
-          prComment,
+          { body: prComment },
         )
       }
 

@@ -1,17 +1,11 @@
 import { setFailed } from '@actions/core'
 import dotenv from 'dotenv'
 
-import { once } from './once.js'
 import type { Env } from './types'
 
 dotenv.config()
 
-const gitlabTokenGetter = once(() => {
-  if (!process.env.GITLAB_TOKEN) {
-    setFailed('Please add the `GITLAB_TOKEN` to the changesets action')
-  }
-  return process.env.GITLAB_TOKEN as string
-})
+let isGitlabTokenValidated = false
 
 export const env = {
   ...process.env,
@@ -25,6 +19,12 @@ export const env = {
   // only check for the token if we are explicitly using it
   // eslint-disable-next-line sonar/function-name
   get GITLAB_TOKEN() {
-    return gitlabTokenGetter()
+    if (!isGitlabTokenValidated) {
+      isGitlabTokenValidated = true
+      if (!process.env.GITLAB_TOKEN) {
+        setFailed('Please add the `GITLAB_TOKEN` to the changesets action')
+      }
+    }
+    return process.env.GITLAB_TOKEN as string
   },
 } as Env

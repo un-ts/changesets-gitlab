@@ -97,8 +97,31 @@ export async function runPublish({
   const { packages, tool } = await getPackages(cwd)
   const releasedPackages: Package[] = []
 
-  // eslint-disable-next-line no-negated-condition -- do not change original source code logic
-  if (tool !== 'root') {
+  if (tool === 'root') {
+    if (packages.length === 0) {
+      throw new Error(
+        `No package found.` +
+          'This is probably a bug in the action, please open an issue',
+      )
+    }
+    const pkg = packages[0]
+    const newTagRegex = /New tag:/
+
+    for (const line of changesetPublishOutput.stdout.split('\n')) {
+      const match = newTagRegex.exec(line)
+
+      if (match) {
+        releasedPackages.push(pkg)
+        if (createGitlabReleases) {
+          await createRelease(api, {
+            pkg,
+            tagName: `v${pkg.packageJson.version}`,
+          })
+        }
+        break
+      }
+    }
+  } else {
     // eslint-disable-next-line regexp/no-super-linear-backtracking
     const newTagRegex = /New tag:\s+(@[^/]+\/[^@]+|[^/]+)@(\S+)/
     const packagesByName = new Map(packages.map(x => [x.packageJson.name, x]))
@@ -127,30 +150,6 @@ export async function runPublish({
           }),
         ),
       )
-    }
-  } else {
-    if (packages.length === 0) {
-      throw new Error(
-        `No package found.` +
-          'This is probably a bug in the action, please open an issue',
-      )
-    }
-    const pkg = packages[0]
-    const newTagRegex = /New tag:/
-
-    for (const line of changesetPublishOutput.stdout.split('\n')) {
-      const match = newTagRegex.exec(line)
-
-      if (match) {
-        releasedPackages.push(pkg)
-        if (createGitlabReleases) {
-          await createRelease(api, {
-            pkg,
-            tagName: `v${pkg.packageJson.version}`,
-          })
-        }
-        break
-      }
     }
   }
 

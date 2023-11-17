@@ -30,8 +30,6 @@ export const main = async ({
   setOutput('publishedPackages', [])
 
   if (CI) {
-    const { CI_PROJECT_PATH } = env
-
     console.log('setting git user')
     await setupUser()
 
@@ -48,7 +46,7 @@ export const main = async ({
         'origin',
         `${url.protocol}//${username}:${GITLAB_TOKEN}@${
           url.host
-        }${url.pathname.replace(/\/$/, '')}/${CI_PROJECT_PATH}.git`,
+        }${url.pathname.replace(/\/$/, '')}/${env.CI_PROJECT_PATH}.git`, // eslint-disable-line unicorn/consistent-destructuring
       ],
       { silent: !['true', '1'].includes(DEBUG_GITLAB_CREDENTIAL) },
     )

@@ -1,8 +1,8 @@
 import { setFailed } from '@actions/core'
 import dotenv from 'dotenv'
 
+import { once } from './once.js'
 import type { Env } from './types'
-import { once } from './utils.js'
 
 dotenv.config()
 

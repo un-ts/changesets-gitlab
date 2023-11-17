@@ -9,7 +9,9 @@ jobs:
     name: Lint and Test with Node.js ${{ matrix.node }}
     strategy:
       matrix:
-        node: [18, 20]
+        node:
+          - 18
+          - 20
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo

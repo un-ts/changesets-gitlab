@@ -10,7 +10,7 @@ const prepareEnv = () => {
 
     CI_MERGE_REQUEST_IID: +process.env.CI_MERGE_REQUEST_IID!,
     GITLAB_CI_USER_EMAIL:
-      process.env.GITLAB_CI_USER_EMAIL ??
+      process.env.GITLAB_CI_USER_EMAIL ||
       'gitlab[bot]@users.noreply.gitlab.com',
     GITLAB_COMMENT_TYPE: process.env.GITLAB_COMMENT_TYPE ?? 'discussion',
     DEBUG_GITLAB_CREDENTIAL: process.env.DEBUG_GITLAB_CREDENTIAL ?? 'false',

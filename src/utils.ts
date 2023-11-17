@@ -12,7 +12,7 @@ import remarkParse from 'remark-parse'
 import remarkStringify from 'remark-stringify'
 import { unified } from 'unified'
 
-import { env } from './env'
+import { env } from './env.js'
 
 export const BumpLevels = {
   dep: 0,

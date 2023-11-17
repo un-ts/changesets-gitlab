@@ -2,7 +2,7 @@ import { Gitlab } from '@gitbeaker/rest'
 import type { ProxyAgentConfigurationType } from 'global-agent'
 import { bootstrap } from 'global-agent'
 
-import { env } from './env'
+import { env } from './env.js'
 
 const PROXY_PROPS = ['http_proxy', 'https_proxy', 'no_proxy'] as const
 

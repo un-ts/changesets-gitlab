@@ -199,7 +199,7 @@ export const comment = async () => {
         }),
       ] as const)
 
-    const addChangesetUrl = `${CI_MERGE_REQUEST_PROJECT_URL!}/new/${mrBranch}?file_name=.changeset/${humanId(
+    const addChangesetUrl = `${CI_MERGE_REQUEST_PROJECT_URL!}/-/new/${mrBranch}?file_name=.changeset/${humanId(
       {
         separator: '-',
         capitalize: false,

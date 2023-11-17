@@ -24,7 +24,7 @@ jobs:
           cache: yarn
 
       - name: Install Dependencies
-        run: yarn --frozen-lockfile
+        run: yarn --frozen-lockfile --ignore-engines
 
       - name: Build, Lint and Test
         run: |

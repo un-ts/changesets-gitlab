@@ -1,5 +1,17 @@
 # changesets-gitlab
 
+## 0.11.0
+
+### Minor Changes
+
+- [#138](https://github.com/un-ts/changesets-gitlab/pull/138) [`be50e4a`](https://github.com/un-ts/changesets-gitlab/commit/be50e4a6ffa42becbb9a5ffab82b931b657d7451) Thanks [@alan910127](https://github.com/alan910127)! - Fix deprecation warning of using @gitbeaker/node package
+
+- [#139](https://github.com/un-ts/changesets-gitlab/pull/139) [`0fcdf63`](https://github.com/un-ts/changesets-gitlab/commit/0fcdf63600c00b0ab976647ad8a2c0cafd8ef632) Thanks [@JounQin](https://github.com/JounQin)! - feat!: bump all (dev)Deps, require node 18+
+
+### Patch Changes
+
+- [#137](https://github.com/un-ts/changesets-gitlab/pull/137) [`955c958`](https://github.com/un-ts/changesets-gitlab/commit/955c95838f634bdb38c359df868cd62a42312b55) Thanks [@angleshe](https://github.com/angleshe)! - fix: not open add changeset url on specific environment
+
 ## 0.10.3
 
 ### Patch Changes

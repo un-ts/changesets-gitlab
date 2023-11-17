@@ -29,20 +29,23 @@ export const createApi = (gitlabToken?: string) => {
   // we cannot use { [tokenType]: token } now
   // because it will break the type of the Gitlab constructor
   switch (process.env.GITLAB_TOKEN_TYPE) {
-    case 'job':
+    case 'job': {
       return new Gitlab({
         host,
         jobToken: token,
       })
-    case 'oauth':
+    }
+    case 'oauth': {
       return new Gitlab({
         host,
         oauthToken: token,
       })
-    default:
+    }
+    default: {
       return new Gitlab({
         host,
         token,
       })
+    }
   }
 }

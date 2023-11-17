@@ -114,12 +114,7 @@ export const getChangedPackages = async ({
       )
     }
   }
-  let tool:
-    | {
-        tool: Tool
-        globs: string[]
-      }
-    | undefined
+  let tool: { tool: Tool; globs: string[] } | undefined
 
   if (isPnpm) {
     tool = {
@@ -134,16 +129,12 @@ export const getChangedPackages = async ({
     const rootPackageJsonContent = await rootPackageJsonContentsPromise
 
     if (rootPackageJsonContent.workspaces) {
-      // eslint-disable-next-line no-negated-condition
-      tool = !Array.isArray(rootPackageJsonContent.workspaces)
-        ? {
-            tool: 'yarn',
-            globs: rootPackageJsonContent.workspaces.packages,
-          }
-        : {
-            tool: 'yarn',
-            globs: rootPackageJsonContent.workspaces,
-          }
+      tool = {
+        tool: 'yarn',
+        globs: Array.isArray(rootPackageJsonContent.workspaces)
+          ? rootPackageJsonContent.workspaces
+          : rootPackageJsonContent.workspaces.packages,
+      }
     } else if (rootPackageJsonContent.bolt?.workspaces) {
       tool = {
         tool: 'bolt',
@@ -170,8 +161,8 @@ export const getChangedPackages = async ({
     ) {
       throw new Error('globs are not valid: ' + JSON.stringify(tool.globs))
     }
-    const matches = micromatch(potentialWorkspaceDirectories, tool.globs)
 
+    const matches = micromatch(potentialWorkspaceDirectories, tool.globs)
     packages.packages = await Promise.all(matches.map(dir => getPackage(dir)))
   } else {
     packages.packages.push(packages.root)

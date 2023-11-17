@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
 
-import type { Env } from './env.types'
+import type { Env } from './types'
 
 const prepareEnv = () => {
   dotenv.config()

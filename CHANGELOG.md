@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.11.1
+
+### Patch Changes
+
+- [#143](https://github.com/un-ts/changesets-gitlab/pull/143) [`40818dd`](https://github.com/un-ts/changesets-gitlab/commit/40818dddbe6794ca5a76d9373544c7710a300995) Thanks [@alan910127](https://github.com/alan910127)! - fix: deprecation warning in the `comment` command
+
 ## 0.11.0
 
 ### Minor Changes

@@ -15,6 +15,7 @@ export const env = {
     process.env.GITLAB_CI_USER_EMAIL || 'gitlab[bot]@users.noreply.gitlab.com',
   GITLAB_COMMENT_TYPE: process.env.GITLAB_COMMENT_TYPE ?? 'discussion',
   DEBUG_GITLAB_CREDENTIAL: process.env.DEBUG_GITLAB_CREDENTIAL ?? 'false',
+  GITLAB_HOST: process.env.GITLAB_HOST ?? process.env.CI_SERVER_URL ?? 'https://gitlab.com',
 
   // only check for the token if we are explicitly using it
   // eslint-disable-next-line sonar/function-name

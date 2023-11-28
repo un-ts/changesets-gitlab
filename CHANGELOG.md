@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.11.2
+
+### Patch Changes
+
+- [#147](https://github.com/un-ts/changesets-gitlab/pull/147) [`f8103a8`](https://github.com/un-ts/changesets-gitlab/commit/f8103a8d02215f1aadb42b7c7bd0cb173ac348f2) Thanks [@vinnymac](https://github.com/vinnymac)! - fix: gitlab host fallback environment variables
+
 ## 0.11.1
 
 ### Patch Changes

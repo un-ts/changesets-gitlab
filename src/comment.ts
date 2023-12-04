@@ -5,7 +5,7 @@ import type {
   VersionType,
 } from '@changesets/types'
 import type { Gitlab } from '@gitbeaker/core'
-import type { MergeRequestDiffSchema } from '@gitbeaker/rest'
+import type { MergeRequestChangesSchema } from '@gitbeaker/rest'
 import { captureException } from '@sentry/node'
 import { humanId } from 'human-id'
 import { markdownTable } from 'markdown-table'
@@ -132,10 +132,10 @@ const getNoteInfo = (api: Gitlab, mrIid: number | string) =>
   )
 
 const hasChangesetBeenAdded = async (
-  allDiffsPromise: Promise<MergeRequestDiffSchema[]>,
+  changedFilesPromise: Promise<MergeRequestChangesSchema>,
 ) => {
-  const allDiffs = await allDiffsPromise
-  return allDiffs.some(file => {
+  const changedFiles = await changedFilesPromise
+  return changedFiles.changes.some(file => {
     return (
       file.new_file &&
       /^\.changeset\/.+\.md$/.test(file.new_path) &&
@@ -169,14 +169,19 @@ export const comment = async () => {
   let errFromFetchingChangedFiles = ''
   try {
     const latestCommitSha = CI_MERGE_REQUEST_SOURCE_BRANCH_SHA
-    const allDiffsPromise = api.MergeRequests.allDiffs(context.projectId, mrIid)
+    const changedFilesPromise = api.MergeRequests.showChanges(
+      context.projectId,
+      mrIid,
+    )
 
     const [noteInfo, hasChangeset, { changedPackages, releasePlan }] =
       await Promise.all([
         getNoteInfo(api, mrIid),
-        hasChangesetBeenAdded(allDiffsPromise),
+        hasChangesetBeenAdded(changedFilesPromise),
         getChangedPackages({
-          changedFiles: allDiffsPromise.then(x => x.map(x => x.new_path)),
+          changedFiles: changedFilesPromise.then(x =>
+            x.changes.map(x => x.new_path),
+          ),
           api,
         }).catch((err: unknown) => {
           if (err instanceof ValidationError) {

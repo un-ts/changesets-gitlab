@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.11.3
+
+### Patch Changes
+
+- [#151](https://github.com/un-ts/changesets-gitlab/pull/151) [`47fa2da`](https://github.com/un-ts/changesets-gitlab/commit/47fa2dacef5284f4448002a74d9ab54368dd4a96) Thanks [@JounQin](https://github.com/JounQin)! - feat: add custom `commit_message` support for adding changeset on Web UI
+
 ## 0.11.2
 
 ### Patch Changes

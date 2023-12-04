@@ -1,5 +1,12 @@
 # changesets-gitlab
 
+## 0.11.4
+
+### Patch Changes
+
+- [#153](https://github.com/un-ts/changesets-gitlab/pull/153) [`b687dd8`](https://github.com/un-ts/changesets-gitlab/commit/b687dd8b2994aae5de36a127c542c7c85e1dde6b) Thanks [@alan910127](https://github.com/alan910127)! - fix: keeps commenting on every push ~
+  - close #145, revert #143
+
 ## 0.11.3
 
 ### Patch Changes

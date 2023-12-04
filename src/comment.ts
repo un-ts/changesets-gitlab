@@ -157,6 +157,7 @@ export const comment = async () => {
     CI_MERGE_REQUEST_SOURCE_BRANCH_SHA,
     CI_MERGE_REQUEST_TITLE,
     GITLAB_COMMENT_TYPE,
+    GITLAB_ADD_CHANGESET_MESSAGE,
   } = env
 
   if (mrBranch.startsWith('changeset-release')) {
@@ -199,7 +200,11 @@ export const comment = async () => {
     )}.md&file=${getNewChangesetTemplate(
       changedPackages,
       CI_MERGE_REQUEST_TITLE,
-    )}`
+    )}${
+      GITLAB_ADD_CHANGESET_MESSAGE
+        ? '&commit_message=' + encodeURIComponent(GITLAB_ADD_CHANGESET_MESSAGE)
+        : ''
+    }`
 
     const prComment =
       (hasChangeset

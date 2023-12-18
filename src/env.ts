@@ -29,6 +29,6 @@ export const env = {
         setFailed('Please add the `GITLAB_TOKEN` to the changesets action')
       }
     }
-    return process.env.GITLAB_TOKEN as string
+    return process.env.GITLAB_TOKEN!
   },
 } as Env

@@ -208,6 +208,36 @@ const hasChangesetBeenAdded = async (
   })
 }
 
+/**
+ * @see https://github.com/jdalrymple/gitbeaker/blob/52ef0e622de304d98afb811f4937560edefd8889/packages/rest/src/Requester.ts#L79-L86
+ */
+export interface GitLabAPIError extends Error {
+  cause: {
+    description: string
+    request: Request
+    response: Response
+  }
+}
+
+const GITLAB_API_ERROR_CAUSE_KEYS = new Set([
+  'description',
+  'request',
+  'response',
+])
+
+// eslint-disable-next-line @typescript-eslint/unbound-method
+const { toString } = Object.prototype
+
+const isError = (value: unknown): value is Error =>
+  toString.call(value) === '[object Error]'
+
+const isGitLabAPIError = (error: unknown): error is GitLabAPIError =>
+  isError(error) &&
+  !!error.cause &&
+  typeof error.cause === 'object' &&
+  Object.keys(error.cause).every(key => GITLAB_API_ERROR_CAUSE_KEYS.has(key))
+
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export const comment = async () => {
   const mrBranch = env.CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
   if (!mrBranch) {
@@ -320,7 +350,22 @@ export const comment = async () => {
       }
     }
   } catch (err: unknown) {
-    console.error(err)
+    if (isGitLabAPIError(err)) {
+      const {
+        cause: { description, request, response },
+      } = err
+      console.error(description)
+      try {
+        console.error('request:', await request.text())
+      } catch {
+        console.error("The error's request could not be used as plain text")
+      }
+      try {
+        console.error('response:', await response.text())
+      } catch {
+        console.error("The error's response could not be used as plain text")
+      }
+    }
     throw err
   }
 }

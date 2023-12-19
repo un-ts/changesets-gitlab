@@ -2,4 +2,4 @@
 "changesets-gitlab": patch
 ---
 
-refactor: handle GitLabAPI error cause details for tracing
+refactor: handle GitLab API error cause details for tracing

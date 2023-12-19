@@ -117,7 +117,7 @@ const isMrNote = (
   'noteable_type' in discussionOrNote &&
   discussionOrNote.noteable_type === 'MergeRequest'
 
-const RANDOM_BOT_NAME_PATTERN = /^((?:project|group)_\d+_bot)_\w+$/
+const RANDOM_BOT_NAME_PATTERN = /^((?:project|group)_\d+_bot\w*)_[\da-z]+$/i
 
 const isChangesetBotNote = (
   note: DiscussionNoteSchema | NoteSchema,

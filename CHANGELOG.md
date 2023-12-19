@@ -1,5 +1,15 @@
 # changesets-gitlab
 
+## 0.11.5
+
+### Patch Changes
+
+- [#156](https://github.com/un-ts/changesets-gitlab/pull/156) [`3826317`](https://github.com/un-ts/changesets-gitlab/commit/3826317108fc57b0984fca6630e12e56c853d3e6) Thanks [@JounQin](https://github.com/JounQin)! - fix: use discussion or note API accordingly
+
+- [#156](https://github.com/un-ts/changesets-gitlab/pull/156) [`3826317`](https://github.com/un-ts/changesets-gitlab/commit/3826317108fc57b0984fca6630e12e56c853d3e6) Thanks [@JounQin](https://github.com/JounQin)! - fix: comment username could be random - close #145
+
+- [#158](https://github.com/un-ts/changesets-gitlab/pull/158) [`4e02d62`](https://github.com/un-ts/changesets-gitlab/commit/4e02d62dc47182f34318370642d6c202e6ce6700) Thanks [@JounQin](https://github.com/JounQin)! - refactor: handle GitLab API error cause details for tracing
+
 ## 0.11.4
 
 ### Patch Changes

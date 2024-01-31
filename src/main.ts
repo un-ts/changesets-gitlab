@@ -68,13 +68,14 @@ export const main = async ({
         'No changesets found, attempting to publish any unpublished packages to npm',
       )
 
-      const npmrcPath = `${HOME}/.npmrc`
-      if (fs.existsSync(npmrcPath)) {
+      const npmrcHome = `${HOME}/.npmrc`
+      const npmrcProject = `${CI_PROJECT_DIR}/.npmrc`
+      if (fs.existsSync(npmrcHome) || fs.existsSync(npmrcProject)) {
         console.log('Found existing .npmrc file')
       } else if (NPM_TOKEN) {
         console.log('No .npmrc file found, creating one')
         fs.writeFileSync(
-          npmrcPath,
+          npmrcHome,
           `//registry.npmjs.org/:_authToken=${NPM_TOKEN}`,
         )
       } else {

@@ -15,26 +15,25 @@ GitLab CI cli for [changesets](https://github.com/atlassian/changesets) like its
 ## Usage
 
 ### Inputs
+> Note: environment variables are case-sensitive
 
-> Environment valuables starts with `INPUT_`, case-sensitive, uppercase
-
-- PUBLISH - The command to use to build and publish packages
-- VERSION - The command to update version, edit CHANGELOG, read and delete changesets. Default to `changeset version` if not provided
-- COMMIT - The commit message to use. Default to `Version Packages`
-- TITLE - The merge request title. Default to `Version Packages`
+- `INPUT_PUBLISH` - The command to use to build and publish packages
+- `INPUT_VERSION` - The command to update version, edit CHANGELOG, read and delete changesets. Default to `changeset version` if not provided
+- `INPUT_COMMIT` - The commit message to use. Default to `Version Packages`
+- `INPUT_TITLE` - The merge request title. Default to `Version Packages`
 
 #### Only available in `changesets-gitlab`
 
-- PUBLISHED - Command executed after published
-- ONLY_CHANGESETS - Command executed on only changesets detected
-- REMOVE_SOURCE_BRANCH - Enables the merge request "Delete source branch" checkbox. Default false.
-- TARGET_BRANCH -> The merge request target branch. Defaults to current branch
-- CREATE_GITLAB_RELEASES - A boolean value to indicate whether to create Gitlab releases after publish or not. Default true.
+- `INPUT_PUBLISHED` - Command executed after published
+- `INPUT_ONLY_CHANGESETS` - Command executed on only changesets detected
+- `INPUT_REMOVE_SOURCE_BRANCH` - Enables the merge request "Delete source branch" checkbox. Default false.
+- `INPUT_TARGET_BRANCH` -> The merge request target branch. Defaults to current branch
+- `INPUT_CREATE_GITLAB_RELEASES` - A boolean value to indicate whether to create Gitlab releases after publish or not. Default true.
 
 ### Outputs
 
-- published - A boolean value to indicate whether a publishing is happened or not
-- publishedPackages - A JSON array to present the published packages. The format is `[{"name": "@xx/xx", "version": "1.2.0"}, {"name": "@xx/xy", "version": "0.8.9"}]`
+- `PUBLISHED` - A boolean value to indicate whether a publishing is happened or not
+- `PUBLISHED_PACKAGES` - A JSON array to present the published packages. The format is `[{"name": "@xx/xx", "version": "1.2.0"}, {"name": "@xx/xy", "version": "0.8.9"}]`
 
 ### Environment Variables
 

@@ -15,6 +15,7 @@ GitLab CI cli for [changesets](https://github.com/atlassian/changesets) like its
 ## Usage
 
 ### Inputs
+
 > Note: environment variables are case-sensitive
 
 - `INPUT_PUBLISH` - The command to use to build and publish packages

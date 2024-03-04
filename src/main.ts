@@ -1,6 +1,6 @@
 import { URL } from 'node:url'
 
-import { getInput, setFailed, setOutput, exportVariable } from '@actions/core'
+import { getInput, setFailed } from '@actions/core'
 import { exec } from '@actions/exec'
 import fs from 'fs-extra'
 
@@ -25,9 +25,6 @@ export const main = async ({
     NPM_TOKEN,
     DEBUG_GITLAB_CREDENTIAL = 'false',
   } = env
-
-  setOutput('published', false)
-  setOutput('publishedPackages', [])
 
   if (CI) {
     console.log('setting git user')
@@ -91,10 +88,11 @@ export const main = async ({
       })
 
       if (result.published) {
-        setOutput('published', true)
-        setOutput('publishedPackages', result.publishedPackages)
-        exportVariable('PUBLISHED', true)
-        exportVariable('PUBLISHED_PACKAGES', result.publishedPackages)
+        fs.writeJsonSync(
+          './changesets-gitlab.output.json',
+          result.publishedPackages,
+        )
+
         if (published) {
           execSync(published)
         }

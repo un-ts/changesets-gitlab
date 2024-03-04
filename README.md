@@ -31,10 +31,18 @@ GitLab CI cli for [changesets](https://github.com/atlassian/changesets) like its
 - `INPUT_TARGET_BRANCH` -> The merge request target branch. Defaults to current branch
 - `INPUT_CREATE_GITLAB_RELEASES` - A boolean value to indicate whether to create Gitlab releases after publish or not. Default true.
 
-### Outputs
+### Output
 
-- `PUBLISHED` - A boolean value to indicate whether a publishing is happened or not
-- `PUBLISHED_PACKAGES` - A JSON array to present the published packages. The format is `[{"name": "@xx/xx", "version": "1.2.0"}, {"name": "@xx/xy", "version": "0.8.9"}]`
+When publishing, a list of published packages is written to a file named `changesets-gitlab.output.json`.
+
+```json
+[
+  { "name": "@xx/xx", "version": "1.2.0" },
+  { "name": "@xx/xy", "version": "0.8.9" }
+]
+```
+
+The existence of this file implies that a publish has happened. This file should be added to `.gitignore`.
 
 ### Environment Variables
 
@@ -51,7 +59,7 @@ GITLAB_TOKEN                 # required, token with accessibility to push
 GITLAB_TOKEN_TYPE            # optional, type of the provided token in GITLAB_TOKEN. defaults to personal access token. can be `job` if you provide the Gitlab CI_JOB_TOKEN or `oauth` if you use Gitlab Oauth token
 GITLAB_CI_USER_NAME          # optional, username with accessibility to push, used in pairs of the above token (if it was personal access token). If not set read it from the Gitlab API
 GITLAB_CI_USER_EMAIL         # optional, default `gitlab[bot]@users.noreply.gitlab.com`
-GITLAB_COMMENT_TYPE          # optional, type of the comment. defaults to `discussion`. can be set to `note` to not create a discussion instead of a thread
+GITLAB_COMMENT_TYPE          # optional, type of the comment. defaults to `discussion` (thread that needs to be resolved). can be set to `note` to create a comment instead.
 GITLAB_ADD_CHANGESET_MESSAGE # optional, default commit message for adding changesets on GitLab Web UI
 DEBUG_GITLAB_CREDENTIAL      # optional, default `false`
 ```

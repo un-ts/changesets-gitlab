@@ -88,10 +88,8 @@ export const main = async ({
       })
 
       if (result.published) {
-        fs.writeJsonSync(
-          './changesets-gitlab.output.json',
-          result.publishedPackages,
-        )
+        const filePath = `${HOME}/published-packages.json`
+        fs.writeJsonSync(filePath, result.publishedPackages)
 
         if (published) {
           execSync(published)

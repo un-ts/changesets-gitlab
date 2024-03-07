@@ -28,21 +28,24 @@ GitLab CI cli for [changesets](https://github.com/atlassian/changesets) like its
 - `INPUT_PUBLISHED` - Command executed after published
 - `INPUT_ONLY_CHANGESETS` - Command executed on only changesets detected
 - `INPUT_REMOVE_SOURCE_BRANCH` - Enables the merge request "Delete source branch" checkbox. Default false.
-- `INPUT_TARGET_BRANCH` -> The merge request target branch. Defaults to current branch
+- `INPUT_TARGET_BRANCH` - The merge request target branch. Defaults to current branch
 - `INPUT_CREATE_GITLAB_RELEASES` - A boolean value to indicate whether to create Gitlab releases after publish or not. Default true.
+- `INPUT_CREATE_OUTPUT_FILE` - A boolean value to indicate whether to enable the output file or not. Default false.
+- `INPUT_OUTPUT_FILE_DIRECTORY` - A string value to indiciate where the `changesets-gitlab.output.json` file will be placed. Defaults to the HOME directory.
 
 ### Output
 
-When publishing, a list of published packages is written to a file named `changesets-gitlab.output.json`.
+When publishing, a list of published packages is written to a file named `changesets-gitlab.output.json`, located in the output directory as configured above. The file will look like this:
 
 ```json
-[
-  { "name": "@xx/xx", "version": "1.2.0" },
-  { "name": "@xx/xy", "version": "0.8.9" }
-]
+{
+  "published": true,
+  "publishedPackages": [
+    { "name": "@xx/xx", "version": "1.2.0" },
+    { "name": "@xx/xy", "version": "0.8.9" }
+  ]
+}
 ```
-
-The existence of this file implies that a publish has happened. This file should be added to `.gitignore`.
 
 ### Environment Variables
 

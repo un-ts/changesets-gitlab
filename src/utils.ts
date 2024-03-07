@@ -1,5 +1,4 @@
 import { execSync as _execSync } from 'node:child_process'
-import fs from 'node:fs'
 import path from 'node:path'
 
 import { getInput } from '@actions/core'
@@ -7,12 +6,14 @@ import { exec } from '@actions/exec'
 import type { Gitlab } from '@gitbeaker/core'
 import type { Package } from '@manypkg/get-packages'
 import { getPackages } from '@manypkg/get-packages'
+import fs from 'fs-extra'
 import { toString as mdastToString } from 'mdast-util-to-string'
 import remarkParse from 'remark-parse'
 import remarkStringify from 'remark-stringify'
 import { unified } from 'unified'
 
 import { env } from './env.js'
+import type { PublishResult } from './run.js'
 
 export const BumpLevels = {
   dep: 0,
@@ -161,4 +162,16 @@ export const getUsername = (api: Gitlab) => {
     env.GITLAB_CI_USER_NAME ??
     api.Users.showCurrentUser().then(currentUser => currentUser.username)
   )
+}
+
+export function writePublishResultIfNeeded(publishResult: PublishResult) {
+  if (getInput('create_output_file') !== 'true') {
+    return
+  }
+
+  const outputFileDirectory =
+    getOptionalInput('output_file_directory') ?? env.HOME
+
+  const filePath = `${outputFileDirectory}/changesets-gitlab.output.json`
+  fs.writeJsonSync(filePath, publishResult)
 }

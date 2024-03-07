@@ -9,7 +9,12 @@ import { setupUser } from './gitUtils.js'
 import readChangesetState from './readChangesetState.js'
 import { runPublish, runVersion } from './run.js'
 import type { MainCommandOptions } from './types.js'
-import { execSync, getOptionalInput, getUsername } from './utils.js'
+import {
+  execSync,
+  getOptionalInput,
+  getUsername,
+  writePublishResultIfNeeded,
+} from './utils.js'
 
 import { createApi } from './index.js'
 
@@ -25,6 +30,8 @@ export const main = async ({
     NPM_TOKEN,
     DEBUG_GITLAB_CREDENTIAL = 'false',
   } = env
+
+  writePublishResultIfNeeded({ published: false })
 
   if (CI) {
     console.log('setting git user')
@@ -88,8 +95,7 @@ export const main = async ({
       })
 
       if (result.published) {
-        const filePath = `${HOME}/published-packages.json`
-        fs.writeJsonSync(filePath, result.publishedPackages)
+        writePublishResultIfNeeded(result)
 
         if (published) {
           execSync(published)

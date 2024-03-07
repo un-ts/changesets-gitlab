@@ -1,6 +1,6 @@
 import { URL } from 'node:url'
 
-import { getInput, setFailed, setOutput, exportVariable } from '@actions/core'
+import { getInput, setFailed } from '@actions/core'
 import { exec } from '@actions/exec'
 import fs from 'fs-extra'
 
@@ -9,7 +9,12 @@ import { setupUser } from './gitUtils.js'
 import readChangesetState from './readChangesetState.js'
 import { runPublish, runVersion } from './run.js'
 import type { MainCommandOptions } from './types.js'
-import { execSync, getOptionalInput, getUsername } from './utils.js'
+import {
+  execSync,
+  getOptionalInput,
+  getUsername,
+  writePublishResultIfNeeded,
+} from './utils.js'
 
 import { createApi } from './index.js'
 
@@ -26,8 +31,7 @@ export const main = async ({
     DEBUG_GITLAB_CREDENTIAL = 'false',
   } = env
 
-  setOutput('published', false)
-  setOutput('publishedPackages', [])
+  writePublishResultIfNeeded({ published: false })
 
   if (CI) {
     console.log('setting git user')
@@ -91,10 +95,8 @@ export const main = async ({
       })
 
       if (result.published) {
-        setOutput('published', true)
-        setOutput('publishedPackages', result.publishedPackages)
-        exportVariable('PUBLISHED', true)
-        exportVariable('PUBLISHED_PACKAGES', result.publishedPackages)
+        writePublishResultIfNeeded(result)
+
         if (published) {
           execSync(published)
         }

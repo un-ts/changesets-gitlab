@@ -101,13 +101,16 @@ There's two ways you can authenticate with the GitLab CI cli.
   - Alternatively the project root `.npmrc` by setting `PREFER_PROJECT_LEVEL_NPMRC` to `true`
 - Setting `NPM_TOKEN` in [custom CI/CD variables](https://docs.gitlab.com/ee/ci/variables/#custom-cicd-variables) (only works with the public registry `registry.npmjs.org`)
 
-If you're using the public npm registry, you'll need to have an [npm token](https://docs.npmjs.com/creating-and-viewing-authentication-tokens) that can publish the packages in the repo you're setting up the action for and doesn't have 2FA on publish enabled ([2FA on auth can be enabled](https://docs.npmjs.com/about-two-factor-authentication)). [add it as a custom environment variable on your GitLab repo](https://docs.gitlab.com/ee/ci/variables/#custom-cicd-variables) with the name `NPM_TOKEN`. The GitLab CI cli then creates a `.npmrc` file with the following content:
+If you're using the public npm registry, you'll need to have an [npm token](https://docs.npmjs.com/creating-and-viewing-authentication-tokens) that can publish the packages in the repo you're setting up the action for and doesn't have 2FA on publish enabled ([2FA on auth can be enabled](https://docs.npmjs.com/about-two-factor-authentication)).
+[Add it as a custom environment variable on your GitLab repo](https://docs.gitlab.com/ee/ci/variables/#custom-cicd-variables) with the name `NPM_TOKEN`.
+The GitLab CI cli then creates a `.npmrc` file with the following content:
 
 ```sh
 //registry.npmjs.org/:_authToken=${process.env.NPM_TOKEN}
 ```
 
-If `.npmrc` exists in `$HOME` (or in the project root with `PREFER_PROJECT_LEVEL_NPMRC` set to `true`), the GitLab CI cli does not touch the file. This is useful if you need to configure the `.npmrc` file on your own.
+If `.npmrc` exists in `$HOME` (or in the project root with `PREFER_PROJECT_LEVEL_NPMRC` set to `true`), the GitLab CI cli does not touch the file.
+This is useful if you need to configure the `.npmrc` file on your own.
 For example, you can add a step before running the Changesets GitLab CI cli:
 
 ```yml

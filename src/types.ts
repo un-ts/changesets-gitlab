@@ -25,6 +25,7 @@ export type Env = GitLabCIPredefinedVariables &
 
     HOME: string
     NPM_TOKEN?: string
+    PREFER_PROJECT_LEVEL_NPMRC?: string
   }
 
 type MergeRequestVariables =
@@ -44,10 +45,12 @@ type GitLabCIPredefinedVariables = { GITLAB_USER_NAME: string } & (
   | {
       // this is used to be checked if the current job is in a CI environment
       CI: undefined
+      CI_PROJECT_DIR: undefined
     }
   | {
       CI: 'true'
       CI_PROJECT_PATH: string
       CI_SERVER_URL: string
+      CI_PROJECT_DIR: string
     }
 )

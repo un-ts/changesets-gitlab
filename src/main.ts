@@ -13,6 +13,14 @@ import { execSync, getOptionalInput, getUsername } from './utils.js'
 
 import { createApi } from './index.js'
 
+const getNpmrcPath = () => {
+  if (env.CI && env.PREFER_PROJECT_LEVEL_NPMRC) {
+    return `${env.CI_PROJECT_DIR}/.npmrc`
+  }
+
+  return `${env.HOME}/.npmrc`
+}
+
 export const main = async ({
   published,
   onlyChangesets,
@@ -21,7 +29,6 @@ export const main = async ({
     CI,
     GITLAB_HOST,
     GITLAB_TOKEN,
-    HOME,
     NPM_TOKEN,
     DEBUG_GITLAB_CREDENTIAL = 'false',
   } = env
@@ -68,7 +75,7 @@ export const main = async ({
         'No changesets found, attempting to publish any unpublished packages to npm',
       )
 
-      const npmrcPath = `${HOME}/.npmrc`
+      const npmrcPath = getNpmrcPath()
       if (fs.existsSync(npmrcPath)) {
         console.log('Found existing .npmrc file')
       } else if (NPM_TOKEN) {

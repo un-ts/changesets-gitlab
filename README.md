@@ -72,12 +72,14 @@ before_script: yarn --frozen-lockfile
 comment:
   image: node:lts-alpine
   stage: comment
-  only: merge_requests
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   script: yarn changesets-gitlab comment # comment automatically like https://github.com/changesets/bot
 
 release:
   image: node:lts-alpine
-  only: main
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   script: yarn changesets-gitlab
 ```
 
@@ -95,12 +97,14 @@ before_script: yarn --frozen-lockfile
 comment:
   image: node:lts-alpine
   stage: comment
-  only: merge_requests
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   script: yarn changesets-gitlab comment
 
 release:
   image: node:lts-alpine
-  only: main
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   script: yarn changesets-gitlab
   variables:
     INPUT_PUBLISH: yarn release
@@ -139,13 +143,14 @@ before_script: yarn --frozen-lockfile
 comment:
   image: node:lts-alpine
   stage: comment
-  only:
-    - merge_requests
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   script: yarn changesets-gitlab comment
 
 release:
   image: node:lts-alpine
-  only: main
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   script: yarn changesets-gitlab
   variables:
     INPUT_VERSION: yarn version
@@ -165,13 +170,14 @@ before_script: yarn --frozen-lockfile
 comment:
   image: node:lts-alpine
   stage: comment
-  only:
-    - merge_requests
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   script: yarn changesets-gitlab comment
 
 release:
   image: node:lts-alpine
-  only: main
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   script: yarn changesets-gitlab
   variables:
     INPUT_VERSION: yarn changeset version
@@ -182,7 +188,8 @@ You may also want to run `yarn install` after the `changeset verion` command to 
 ```yml
 release:
   image: node:lts-alpine
-  only: main
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   script: yarn changesets-gitlab
   variables:
     YARN_ENABLE_IMMUTABLE_INSTALLS: 'false'

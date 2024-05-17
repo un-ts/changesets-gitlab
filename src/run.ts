@@ -13,11 +13,12 @@ import * as context from './context.js'
 import * as gitUtils from './gitUtils.js'
 import readChangesetState from './readChangesetState.js'
 import {
-  getChangelogEntry,
   execWithOutput,
   getChangedPackages,
-  sortTheThings,
+  getChangelogEntry,
+  getOptionalInput,
   getVersionsByDirectory,
+  sortTheThings,
 } from './utils.js'
 
 import { createApi } from './index.js'
@@ -312,6 +313,9 @@ ${
       {
         description: await mrBodyPromise,
         removeSourceBranch,
+        labels: getOptionalInput('labels')
+          ?.split(',')
+          .map(x => x.trim()),
       },
     )
   } else {

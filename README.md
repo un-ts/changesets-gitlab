@@ -30,6 +30,7 @@ GitLab CI cli for [changesets](https://github.com/atlassian/changesets) like its
 - `INPUT_REMOVE_SOURCE_BRANCH` - Enables the merge request "Delete source branch" checkbox. Default false.
 - `INPUT_TARGET_BRANCH` -> The merge request target branch. Defaults to current branch
 - `INPUT_CREATE_GITLAB_RELEASES` - A boolean value to indicate whether to create Gitlab releases after publish or not. Default true.
+- `INPUT_LABELS` - A comma separated string of labels to be added to the version package Gitlab Merge request
 
 ### Outputs
 

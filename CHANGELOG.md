@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.12.0
+
+### Minor Changes
+
+- [#180](https://github.com/un-ts/changesets-gitlab/pull/180) [`3678f85`](https://github.com/un-ts/changesets-gitlab/commit/3678f855cd4a2d145581afe5b1ae54b3e8158de1) Thanks [@TheHolyWaffle](https://github.com/TheHolyWaffle)! - Allow adding custom labels to the version package Gitlab Merge Request
+
 ## 0.11.5
 
 ### Patch Changes

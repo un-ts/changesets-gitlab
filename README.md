@@ -73,14 +73,14 @@ before_script: yarn --frozen-lockfile
 comment:
   image: node:lts-alpine
   stage: comment
-  only: 
+  only:
     - merge_requests
   script: yarn changesets-gitlab comment # comment automatically like https://github.com/changesets/bot
 
 release:
   image: node:lts-alpine
   stage: release
-  only: 
+  only:
     - main
   script: yarn changesets-gitlab
 ```
@@ -99,14 +99,14 @@ before_script: yarn --frozen-lockfile
 comment:
   image: node:lts-alpine
   stage: comment
-  only: 
+  only:
     - merge_requests
   script: yarn changesets-gitlab comment
 
 release:
   image: node:lts-alpine
   stage: release
-  only: 
+  only:
     - main
   script: yarn changesets-gitlab
   variables:
@@ -153,7 +153,7 @@ comment:
 release:
   image: node:lts-alpine
   stage: release
-  only: 
+  only:
     - main
   script: yarn changesets-gitlab
   variables:
@@ -181,7 +181,7 @@ comment:
 release:
   image: node:lts-alpine
   stage: release
-  only: 
+  only:
     - main
   script: yarn changesets-gitlab
   variables:
@@ -193,7 +193,7 @@ You may also want to run `yarn install` after the `changeset verion` command to 
 ```yml
 release:
   image: node:lts-alpine
-  only: 
+  only:
     - main
   script: yarn changesets-gitlab
   variables:

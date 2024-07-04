@@ -76,9 +76,12 @@ Merging this MR will not cause a version bump for any packages. If these changes
 
 ${getReleasePlanMessage(releasePlan)}
 
-[Click here to learn what changesets are, and how to add one](https://github.com/changesets/changesets/blob/master/docs/adding-a-changeset.md).
+${
+  env.GITLAB_COMMENT_CUSTOM_LINKS ||
+  `[Click here to learn what changesets are, and how to add one](https://github.com/changesets/changesets/blob/main/docs/adding-a-changeset.md).
 
-[Click here if you're a maintainer who wants to add a changeset to this MR](${addChangesetUrl})
+[Click here if you're a maintainer who wants to add a changeset to this MR](${addChangesetUrl})`
+}
 
 __${generatedByBotNote}__
 `
@@ -95,9 +98,12 @@ Latest commit: ${commitSha}
 
 ${getReleasePlanMessage(releasePlan)}
 
-Not sure what this means? [Click here  to learn what changesets are](https://github.com/changesets/changesets/blob/master/docs/adding-a-changeset.md).
+${
+  env.GITLAB_COMMENT_CUSTOM_LINKS ||
+  `Not sure what this means? [Click here to learn what changesets are](https://github.com/changesets/changesets/blob/main/docs/adding-a-changeset.md).
 
-[Click here if you're a maintainer who wants to add another changeset to this MR](${addChangesetUrl})
+[Click here if you're a maintainer who wants to add another changeset to this MR](${addChangesetUrl})`
+}
 
 __${generatedByBotNote}__
 `

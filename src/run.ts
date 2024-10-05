@@ -324,6 +324,9 @@ ${
       title: finalMrTitle,
       description: await mrBodyPromise,
       removeSourceBranch,
+      labels: getOptionalInput('labels')
+        ?.split(',')
+        .map(x => x.trim()),
     })
   }
 }

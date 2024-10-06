@@ -216,6 +216,10 @@ export async function runVersion({
   await exec('git', ['fetch', 'origin', currentBranch])
   await gitUtils.reset(`origin/${currentBranch}`)
 
+  const labels = getOptionalInput('labels')
+    ?.split(',')
+    .map(x => x.trim())
+
   const versionsByDirectory = await getVersionsByDirectory(cwd)
 
   if (script) {
@@ -313,9 +317,7 @@ ${
       {
         description: await mrBodyPromise,
         removeSourceBranch,
-        labels: getOptionalInput('labels')
-          ?.split(',')
-          .map(x => x.trim()),
+        labels,
       },
     )
   } else {
@@ -324,9 +326,7 @@ ${
       title: finalMrTitle,
       description: await mrBodyPromise,
       removeSourceBranch,
-      labels: getOptionalInput('labels')
-        ?.split(',')
-        .map(x => x.trim()),
+      labels,
     })
   }
 }

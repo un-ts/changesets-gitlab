@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.12.1
+
+### Patch Changes
+
+- [#192](https://github.com/un-ts/changesets-gitlab/pull/192) [`a557b95`](https://github.com/un-ts/changesets-gitlab/commit/a557b95d0911d715340ad5ccf1eaaa00ee6a8c49) Thanks [@Tchoupinax](https://github.com/Tchoupinax)! - feat: update labels on update merge request
+
 ## 0.12.0
 
 ### Minor Changes

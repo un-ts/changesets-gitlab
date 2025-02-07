@@ -45,7 +45,7 @@
     "@changesets/errors": "^0.1.4",
     "@changesets/parse": "^0.3.16",
     "@changesets/pre": "^1.0.14",
-    "@changesets/read": "^0.5.9",
+    "@changesets/read": "^0.6.2",
     "@gitbeaker/rest": "^39.23.0",
     "@manypkg/get-packages": "^1.1.3",
     "@sentry/node": "^7.80.1",

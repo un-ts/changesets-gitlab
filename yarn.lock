@@ -3180,10 +3180,10 @@
   resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-9.0.7.tgz#b14cebc75455eeeb160d5fe23c2fcc0c64f724d8"
   integrity sha512-WUtIVRUZ9i5dYXefDEAI7sh9/O7jGvHg7Df/5O/gtH3Yabe5odI3UWopVR1qbPXQtvOxWu3mM4XxlYeZtMWF4g==
 
-"@types/web@^0.0.128":
-  version "0.0.128"
-  resolved "https://registry.yarnpkg.com/@types/web/-/web-0.0.128.tgz#a431a051fbed2a03da97f032990d27c27150735c"
-  integrity sha512-STOv2gEXqlhUSB8ea9Tm3MlGrG9Pn+mh5+Eg8Rt6oC6Ju92kAK109/KzRb/F1PvBg+G1fX0cQayDZbvBqBET4Q==
+"@types/web@^0.0.203":
+  version "0.0.203"
+  resolved "https://registry.yarnpkg.com/@types/web/-/web-0.0.203.tgz#49c276d49fb3366017f430140943461d13f2cf71"
+  integrity sha512-ZWthXkqMAUjWUYQxb31kJsIQODIlQZuUWjZsyHDMSUHot9Fan3NgQpZTU9CnM4dpw2G/6iF7Pmict/7bYckTtQ==
 
 "@types/whatwg-mimetype@3.0.1":
   version "3.0.1"

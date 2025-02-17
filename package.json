@@ -7,7 +7,7 @@
   "funding": "https://opencollective.com/unts",
   "license": "MIT",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.20.6"
   },
   "bin": {
     "changesets-gitlab": "lib/cli.js"

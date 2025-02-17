@@ -12,7 +12,6 @@ import type {
   MergeRequestNoteSchema,
   NoteSchema,
 } from '@gitbeaker/rest'
-import { captureException } from '@sentry/node'
 import { humanId } from 'human-id'
 import { markdownTable } from 'markdown-table'
 
@@ -282,7 +281,6 @@ export const comment = async () => {
             errFromFetchingChangedFiles = `<details><summary>💥 An error occurred when fetching the changed packages and changesets in this MR</summary>\n\n\`\`\`\n${err.message}\n\`\`\`\n\n</details>\n`
           } else {
             console.error(err)
-            captureException(err)
           }
           return {
             changedPackages: ['@fake-scope/fake-pkg'],

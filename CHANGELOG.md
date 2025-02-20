@@ -1,5 +1,13 @@
 # changesets-gitlab
 
+## 0.12.2
+
+### Patch Changes
+
+- [#184](https://github.com/un-ts/changesets-gitlab/pull/184) [`006a7e7`](https://github.com/un-ts/changesets-gitlab/commit/006a7e7404a8f77789d15be6b8a5309adfa7ee60) Thanks [@dylf](https://github.com/dylf)! - fix: remove job token
+
+- [#202](https://github.com/un-ts/changesets-gitlab/pull/202) [`bd3280a`](https://github.com/un-ts/changesets-gitlab/commit/bd3280abe32b3a6314ac30ae90f1793def87b34d) Thanks [@TheHolyWaffle](https://github.com/TheHolyWaffle)! - chore: remove unused @sentry/node dependency
+
 ## 0.12.1
 
 ### Patch Changes

@@ -54,7 +54,7 @@
     "global-agent": "^3.0.0",
     "human-id": "^4.1.0",
     "js-yaml": "^4.1.0",
-    "markdown-table": "^3.0.3",
+    "markdown-table": "^3.0.4",
     "mdast-util-to-string": "^4.0.0",
     "micromatch": "^4.0.5",
     "remark-parse": "^11.0.0",

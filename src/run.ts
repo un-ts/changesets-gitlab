@@ -155,14 +155,12 @@ export async function runPublish({
       )
     }
     if (createGitlabReleases) {
-      await Promise.all(
-        releasedPackages.map(pkg =>
-          createRelease(api, {
-            pkg,
-            tagName: `${pkg.packageJson.name}@${pkg.packageJson.version}`,
-          }),
-        ),
-      )
+      for (const pkg of releasedPackages) {
+        await createRelease(api, {
+          pkg,
+          tagName: `${pkg.packageJson.name}@${pkg.packageJson.version}`,
+        })
+      }
     }
   }
 

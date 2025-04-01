@@ -88,7 +88,6 @@ export const main = async ({
         createGitlabReleases: !FALSY_VALUES.has(
           getInput('create_gitlab_releases'),
         ),
-        pushAllTags: !FALSY_VALUES.has(getInput('push_all_tags')),
       })
 
       if (result.published) {

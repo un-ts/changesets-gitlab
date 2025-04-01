@@ -175,3 +175,5 @@ export const cjsRequire =
 export const FALSY_VALUES = new Set(['false', '0'])
 
 export const TRUTHY_VALUES = new Set(['true', '1'])
+
+export const GITLAB_MAX_TAGS = 4

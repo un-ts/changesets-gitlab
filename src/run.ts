@@ -19,6 +19,7 @@ import {
   getChangelogEntry,
   getOptionalInput,
   getVersionsByDirectory,
+  GITLAB_MAX_TAGS,
   sortTheThings,
 } from './utils.js'
 
@@ -59,7 +60,6 @@ export interface PublishOptions {
   script: string
   gitlabToken: string
   createGitlabReleases?: boolean
-  pushAllTags?: boolean
   cwd?: string
 }
 
@@ -77,7 +77,6 @@ export async function runPublish({
   script,
   gitlabToken,
   createGitlabReleases = true,
-  pushAllTags = true,
   cwd = process.cwd(),
 }: PublishOptions): Promise<PublishResult> {
   const api = createApi(gitlabToken)
@@ -89,15 +88,23 @@ export async function runPublish({
     { cwd },
   )
 
+  const { packages, tool } = await getPackages(cwd)
+
+  const pushAllTags =
+    packages.length <= GITLAB_MAX_TAGS ||
+    (await api.FeatureFlags.show(
+      context.projectId,
+      'git_push_create_all_pipelines',
+    ).catch(() => false))
+
   if (pushAllTags) {
     await gitUtils.pushTags()
   }
 
-  const { packages, tool } = await getPackages(cwd)
   const releasedPackages: Package[] = []
 
   if (tool === 'root') {
-    if (packages.length === 0) {
+    if (packages.length !== 1) {
       throw new Error(
         `No package found.` +
           'This is probably a bug in the action, please open an issue',
@@ -112,9 +119,6 @@ export async function runPublish({
       if (match) {
         releasedPackages.push(pkg)
         const tagName = `v${pkg.packageJson.version}`
-        if (!pushAllTags) {
-          await gitUtils.pushTag(tagName)
-        }
         if (createGitlabReleases) {
           await createRelease(api, { pkg, tagName })
         }

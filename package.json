@@ -14,23 +14,38 @@
   "main": "./lib/index.cjs",
   "module": "./lib/index.js",
   "exports": {
-    "import": {
-      "types": "./lib/index.d.ts",
-      "default": "./lib/index.js"
+    ".": {
+      "import": {
+        "types": "./lib/index.d.ts",
+        "default": "./lib/index.js"
+      },
+      "module-sync": {
+        "types": "./lib/index.d.ts",
+        "default": "./lib/index.js"
+      },
+      "require": {
+        "types": "./index.d.cts",
+        "default": "./lib/index.cjs"
+      }
     },
-    "module-sync": {
-      "types": "./lib/index.d.ts",
-      "default": "./lib/index.js"
-    },
-    "require": {
-      "types": "./index.d.cts",
-      "default": "./lib/index.cjs"
-    }
+    "./package.json": "./package.json"
   },
   "types": "./lib/index.d.ts",
   "files": [
     "index.d.cts",
     "lib"
+  ],
+  "keywords": [
+    "@changesets/cli",
+    "ci",
+    "changeset",
+    "changesets",
+    "gitlab",
+    "changelog",
+    "auto-release",
+    "release",
+    "release-automation",
+    "release-plz"
   ],
   "scripts": {
     "build": "run-p 'build:*'",

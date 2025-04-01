@@ -8,7 +8,7 @@ export interface MainCommandOptions {
 // have a default value, but can also be overridden by the user.
 // The weird `string & {}` is to make sure that the type is not narrowed to `string`
 // See: https://twitter.com/mattpocockuk/status/1671908303918473217
-// eslint-disable-next-line @typescript-eslint/ban-types, sonar/no-useless-intersection
+// eslint-disable-next-line sonarjs/no-useless-intersection
 export type LooseString<T extends string> = T | (string & {})
 
 export type Env = GitLabCIPredefinedVariables &

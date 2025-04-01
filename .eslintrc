@@ -1,8 +1,0 @@
-{
-  "root": true,
-  "extends": "@1stg",
-  "rules": {
-    "@typescript-eslint/consistent-type-imports": "error",
-    "unicorn/prefer-top-level-await": "off"
-  }
-}

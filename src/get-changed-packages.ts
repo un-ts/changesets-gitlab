@@ -1,8 +1,9 @@
+import fs from 'node:fs/promises'
 import nodePath from 'node:path'
 
-import _assembleReleasePlan from '@changesets/assemble-release-plan'
+import assembleReleasePlan from '@changesets/assemble-release-plan'
 import { parse as parseConfig } from '@changesets/config'
-import _parseChangeset from '@changesets/parse'
+import parseChangeset from '@changesets/parse'
 import type {
   PackageJSON,
   PreState,
@@ -11,19 +12,14 @@ import type {
 } from '@changesets/types'
 import type { Gitlab } from '@gitbeaker/core'
 import type { Packages, Tool } from '@manypkg/get-packages'
-import fs from 'fs-extra'
-import { load } from 'js-yaml'
 import micromatch from 'micromatch'
+import { parse } from 'yaml'
 
 import { getAllFiles } from './utils.js'
 
-// workaround for https://github.com/atlassian/changesets/issues/622
-// @ts-expect-error
-const assembleReleasePlan = (_assembleReleasePlan.default ||
-  _assembleReleasePlan) as typeof _assembleReleasePlan
-// @ts-expect-error
-const parseChangeset = (_parseChangeset.default ||
-  _parseChangeset) as typeof _parseChangeset
+function fetchFile(path: string) {
+  return fs.readFile(path, 'utf8')
+}
 
 export const getChangedPackages = async ({
   changedFiles: changedFilesPromise,
@@ -33,26 +29,26 @@ export const getChangedPackages = async ({
   // eslint-disable-next-line sonarjs/cognitive-complexity
 }) => {
   let hasErrored = false
-  function fetchFile(path: string) {
-    return fs.readFile(path, 'utf8')
+
+  async function fetchJsonFile<T = unknown>(path: string) {
+    try {
+      const x = await fetchFile(path)
+      return JSON.parse(x) as T
+    } catch (err) {
+      hasErrored = true
+      console.error(err)
+      return {} as unknown as T
+    }
   }
 
-  function fetchJsonFile<T = unknown>(path: string) {
-    return fetchFile(path)
-      .then(x => JSON.parse(x) as T)
-      .catch((err: unknown) => {
-        hasErrored = true
-        console.error(err)
-        return {} as unknown as T
-      })
-  }
-
-  function fetchTextFile(path: string) {
-    return fetchFile(path).catch((err: unknown) => {
+  async function fetchTextFile(path: string) {
+    try {
+      return await fetchFile(path)
+    } catch (err) {
       hasErrored = true
       console.error(err)
       return ''
-    })
+    }
   }
 
   async function getPackage(pkgPath: string) {
@@ -120,7 +116,7 @@ export const getChangedPackages = async ({
     tool = {
       tool: 'pnpm',
       globs: (
-        load(await fetchTextFile('pnpm-workspace.yaml')) as {
+        parse(await fetchTextFile('pnpm-workspace.yaml')) as {
           packages: string[]
         }
       ).packages,

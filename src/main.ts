@@ -12,6 +12,7 @@ import { runPublish, runVersion } from './run.js'
 import type { MainCommandOptions } from './types.js'
 import {
   execSync,
+  FALSY_VALUES,
   getOptionalInput,
   getUsername,
   TRUTHY_VALUES,
@@ -84,8 +85,10 @@ export const main = async ({
       const result = await runPublish({
         script: publishScript,
         gitlabToken: GITLAB_TOKEN,
-        createGitlabReleases: getInput('create_gitlab_releases') !== 'false',
-        pushAllTags: getInput('push_all_tags') !== 'false',
+        createGitlabReleases: !FALSY_VALUES.has(
+          getInput('create_gitlab_releases'),
+        ),
+        pushAllTags: !FALSY_VALUES.has(getInput('push_all_tags')),
       })
 
       if (result.published) {

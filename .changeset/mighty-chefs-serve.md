@@ -1,5 +1,5 @@
 ---
-'changesets-gitlab': minor
+"changesets-gitlab": minor
 ---
 
-fetch the tags and push each one individually
+feat: fetch the tags and push each one individually

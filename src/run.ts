@@ -22,7 +22,7 @@ import {
   sortTheThings,
 } from './utils.js'
 
-const createRelease = async (
+export const createRelease = async (
   api: Gitlab,
   { pkg, tagName }: { pkg: Package; tagName: string },
 ) => {
@@ -55,7 +55,7 @@ const createRelease = async (
   }
 }
 
-interface PublishOptions {
+export interface PublishOptions {
   script: string
   gitlabToken: string
   createGitlabReleases?: boolean
@@ -63,19 +63,14 @@ interface PublishOptions {
   cwd?: string
 }
 
-interface PublishedPackage {
+export interface PublishedPackage {
   name: string
   version: string
 }
 
-type PublishResult =
-  | {
-      published: false
-    }
-  | {
-      published: true
-      publishedPackages: PublishedPackage[]
-    }
+export type PublishResult =
+  | { published: false }
+  | { published: true; publishedPackages: PublishedPackage[] }
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export async function runPublish({
@@ -116,16 +111,12 @@ export async function runPublish({
 
       if (match) {
         releasedPackages.push(pkg)
+        const tagName = `v${pkg.packageJson.version}`
         if (!pushAllTags) {
-          await gitUtils.pushTag(
-            `${pkg.packageJson.name}@${pkg.packageJson.version}`,
-          )
+          await gitUtils.pushTag(tagName)
         }
         if (createGitlabReleases) {
-          await createRelease(api, {
-            pkg,
-            tagName: `v${pkg.packageJson.version}`,
-          })
+          await createRelease(api, { pkg, tagName })
         }
         break
       }
@@ -151,11 +142,13 @@ export async function runPublish({
       releasedPackages.push(pkg)
     }
     if (!pushAllTags) {
-      for (const pkg of releasedPackages) {
-        await gitUtils.pushTag(
-          `${pkg.packageJson.name}@${pkg.packageJson.version}`,
-        )
-      }
+      await Promise.all(
+        releasedPackages.map(pkg =>
+          gitUtils.pushTag(
+            `${pkg.packageJson.name}@${pkg.packageJson.version}`,
+          ),
+        ),
+      )
     }
     if (createGitlabReleases) {
       await Promise.all(
@@ -197,7 +190,7 @@ const requireChangesetsCliPkgJson = (cwd: string) => {
   }
 }
 
-interface VersionOptions {
+export interface VersionOptions {
   script?: string
   gitlabToken: string
   cwd?: string

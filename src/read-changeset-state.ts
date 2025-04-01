@@ -1,15 +1,11 @@
 import { readPreState } from '@changesets/pre'
-import _readChangesets from '@changesets/read'
+import readChangesets from '@changesets/read'
 import type { PreState, NewChangeset } from '@changesets/types'
 
 export interface ChangesetState {
   preState: PreState | undefined
   changesets: NewChangeset[]
 }
-
-// @ts-expect-error - workaround for https://github.com/atlassian/changesets/issues/622
-const readChangesets = (_readChangesets.default ||
-  _readChangesets) as typeof _readChangesets
 
 export default async function readChangesetState(
   cwd: string = process.cwd(),

@@ -64,6 +64,10 @@ const getReleasePlanMessage = (releasePlan: ReleasePlan | null) => {
 </details>`
 }
 
+const customLinks = env.GITLAB_COMMENT_CUSTOM_LINKS?.trim()
+
+const ADD_CHANGESET_URL_PLACEHOLDER_REGEXP = /\{\{\s*addChangesetUrl\s*\}\}/
+
 const getAbsentMessage = (
   commitSha: string,
   addChangesetUrl: string,
@@ -77,8 +81,9 @@ Merging this MR will not cause a version bump for any packages. If these changes
 ${getReleasePlanMessage(releasePlan)}
 
 ${
-  env.GITLAB_COMMENT_CUSTOM_LINKS ||
-  `[Click here to learn what changesets are, and how to add one](https://github.com/changesets/changesets/blob/main/docs/adding-a-changeset.md).
+  customLinks
+    ? customLinks.replace(ADD_CHANGESET_URL_PLACEHOLDER_REGEXP, addChangesetUrl)
+    : `[Click here to learn what changesets are, and how to add one](https://github.com/changesets/changesets/blob/main/docs/adding-a-changeset.md).
 
 [Click here if you're a maintainer who wants to add a changeset to this MR](${addChangesetUrl})`
 }
@@ -99,8 +104,9 @@ Latest commit: ${commitSha}
 ${getReleasePlanMessage(releasePlan)}
 
 ${
-  env.GITLAB_COMMENT_CUSTOM_LINKS ||
-  `Not sure what this means? [Click here to learn what changesets are](https://github.com/changesets/changesets/blob/main/docs/adding-a-changeset.md).
+  customLinks
+    ? customLinks.replace(ADD_CHANGESET_URL_PLACEHOLDER_REGEXP, addChangesetUrl)
+    : `Not sure what this means? [Click here to learn what changesets are](https://github.com/changesets/changesets/blob/main/docs/adding-a-changeset.md).
 
 [Click here if you're a maintainer who wants to add another changeset to this MR](${addChangesetUrl})`
 }

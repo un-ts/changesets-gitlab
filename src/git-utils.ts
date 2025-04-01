@@ -31,7 +31,6 @@ export const pushTags = async () => {
 }
 
 export const pushTag = async (tag: string) => {
-  console.log('Pushing tag: ' + tag)
   await exec('git', ['push', 'origin', tag])
 }
 

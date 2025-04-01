@@ -171,3 +171,5 @@ export const getUsername = (api: Gitlab) => {
 
 export const cjsRequire =
   typeof require === 'undefined' ? createRequire(import.meta.url) : require
+
+export const TRUTHY_VALUES = new Set(['true', '1'])

@@ -10,29 +10,27 @@ import { setupUser } from './git-utils.js'
 import readChangesetState from './read-changeset-state.js'
 import { runPublish, runVersion } from './run.js'
 import type { MainCommandOptions } from './types.js'
-import { execSync, getOptionalInput, getUsername } from './utils.js'
+import {
+  execSync,
+  getOptionalInput,
+  getUsername,
+  TRUTHY_VALUES,
+} from './utils.js'
 
 export const main = async ({
   published,
   onlyChangesets,
 }: MainCommandOptions = {}) => {
-  const {
-    CI,
-    GITLAB_HOST,
-    GITLAB_TOKEN,
-    HOME,
-    NPM_TOKEN,
-    DEBUG_GITLAB_CREDENTIAL = 'false',
-  } = env
+  const { GITLAB_TOKEN, NPM_TOKEN } = env
 
   setOutput('published', false)
   setOutput('publishedPackages', [])
 
-  if (CI) {
+  if (env.CI) {
     console.log('setting git user')
     await setupUser()
 
-    const url = new URL(GITLAB_HOST)
+    const url = new URL(env.GITLAB_HOST)
 
     console.log('setting GitLab credentials')
     const username = await getUsername(createApi())
@@ -47,7 +45,7 @@ export const main = async ({
           url.host
         }${url.pathname.replace(/\/$/, '')}/${env.CI_PROJECT_PATH}.git`,
       ],
-      { silent: !['true', '1'].includes(DEBUG_GITLAB_CREDENTIAL) },
+      { silent: !TRUTHY_VALUES.has(env.DEBUG_GITLAB_CREDENTIAL!) },
     )
   }
 
@@ -67,7 +65,7 @@ export const main = async ({
         'No changesets found, attempting to publish any unpublished packages to npm',
       )
 
-      const npmrcPath = `${HOME}/.npmrc`
+      const npmrcPath = `${env.HOME}/.npmrc`
       if (fs.existsSync(npmrcPath)) {
         console.log('Found existing .npmrc file')
       } else if (NPM_TOKEN) {

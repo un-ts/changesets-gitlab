@@ -1,5 +1,27 @@
 # changesets-gitlab
 
+## 0.13.0
+
+### Minor Changes
+
+- [`e9adb24`](https://github.com/un-ts/changesets-gitlab/commit/e9adb245cc1152a2bc1516d4259b08f437879308) Thanks [@JounQin](https://github.com/JounQin)! - chore: housekeeping, bump all (dev) deps, add `module-sync` entry
+
+  fix: `commonjs` types entry
+
+- [#195](https://github.com/un-ts/changesets-gitlab/pull/195) [`e7cbdff`](https://github.com/un-ts/changesets-gitlab/commit/e7cbdff3854d7640884735179ab4cb695e62f3c2) Thanks [@WeslleyNasRocha](https://github.com/WeslleyNasRocha)! - feat: fetch the tags and push each one individually based on size of `packages` to be published and `api.FeatureFlags(projectId, 'git_push_create_all_pipelines')`
+
+- [#210](https://github.com/un-ts/changesets-gitlab/pull/210) [`8bdaf2d`](https://github.com/un-ts/changesets-gitlab/commit/8bdaf2de0e249cbf34be9a4e7d199b13e85d242c) Thanks [@JounQin](https://github.com/JounQin)! - feat: try `allDiffs` api first and fallback to `showChanges` when unavailable
+
+- [#209](https://github.com/un-ts/changesets-gitlab/pull/209) [`4ca179c`](https://github.com/un-ts/changesets-gitlab/commit/4ca179c9b7fb0440a8194f97ad65d1294d19810b) Thanks [@JounQin](https://github.com/JounQin)! - feat: add a new optional `GITLAB_COMMENT_CUSTOM_LINKS` environment variable to override the links content referenced in the cli bot comment, use `{{ addChangesetUrl }}` placeholder for the dynamic URL to add a changeset
+
+- [#196](https://github.com/un-ts/changesets-gitlab/pull/196) [`b681513`](https://github.com/un-ts/changesets-gitlab/commit/b6815131caf733494a6f0e243ed64ad9441fc2b4) Thanks [@crysadrak](https://github.com/crysadrak)! - feat: add a new optional `GITLAB_COMMENT_DISCUSSION_AUTO_RESOLVE` environment variable to automatically resolve added discussion when changeset is present, if you want to always resolve the discussion, you should actually use `GITLAB_COMMENT_TYPE=note` instead, default `true`
+
+- [#206](https://github.com/un-ts/changesets-gitlab/pull/206) [`842110d`](https://github.com/un-ts/changesets-gitlab/commit/842110db46fc90e927851ab00389fce93060ff32) Thanks [@jean-smaug](https://github.com/jean-smaug)! - refactor: publish releases with limited concurrency with [`p-limit`](https://github.com/sindresorhus/p-limit)
+
+### Patch Changes
+
+- [#211](https://github.com/un-ts/changesets-gitlab/pull/211) [`6e8e7be`](https://github.com/un-ts/changesets-gitlab/commit/6e8e7be192ba43985518d1695e90686b6d3b297e) Thanks [@JounQin](https://github.com/JounQin)! - chore: add `package.json` entry
+
 ## 0.12.2
 
 ### Patch Changes

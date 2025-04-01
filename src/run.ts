@@ -5,6 +5,7 @@ import { exec } from '@actions/exec'
 import type { Gitlab } from '@gitbeaker/core'
 import type { Package } from '@manypkg/get-packages'
 import { getPackages } from '@manypkg/get-packages'
+import pLimit from 'p-limit'
 import resolveFrom from 'resolve-from'
 import semver from 'semver'
 
@@ -22,6 +23,8 @@ import {
   GITLAB_MAX_TAGS,
   sortTheThings,
 } from './utils.js'
+
+const limit = pLimit(2 * 3)
 
 export const createRelease = async (
   api: Gitlab,
@@ -157,10 +160,12 @@ export async function runPublish({
     if (createGitlabReleases) {
       await Promise.all(
         releasedPackages.map(pkg =>
-          createRelease(api, {
-            pkg,
-            tagName: `${pkg.packageJson.name}@${pkg.packageJson.version}`,
-          }),
+          limit(() =>
+            createRelease(api, {
+              pkg,
+              tagName: `${pkg.packageJson.name}@${pkg.packageJson.version}`,
+            }),
+          ),
         ),
       )
     }

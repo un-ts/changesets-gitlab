@@ -1,4 +1,4 @@
-import { getAllFiles } from '../src/utils'
+import { getAllFiles } from '../src/utils.js'
 
 describe('utils', () => {
   test('getAllFiles', async () => {

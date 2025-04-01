@@ -1,5 +1,5 @@
 {
-  "extends": "@1stg/tsconfig/lib",
+  "extends": "@1stg/tsconfig/node16",
   "compilerOptions": {
     "target": "ES2020"
   },

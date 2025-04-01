@@ -1,7 +1,11 @@
+coverage
 lib
 node_modules
-.eslintcache
+.*cache
 .env
 .type-coverage
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
 *.log
 *.tsbuildinfo

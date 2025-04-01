@@ -1,18 +1,19 @@
-import _ from 'node:module'
+import fs from 'node:fs/promises'
 import path from 'node:path'
 
 import { exec } from '@actions/exec'
 import type { Gitlab } from '@gitbeaker/core'
 import type { Package } from '@manypkg/get-packages'
 import { getPackages } from '@manypkg/get-packages'
-import fs from 'fs-extra'
 import resolveFrom from 'resolve-from'
 import semver from 'semver'
 
+import { createApi } from './api.ts'
 import * as context from './context.js'
-import * as gitUtils from './gitUtils.js'
-import readChangesetState from './readChangesetState.js'
+import * as gitUtils from './git-utils.js'
+import readChangesetState from './read-changeset-state.js'
 import {
+  cjsRequire,
   execWithOutput,
   getChangedPackages,
   getChangelogEntry,
@@ -20,8 +21,6 @@ import {
   getVersionsByDirectory,
   sortTheThings,
 } from './utils.js'
-
-import { createApi } from './index.js'
 
 const createRelease = async (
   api: Gitlab,
@@ -123,7 +122,7 @@ export async function runPublish({
       }
     }
   } else {
-    // eslint-disable-next-line regexp/no-super-linear-backtracking
+    // eslint-disable-next-line regexp/no-misleading-capturing-group, regexp/no-super-linear-backtracking, sonarjs/slow-regex
     const newTagRegex = /New tag:\s+(@[^/]+\/[^@]+|[^/]+)@(\S+)/
     const packagesByName = new Map(packages.map(x => [x.packageJson.name, x]))
 
@@ -166,9 +165,6 @@ export async function runPublish({
 
   return { published: false }
 }
-
-const cjsRequire =
-  typeof require === 'undefined' ? _.createRequire(import.meta.url) : require
 
 const requireChangesetsCliPkgJson = (cwd: string) => {
   try {
@@ -284,6 +280,7 @@ ${
       .map(x => x.content)
       .join('\n '))()
 
+  // eslint-disable-next-line sonarjs/no-nested-template-literals
   const finalMrTitle = `${mrTitle}${preState ? ` (${preState.tag})` : ''}`
 
   // project with `commit: true` setting could have already committed files

@@ -1,7 +1,7 @@
 import { setFailed } from '@actions/core'
 import dotenv from 'dotenv'
 
-import type { Env } from './types'
+import type { Env } from './types.js'
 
 dotenv.config()
 
@@ -21,7 +21,7 @@ export const env = {
   DEBUG_GITLAB_CREDENTIAL: process.env.DEBUG_GITLAB_CREDENTIAL ?? 'false',
 
   // only check for the token if we are explicitly using it
-  // eslint-disable-next-line sonar/function-name
+
   get GITLAB_TOKEN() {
     if (!isGitlabTokenValidated) {
       isGitlabTokenValidated = true

@@ -1,5 +1,6 @@
-import { execSync as _execSync } from 'node:child_process'
+import { execSync as execSync_ } from 'node:child_process'
 import fs from 'node:fs'
+import { createRequire } from 'node:module'
 import path from 'node:path'
 
 import { getInput } from '@actions/core'
@@ -83,7 +84,11 @@ export function getChangelogEntry(changelog: string, version: string) {
     }
   }
   if (headingStartInfo) {
-    ast.children = ast.children.slice(headingStartInfo.index + 1, endIndex)
+    ast.children = ast.children.slice(
+      headingStartInfo.index + 1,
+      // eslint-disable-next-line sonarjs/argument-type
+      endIndex,
+    )
   }
   return {
     content: unified().use(remarkStringify).stringify(ast),
@@ -139,6 +144,7 @@ export const identify = <T>(
 export async function getAllFiles(dir: string, base = dir): Promise<string[]> {
   const direntList = await fs.promises.readdir(dir, { withFileTypes: true })
   const files = await Promise.all(
+    // eslint-disable-next-line sonarjs/function-return-type
     direntList.map(dirent => {
       const res = path.resolve(dir, dirent.name)
       return dirent.isDirectory()
@@ -150,15 +156,18 @@ export async function getAllFiles(dir: string, base = dir): Promise<string[]> {
 }
 
 export const execSync = (command: string) =>
-  _execSync(command, {
-    stdio: 'inherit',
-  })
+  // eslint-disable-next-line sonarjs/os-command
+  execSync_(command, { stdio: 'inherit' })
 
 export const getOptionalInput = (name: string) => getInput(name) || undefined
 
+// eslint-disable-next-line sonarjs/function-return-type
 export const getUsername = (api: Gitlab) => {
   return (
     env.GITLAB_CI_USER_NAME ??
     api.Users.showCurrentUser().then(currentUser => currentUser.username)
   )
 }
+
+export const cjsRequire =
+  typeof require === 'undefined' ? createRequire(import.meta.url) : require

@@ -1,17 +1,16 @@
+import fs from 'node:fs'
 import { URL } from 'node:url'
 
 import { getInput, setFailed, setOutput, exportVariable } from '@actions/core'
 import { exec } from '@actions/exec'
-import fs from 'fs-extra'
 
+import { createApi } from './api.ts'
 import { env } from './env.js'
-import { setupUser } from './gitUtils.js'
-import readChangesetState from './readChangesetState.js'
+import { setupUser } from './git-utils.js'
+import readChangesetState from './read-changeset-state.js'
 import { runPublish, runVersion } from './run.js'
 import type { MainCommandOptions } from './types.js'
 import { execSync, getOptionalInput, getUsername } from './utils.js'
-
-import { createApi } from './index.js'
 
 export const main = async ({
   published,
@@ -46,7 +45,7 @@ export const main = async ({
         'origin',
         `${url.protocol}//${username}:${GITLAB_TOKEN}@${
           url.host
-        }${url.pathname.replace(/\/$/, '')}/${env.CI_PROJECT_PATH}.git`, // eslint-disable-line unicorn/consistent-destructuring
+        }${url.pathname.replace(/\/$/, '')}/${env.CI_PROJECT_PATH}.git`,
       ],
       { silent: !['true', '1'].includes(DEBUG_GITLAB_CREDENTIAL) },
     )
@@ -73,7 +72,7 @@ export const main = async ({
         console.log('Found existing .npmrc file')
       } else if (NPM_TOKEN) {
         console.log('No .npmrc file found, creating one')
-        fs.writeFileSync(
+        await fs.promises.writeFile(
           npmrcPath,
           `//registry.npmjs.org/:_authToken=${NPM_TOKEN}`,
         )

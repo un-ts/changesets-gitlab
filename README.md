@@ -53,9 +53,9 @@ GITLAB_TOKEN_TYPE                      # optional, type of the provided token in
 GITLAB_CI_USER_NAME                    # optional, username with accessibility to push, used in pairs of the above token (if it was personal access token). If not set read it from the Gitlab API
 GITLAB_CI_USER_EMAIL                   # optional, default `gitlab[bot]@users.noreply.gitlab.com`
 GITLAB_COMMENT_TYPE                    # optional, type of the comment. defaults to `discussion`. can be set to `note` to not create a discussion instead of a thread
+GITLAB_COMMENT_DISCUSSION_AUTO_RESOLVE # optional, automatically resolve added discussion when changeset is present, if you want to always resolve the discussion, you should actually use `GITLAB_COMMENT_TYPE=note` instead, default `true`
 GITLAB_ADD_CHANGESET_MESSAGE           # optional, default commit message for adding changesets on GitLab Web UI
-GITLAB_COMMENT_DISCUSSION_AUTO_RESOLVE # optional, automatically resolve added discussion with options to resolve discussion by default (value `always`) or resolve only when changeset is present (value `hasChangeset`)
-DEBUG_GITLAB_CREDENTIAL                # optional, default `false`
+DEBUG_GITLAB_CREDENTIAL                # optional, whether to log when setting remote url with sensitive `token` displayed
 ```
 
 ### Example workflow

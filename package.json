@@ -1,6 +1,6 @@
 {
   "name": "changesets-gitlab",
-  "version": "0.12.2",
+  "version": "0.13.0",
   "type": "module",
   "repository": "https://github.com/un-ts/changesets-gitlab.git",
   "author": "JounQin (https://www.1stG.me) <admin@1stg.me>",

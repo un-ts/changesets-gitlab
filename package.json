@@ -37,12 +37,12 @@
   ],
   "keywords": [
     "@changesets/cli",
-    "ci",
+    "auto-release",
+    "changelog",
     "changeset",
     "changesets",
+    "ci",
     "gitlab",
-    "changelog",
-    "auto-release",
     "release",
     "release-automation",
     "release-plz"

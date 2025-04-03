@@ -1,6 +1,7 @@
 # changesets-gitlab
 
-[![GitHub Actions](https://github.com/un-ts/changesets-gitlab/workflows/CI/badge.svg)](https://github.com/un-ts/changesets-gitlab/actions/workflows/ci.yml)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/un-ts/changesets-gitlab/ci.yml?branch=main)](https://github.com/un-ts/changesets-gitlab/actions/workflows/ci.yml?query=branch%3Amain)
+[![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/un-ts/changesets-gitlab)](https://coderabbit.ai)
 [![npm](https://img.shields.io/npm/v/changesets-gitlab.svg)](https://www.npmjs.com/package/changesets-gitlab)
 [![GitHub Release](https://img.shields.io/github/release/un-ts/changesets-gitlab)](https://github.com/un-ts/changesets-gitlab/releases)
 
@@ -229,6 +230,6 @@ Detailed changes for each release are documented in [CHANGELOG.md](./CHANGELOG.m
 
 [MIT][] © [JounQin][]@[1stG.me][]
 
-[1stg.me]: https://www.1stg.me
-[jounqin]: https://GitHub.com/JounQin
-[mit]: http://opensource.org/licenses/MIT
+[1stG.me]: https://www.1stG.me
+[JounQin]: https://github.com/JounQin
+[MIT]: http://opensource.org/licenses/MIT

@@ -3,7 +3,7 @@
   "version": "0.13.0",
   "type": "module",
   "repository": "https://github.com/un-ts/changesets-gitlab.git",
-  "author": "JounQin (https://www.1stG.me) <admin@1stg.me>",
+  "author": "JounQin <admin@1stg.me> (https://www.1stG.me)",
   "funding": "https://opencollective.com/changesets-gitlab",
   "license": "MIT",
   "packageManager": "yarn@4.8.1",
@@ -79,6 +79,7 @@
     "markdown-table": "^3.0.4",
     "mdast-util-to-string": "^4.0.0",
     "micromatch": "^4.0.8",
+    "p-limit": "^6.2.0",
     "remark-parse": "^11.0.0",
     "remark-stringify": "^11.0.0",
     "resolve-from": "^5.0.0",
@@ -87,7 +88,7 @@
     "yaml": "^2.7.1"
   },
   "devDependencies": {
-    "@1stg/common-config": "^11.1.1",
+    "@1stg/common-config": "^11.1.2",
     "@changesets/changelog-github": "^0.5.1",
     "@changesets/cli": "^2.28.1",
     "@commitlint/cli": "^19.8.0",
@@ -100,7 +101,6 @@
     "eslint": "^9.23.0",
     "lint-staged": "^15.5.0",
     "npm-run-all2": "^7.0.2",
-    "p-limit": "^6.2.0",
     "prettier": "^3.5.3",
     "simple-git-hooks": "^2.12.1",
     "size-limit": "^11.2.0",

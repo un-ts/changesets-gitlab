@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.13.1
+
+### Patch Changes
+
+- [#212](https://github.com/un-ts/changesets-gitlab/pull/212) [`7d1eb71`](https://github.com/un-ts/changesets-gitlab/commit/7d1eb7118bc8634812d36dd8b9f180a570d73e48) Thanks [@JounQin](https://github.com/JounQin)! - fix: `p-limit` should be dep instead
+
 ## 0.13.0
 
 ### Minor Changes

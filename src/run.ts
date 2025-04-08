@@ -98,7 +98,9 @@ export async function runPublish({
     (await api.FeatureFlags.show(
       context.projectId,
       'git_push_create_all_pipelines',
-    ).catch(() => false))
+    )
+      .then(({ active }) => active)
+      .catch(() => false))
 
   if (pushAllTags) {
     await gitUtils.pushTags()

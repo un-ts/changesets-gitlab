@@ -1,5 +1,13 @@
 # changesets-gitlab
 
+## 0.13.2
+
+### Patch Changes
+
+- [#214](https://github.com/un-ts/changesets-gitlab/pull/214) [`b69af62`](https://github.com/un-ts/changesets-gitlab/commit/b69af627480e11ed0d8b11fcdcac122566e6f3e0) Thanks [@JounQin](https://github.com/JounQin)! - fix: detect `git_push_create_all_pipelines` feature flag correctly
+
+- [#214](https://github.com/un-ts/changesets-gitlab/pull/214) [`b69af62`](https://github.com/un-ts/changesets-gitlab/commit/b69af627480e11ed0d8b11fcdcac122566e6f3e0) Thanks [@JounQin](https://github.com/JounQin)! - fix: legacy `types` should point to `.d.cts` instead
+
 ## 0.13.1
 
 ### Patch Changes

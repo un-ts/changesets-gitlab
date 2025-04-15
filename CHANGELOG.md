@@ -1,5 +1,13 @@
 # changesets-gitlab
 
+## 0.13.3
+
+### Patch Changes
+
+- [#216](https://github.com/un-ts/changesets-gitlab/pull/216) [`0bdd8e8`](https://github.com/un-ts/changesets-gitlab/commit/0bdd8e86af15553dcb64343d9a54f01c5e5e3513) Thanks [@JounQin](https://github.com/JounQin)! - fix: add `newChangesetTemplateFallback` for newer GitLab versions - close [#178](https://github.com/un-ts/changesets-gitlab/issues/178)
+
+  related <https://gitlab.com/gitlab-org/gitlab/-/issues/532221>
+
 ## 0.13.2
 
 ### Patch Changes

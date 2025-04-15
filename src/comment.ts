@@ -312,7 +312,7 @@ export const comment = async () => {
     }`
 
     const newChangesetTemplateFallback = `
-If the above link doesn't fill the changeset template file name and content which is [a known regression on GitLab > 16.11](https://gitlab.com/gitlab-org/gitlab/-/issues/532221), you can copy and paste the following template into ${newChangesetFileName} instead:
+If the above link doesn't fill the changeset template file name and content which is [a known regression on GitLab >= 16.11](https://gitlab.com/gitlab-org/gitlab/-/issues/532221), you can copy and paste the following template into ${newChangesetFileName} instead:
 
 \`\`\`yaml
 ${newChangesetTemplate}

@@ -1,6 +1,4 @@
-/**
- * Simulate context in GitHub Actions
- */
+// Simulate context in GitHub Actions
 
 export const projectId = process.env.CI_PROJECT_ID!
 

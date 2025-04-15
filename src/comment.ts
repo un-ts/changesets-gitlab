@@ -74,6 +74,7 @@ const ADD_CHANGESET_URL_PLACEHOLDER_REGEXP = /\{\{\s*addChangesetUrl\s*\}\}/
 const getAbsentMessage = (
   commitSha: string,
   addChangesetUrl: string,
+  newChangesetTemplateFallback: string,
   releasePlan: ReleasePlan | null,
 ) => `###  ⚠️  No Changeset found
 
@@ -91,12 +92,15 @@ ${
 [Click here if you're a maintainer who wants to add a changeset to this MR](${addChangesetUrl})`
 }
 
+${newChangesetTemplateFallback}
+
 __${generatedByBotNote}__
 `
 
 const getApproveMessage = (
   commitSha: string,
   addChangesetUrl: string,
+  newChangesetTemplateFallback: string,
   releasePlan: ReleasePlan | null,
 ) => `###  🦋  Changeset detected
 
@@ -114,16 +118,20 @@ ${
 [Click here if you're a maintainer who wants to add another changeset to this MR](${addChangesetUrl})`
 }
 
+${newChangesetTemplateFallback}
+
 __${generatedByBotNote}__
 `
 
-const getNewChangesetTemplate = (changedPackages: string[], title: string) =>
-  encodeURIComponent(`---
+const getNewChangesetTemplate = (
+  changedPackages: string[],
+  title: string,
+) => `---
 ${changedPackages.map(x => `"${x}": patch`).join('\n')}
 ---
 
 ${title}
-`)
+`
 
 const isMrNote = (
   discussionOrNote: DiscussionSchema | MergeRequestNoteSchema,
@@ -201,7 +209,8 @@ async function getNoteInfo(
   }
 
   /**
-   * The `username` used for commenting could be random, if we haven't tested the random `username`, then test it
+   * The `username` used for commenting could be random, if we haven't tested
+   * the random `username`, then test it
    *
    * @see https://docs.gitlab.com/ee/development/internal_users.html
    * @see https://github.com/un-ts/changesets-gitlab/issues/145#issuecomment-1860610958
@@ -286,25 +295,44 @@ export const comment = async () => {
         }),
       ] as const)
 
-    const addChangesetUrl = `${env.CI_MERGE_REQUEST_PROJECT_URL}/-/new/${mrBranch}?file_name=.changeset/${humanId(
-      {
-        separator: '-',
-        capitalize: false,
-      },
-    )}.md&file=${getNewChangesetTemplate(
+    const newChangesetFileName = `.changeset/${humanId({
+      separator: '-',
+      capitalize: false,
+    })}.md`
+
+    const newChangesetTemplate = getNewChangesetTemplate(
       changedPackages,
       env.CI_MERGE_REQUEST_TITLE,
-    )}${
+    )
+
+    const addChangesetUrl = `${env.CI_MERGE_REQUEST_PROJECT_URL}/-/new/${mrBranch}?file_name=${newChangesetFileName}&file=${encodeURIComponent(newChangesetTemplate)}${
       commitMessage
         ? '&commit_message=' + encodeURIComponent(commitMessage)
         : ''
     }`
 
+    const newChangesetTemplateFallback = `
+If the above link doesn't fill the changeset template file name and content which is [a known regression on GitLab > 16.11](https://gitlab.com/gitlab-org/gitlab/-/issues/532221), you can copy and paste the following template into ${newChangesetFileName} instead:
+
+\`\`\`yaml
+${newChangesetTemplate}
+\`\`\`
+`.trim()
+
     const prComment =
       (hasChangeset
-        ? getApproveMessage(latestCommitSha, addChangesetUrl, releasePlan)
-        : getAbsentMessage(latestCommitSha, addChangesetUrl, releasePlan)) +
-      errFromFetchingChangedFiles
+        ? getApproveMessage(
+            latestCommitSha,
+            addChangesetUrl,
+            newChangesetTemplateFallback,
+            releasePlan,
+          )
+        : getAbsentMessage(
+            latestCommitSha,
+            addChangesetUrl,
+            newChangesetTemplateFallback,
+            releasePlan,
+          )) + errFromFetchingChangedFiles
 
     switch (commentType) {
       case 'discussion': {

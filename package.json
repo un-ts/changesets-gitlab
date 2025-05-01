@@ -6,7 +6,7 @@
   "author": "JounQin <admin@1stg.me> (https://www.1stG.me)",
   "funding": "https://opencollective.com/changesets-gitlab",
   "license": "MIT",
-  "packageManager": "yarn@4.8.1",
+  "packageManager": "yarn@4.9.1",
   "engines": {
     "node": ">=18.0.0"
   },
@@ -95,8 +95,8 @@
     "@pkgr/rollup": "^6.0.3",
     "@types/global-agent": "^3.0.0",
     "@types/micromatch": "^4.0.9",
-    "@types/web": "^0.0.218",
-    "@vitest/coverage-istanbul": "3.1.1",
+    "@types/web": "^0.0.228",
+    "@vitest/coverage-istanbul": "3.1.2",
     "clean-pkg-json": "^1.2.1",
     "eslint": "^9.24.0",
     "nano-staged": "^0.8.0",

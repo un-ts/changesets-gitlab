@@ -42,7 +42,7 @@ export const main = async ({
         'remote',
         'set-url',
         'origin',
-        `${url.protocol}//${username}:${GITLAB_TOKEN}@${
+        `${url.protocol}//${encodeURIComponent(username)}:${GITLAB_TOKEN}@${
           url.host
         }${url.pathname.replace(/\/$/, '')}/${env.CI_PROJECT_PATH}.git`,
       ],

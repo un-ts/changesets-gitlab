@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.13.4
+
+### Patch Changes
+
+- [#223](https://github.com/un-ts/changesets-gitlab/pull/223) [`9ab4bb0`](https://github.com/un-ts/changesets-gitlab/commit/9ab4bb0ba32483c5627a2860295a266e484d5160) Thanks [@afonja14755](https://github.com/afonja14755)! - fix: encode `username` in URL
+
 ## 0.13.3
 
 ### Patch Changes

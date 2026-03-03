@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises'
+import path from 'node:path'
 import { URL } from 'node:url'
 
 import { exportVariable, getInput, setOutput } from '@actions/core'
@@ -52,7 +53,9 @@ export const main = async ({
     )
   }
 
-  const { changesets } = await readChangesetState()
+  const cwd = path.resolve(process.cwd(), getOptionalInput('cwd') ?? '.')
+
+  const { changesets } = await readChangesetState(cwd)
 
   const publishScript = getInput('publish')
   const hasChangesets = changesets.length > 0
@@ -111,6 +114,7 @@ export const main = async ({
         createGitlabReleases: !FALSY_VALUES.has(
           getInput('create_gitlab_releases'),
         ),
+        cwd,
       })
 
       if (result.published) {
@@ -133,6 +137,7 @@ export const main = async ({
         commitMessage: getOptionalInput('commit'),
         removeSourceBranch: getInput('remove_source_branch') === 'true',
         hasPublishScript,
+        cwd,
       })
       if (onlyChangesets) {
         execSync(onlyChangesets)

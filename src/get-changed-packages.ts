@@ -23,9 +23,11 @@ function fetchFile(path: string) {
 
 export const getChangedPackages = async ({
   changedFiles: changedFilesPromise,
+  cwd = process.cwd(),
 }: {
   changedFiles: Promise<string[]> | string[]
   api: Gitlab
+  cwd?: string
   // eslint-disable-next-line sonarjs/cognitive-complexity
 }) => {
   let hasErrored = false
@@ -53,7 +55,7 @@ export const getChangedPackages = async ({
 
   async function getPackage(pkgPath: string) {
     const jsonContent = await fetchJsonFile<PackageJSON>(
-      pkgPath + '/package.json',
+      nodePath.join(cwd, pkgPath, 'package.json'),
     )
     return {
       packageJson: jsonContent,
@@ -72,10 +74,12 @@ export const getChangedPackages = async ({
         workspaces?: string[]
       }
     }
-  >('package.json')
-  const configPromise = fetchJsonFile<WrittenConfig>('.changeset/config.json')
+  >(nodePath.join(cwd, 'package.json'))
+  const configPromise = fetchJsonFile<WrittenConfig>(
+    nodePath.join(cwd, '.changeset/config.json'),
+  )
 
-  const tree = await getAllFiles(process.cwd())
+  const tree = await getAllFiles(cwd)
 
   let preStatePromise: Promise<PreState> | undefined
   const changesetPromises: Array<Promise<NewChangeset>> = []
@@ -90,7 +94,7 @@ export const getChangedPackages = async ({
     } else if (item === 'pnpm-workspace.yaml') {
       isPnpm = true
     } else if (item === '.changeset/pre.json') {
-      preStatePromise = fetchJsonFile('.changeset/pre.json')
+      preStatePromise = fetchJsonFile(nodePath.join(cwd, '.changeset/pre.json'))
     } else if (
       item !== '.changeset/README.md' &&
       item.startsWith('.changeset') &&
@@ -103,7 +107,7 @@ export const getChangedPackages = async ({
       }
       const id = res[1]
       changesetPromises.push(
-        fetchTextFile(item).then(text => ({
+        fetchTextFile(nodePath.join(cwd, item)).then(text => ({
           ...parseChangeset(text),
           id,
         })),
@@ -116,7 +120,9 @@ export const getChangedPackages = async ({
     tool = {
       tool: 'pnpm',
       globs: (
-        parse(await fetchTextFile('pnpm-workspace.yaml')) as {
+        parse(
+          await fetchTextFile(nodePath.join(cwd, 'pnpm-workspace.yaml')),
+        ) as {
           packages: string[]
         }
       ).packages,

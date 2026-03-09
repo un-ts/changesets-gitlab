@@ -24,9 +24,9 @@ import { env } from './env.js'
 import { getChangedPackages } from './get-changed-packages.js'
 import type { LooseString } from './types.js'
 import {
-  getOptionalInput,
   getUsername,
   HTTP_STATUS_NOT_FOUND,
+  getCwdInput,
   TRUTHY_VALUES,
 } from './utils.js'
 
@@ -258,11 +258,9 @@ export const comment = async () => {
     return
   }
 
-  const cwdInput = getOptionalInput('cwd')
-  const changesetPrefix = cwdInput
-    ? `${cwdInput.replace(/\/$/, '')}/.changeset`
-    : '.changeset'
-  const absoluteCwd = path.resolve(process.cwd(), cwdInput ?? '.')
+  const cwdRel = getCwdInput()
+  const changesetPrefix = cwdRel ? `${cwdRel}/.changeset` : '.changeset'
+  const absoluteCwd = path.resolve(process.cwd(), cwdRel || '.')
 
   const api = createApi()
 
@@ -288,7 +286,7 @@ export const comment = async () => {
       return changes
     })
 
-    const subdirPrefix = cwdInput ? cwdInput.replace(/\/$/, '') + '/' : ''
+    const subdirPrefix = cwdRel ? `${cwdRel}/` : ''
     const packageChangedFiles = changedFilesPromise.then(changedFiles =>
       changedFiles.map(({ new_path }) =>
         subdirPrefix && new_path.startsWith(subdirPrefix)

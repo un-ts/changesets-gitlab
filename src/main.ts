@@ -16,6 +16,7 @@ import {
   TRUTHY_VALUES,
   execSync,
   fileExists,
+  getCwdInput,
   getOptionalInput,
   getUsername,
 } from './utils.js'
@@ -53,7 +54,7 @@ export const main = async ({
     )
   }
 
-  const cwd = path.resolve(process.cwd(), getOptionalInput('cwd') ?? '.')
+  const cwd = path.resolve(process.cwd(), getCwdInput() || '.')
 
   const { changesets } = await readChangesetState(cwd)
 

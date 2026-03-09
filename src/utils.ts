@@ -157,6 +157,18 @@ export const execSync = (command: string) =>
 
 export const getOptionalInput = (name: string) => getInput(name) || undefined
 
+export const getCwdInput = (): string => {
+  const input = getOptionalInput('cwd')
+  if (!input) {
+    return ''
+  }
+  const normalized = input.replace(/^\.\//, '').replace(/\/$/, '')
+  if (path.isAbsolute(normalized) || normalized.split('/').includes('..')) {
+    throw new Error(`Invalid cwd input: "${input}"`)
+  }
+  return normalized === '.' ? '' : normalized
+}
+
 // eslint-disable-next-line sonarjs/function-return-type
 export const getUsername = (api: Gitlab) => {
   return (

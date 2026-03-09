@@ -288,11 +288,13 @@ export const comment = async () => {
 
     const subdirPrefix = cwdRel ? `${cwdRel}/` : ''
     const packageChangedFiles = changedFilesPromise.then(changedFiles =>
-      changedFiles.map(({ new_path }) =>
-        subdirPrefix && new_path.startsWith(subdirPrefix)
-          ? new_path.slice(subdirPrefix.length)
-          : new_path,
-      ),
+      changedFiles
+        .filter(
+          ({ new_path }) => !subdirPrefix || new_path.startsWith(subdirPrefix),
+        )
+        .map(({ new_path }) =>
+          subdirPrefix ? new_path.slice(subdirPrefix.length) : new_path,
+        ),
     )
 
     const [noteInfo, hasChangeset, { changedPackages, releasePlan }] =

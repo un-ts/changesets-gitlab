@@ -1,0 +1,3 @@
+{
+  "extends": ["@dvashim/biome-config/react-recommended"]
+}

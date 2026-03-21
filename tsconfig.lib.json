@@ -1,8 +1,7 @@
 {
   "extends": ".",
   "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "lib"
+    "rootDir": "src"
   },
   "include": ["src"]
 }

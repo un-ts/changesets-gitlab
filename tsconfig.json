@@ -1,7 +1,24 @@
 {
-  "extends": "@1stg/tsconfig/node16",
   "compilerOptions": {
-    "target": "ES2020"
+    "module": "Node16",
+    "target": "ES2024",
+    "declaration": true,
+    "outDir": "lib",
+    "removeComments": true,
+    "importHelpers": true,
+    "incremental": true,
+    "lib": ["ESNext"],
+    "newLine": "lf",
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "resolveJsonModule": true,
+    "rewriteRelativeImportExtensions": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "stripInternal": true,
+    "verbatimModuleSyntax": true
   },
   "exclude": ["lib"]
 }

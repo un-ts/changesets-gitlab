@@ -1,15 +1,9 @@
-# changesets-gitlab
+# @dvashim/changesets-gitlab
 
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/un-ts/changesets-gitlab/ci.yml?branch=main)](https://github.com/un-ts/changesets-gitlab/actions/workflows/ci.yml?query=branch%3Amain)
-[![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/un-ts/changesets-gitlab)](https://coderabbit.ai)
-[![npm](https://img.shields.io/npm/v/changesets-gitlab.svg)](https://www.npmjs.com/package/changesets-gitlab)
-[![GitHub Release](https://img.shields.io/github/release/un-ts/changesets-gitlab)](https://github.com/un-ts/changesets-gitlab/releases)
+[![npm](https://img.shields.io/npm/v/@dvashim/changesets-gitlab.svg)](https://www.npmjs.com/package/@dvashim/changesets-gitlab)
+[![GitHub Release](https://img.shields.io/github/release/dvashim/changesets-gitlab)](https://github.com/dvashim/changesets-gitlab/releases)
 
-[![Conventional Commits](https://img.shields.io/badge/conventional%20commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
-[![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com)
-[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
-[![Code Style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
-[![changesets](https://img.shields.io/badge/maintained%20with-changesets-176de3.svg)](https://github.com/atlassian/changesets)
+> Fork of [changesets-gitlab](https://github.com/un-ts/changesets-gitlab) by [JounQin](https://github.com/JounQin)
 
 GitLab CI cli for [changesets](https://github.com/atlassian/changesets) like its [GitHub Action](https://github.com/changesets/action), it creates a merge request with all of the package versions updated and changelogs updated and when there are new changesets on master, the MR will be updated. When you're ready, you can merge the merge request and you can either publish the packages to npm manually or setup the action to do it for you.
 
@@ -208,28 +202,12 @@ And your `update-versions` script would be:
 }
 ```
 
-## Sponsors
-
-| 1stG                                                                                                                               | RxTS                                                                                                                               | UnTS                                                                                                                               |
-| ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| [![1stG Open Collective backers and sponsors](https://opencollective.com/1stG/organizations.svg)](https://opencollective.com/1stG) | [![RxTS Open Collective backers and sponsors](https://opencollective.com/rxts/organizations.svg)](https://opencollective.com/rxts) | [![UnTS Open Collective backers and sponsors](https://opencollective.com/unts/organizations.svg)](https://opencollective.com/unts) |
-
-## Backers
-
-[![Backers](https://raw.githubusercontent.com/1stG/static/master/sponsors.svg)](https://github.com/sponsors/JounQin)
-
-| 1stG                                                                                                                             | RxTS                                                                                                                             | UnTS                                                                                                                             |
-| -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| [![1stG Open Collective backers and sponsors](https://opencollective.com/1stG/individuals.svg)](https://opencollective.com/1stG) | [![RxTS Open Collective backers and sponsors](https://opencollective.com/rxts/individuals.svg)](https://opencollective.com/rxts) | [![UnTS Open Collective backers and sponsors](https://opencollective.com/unts/individuals.svg)](https://opencollective.com/unts) |
-
 ## Changelog
 
 Detailed changes for each release are documented in [CHANGELOG.md](./CHANGELOG.md).
 
 ## License
 
-[MIT][] © [JounQin][]@[1stG.me][]
+[MIT](http://opensource.org/licenses/MIT) © [Aleksei Reznichenko](https://github.com/dvashim)
 
-[1stG.me]: https://www.1stG.me
-[JounQin]: https://github.com/JounQin
-[MIT]: http://opensource.org/licenses/MIT
+Originally created by [JounQin](https://github.com/JounQin) at [un-ts/changesets-gitlab](https://github.com/un-ts/changesets-gitlab).

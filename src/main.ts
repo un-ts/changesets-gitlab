@@ -1,9 +1,8 @@
+/** biome-ignore-all lint/style/noNonNullAssertion: fix later */
 import fs from 'node:fs'
 import { URL } from 'node:url'
-
-import { getInput, setFailed, setOutput, exportVariable } from '@actions/core'
+import { exportVariable, getInput, setFailed, setOutput } from '@actions/core'
 import { exec } from '@actions/exec'
-
 import { createApi } from './api.ts'
 import { env } from './env.js'
 import { setupUser } from './git-utils.js'
@@ -46,7 +45,7 @@ export const main = async ({
           url.host
         }${url.pathname.replace(/\/$/, '')}/${env.CI_PROJECT_PATH}.git`,
       ],
-      { silent: !TRUTHY_VALUES.has(env.DEBUG_GITLAB_CREDENTIAL!) },
+      { silent: !TRUTHY_VALUES.has(env.DEBUG_GITLAB_CREDENTIAL!) }
     )
   }
 
@@ -61,9 +60,10 @@ export const main = async ({
       console.log('No changesets found')
       return
     }
+
     case !hasChangesets && hasPublishScript: {
       console.log(
-        'No changesets found, attempting to publish any unpublished packages to npm',
+        'No changesets found, attempting to publish any unpublished packages to npm'
       )
 
       const npmrcPath = `${env.HOME}/.npmrc`
@@ -73,11 +73,11 @@ export const main = async ({
         console.log('No .npmrc file found, creating one')
         await fs.promises.writeFile(
           npmrcPath,
-          `//registry.npmjs.org/:_authToken=${NPM_TOKEN}`,
+          `//registry.npmjs.org/:_authToken=${NPM_TOKEN}`
         )
       } else {
         setFailed(
-          'No `.npmrc` found nor `NPM_TOKEN` provided, unable to publish packages',
+          'No `.npmrc` found nor `NPM_TOKEN` provided, unable to publish packages'
         )
         return
       }
@@ -86,7 +86,7 @@ export const main = async ({
         script: publishScript,
         gitlabToken: GITLAB_TOKEN,
         createGitlabReleases: !FALSY_VALUES.has(
-          getInput('create_gitlab_releases'),
+          getInput('create_gitlab_releases')
         ),
       })
 
@@ -101,6 +101,7 @@ export const main = async ({
       }
       return
     }
+
     case hasChangesets: {
       await runVersion({
         script: getOptionalInput('version'),
@@ -111,6 +112,7 @@ export const main = async ({
         removeSourceBranch: getInput('remove_source_branch') === 'true',
         hasPublishScript,
       })
+
       if (onlyChangesets) {
         execSync(onlyChangesets)
       }

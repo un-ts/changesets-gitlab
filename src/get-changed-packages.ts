@@ -1,20 +1,17 @@
 import fs from 'node:fs/promises'
 import nodePath from 'node:path'
-
 import assembleReleasePlan from '@changesets/assemble-release-plan'
 import { parse as parseConfig } from '@changesets/config'
 import parseChangeset from '@changesets/parse'
 import type {
+  NewChangeset,
   PackageJSON,
   PreState,
-  NewChangeset,
   WrittenConfig,
 } from '@changesets/types'
 import type { Gitlab } from '@gitbeaker/core'
-import type { Packages, Tool } from '@manypkg/get-packages'
 import micromatch from 'micromatch'
 import { parse } from 'yaml'
-
 import { getAllFiles } from './utils.js'
 
 function fetchFile(path: string) {
@@ -26,7 +23,6 @@ export const getChangedPackages = async ({
 }: {
   changedFiles: Promise<string[]> | string[]
   api: Gitlab
-  // eslint-disable-next-line sonarjs/cognitive-complexity
 }) => {
   let hasErrored = false
 
@@ -53,7 +49,7 @@ export const getChangedPackages = async ({
 
   async function getPackage(pkgPath: string) {
     const jsonContent = await fetchJsonFile<PackageJSON>(
-      pkgPath + '/package.json',
+      `${pkgPath}/package.json`
     )
     return {
       packageJson: jsonContent,
@@ -92,10 +88,10 @@ export const getChangedPackages = async ({
     } else if (item === '.changeset/pre.json') {
       preStatePromise = fetchJsonFile('.changeset/pre.json')
     } else if (
-      item !== '.changeset/README.md' &&
-      item.startsWith('.changeset') &&
-      item.endsWith('.md') &&
-      changedFiles.includes(item)
+      item !== '.changeset/README.md'
+      && item.startsWith('.changeset')
+      && item.endsWith('.md')
+      && changedFiles.includes(item)
     ) {
       const res = /\.changeset\/([^.]+)\.md/.exec(item)
       if (!res) {
@@ -103,14 +99,15 @@ export const getChangedPackages = async ({
       }
       const id = res[1]
       changesetPromises.push(
-        fetchTextFile(item).then(text => ({
+        fetchTextFile(item).then((text) => ({
           ...parseChangeset(text),
           id,
-        })),
+        }))
       )
     }
   }
-  let tool: { tool: Tool; globs: string[] } | undefined
+
+  let tool: { tool: 'pnpm' | 'yarn' | 'bolt'; globs: string[] } | undefined
 
   if (isPnpm) {
     tool = {
@@ -141,57 +138,57 @@ export const getChangedPackages = async ({
 
   const rootPackageJsonContent = await rootPackageJsonContentsPromise
 
-  const packages: Packages = {
+  const packages = {
     root: {
       dir: '/',
       packageJson: rootPackageJsonContent,
     },
-    tool: tool ? tool.tool : 'root',
-    packages: [],
+    tool: (tool ? tool.tool : 'root') as 'pnpm' | 'yarn' | 'bolt' | 'root',
+    packages: [] as { packageJson: PackageJSON; dir: string }[],
   }
 
   if (tool) {
     if (
-      !Array.isArray(tool.globs) ||
-      !tool.globs.every(x => typeof x === 'string')
+      !Array.isArray(tool.globs)
+      || !tool.globs.every((x) => typeof x === 'string')
     ) {
-      throw new Error('globs are not valid: ' + JSON.stringify(tool.globs))
+      throw new Error(`globs are not valid: ${JSON.stringify(tool.globs)}`)
     }
 
     const matches = micromatch(potentialWorkspaceDirectories, tool.globs)
-    packages.packages = await Promise.all(matches.map(dir => getPackage(dir)))
+    packages.packages = await Promise.all(matches.map((dir) => getPackage(dir)))
   } else {
     packages.packages.push(packages.root)
   }
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- https://github.com/microsoft/TypeScript/issues/9998
+
   if (hasErrored) {
     throw new Error('an error occurred when fetching files')
   }
 
-  const config = await configPromise.then(rawConfig =>
-    parseConfig(rawConfig, packages),
+  const config = await configPromise.then((rawConfig) =>
+    parseConfig(rawConfig, packages)
   )
 
   const releasePlan = assembleReleasePlan(
     await Promise.all(changesetPromises),
     packages,
     config,
-    await preStatePromise,
+    await preStatePromise
   )
 
   return {
     changedPackages: (packages.tool === 'root'
       ? packages.packages
-      : packages.packages.filter(pkg =>
-          changedFiles.some(changedFile => changedFile.includes(pkg.dir)),
+      : packages.packages.filter((pkg) =>
+          changedFiles.some((changedFile) => changedFile.includes(pkg.dir))
         )
     )
       .filter(
-        pkg =>
-          pkg.packageJson.private !== true &&
-          !config.ignore.includes(pkg.packageJson.name),
+        (pkg) =>
+          pkg.packageJson.private !== true
+          && !config.ignore.includes(pkg.packageJson.name)
       )
-      .map(x => x.packageJson.name),
+      .map((x) => x.packageJson.name),
     releasePlan,
   }
 }

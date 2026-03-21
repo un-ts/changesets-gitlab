@@ -1,6 +1,6 @@
 import { readPreState } from '@changesets/pre'
 import readChangesets from '@changesets/read'
-import type { PreState, NewChangeset } from '@changesets/types'
+import type { NewChangeset, PreState } from '@changesets/types'
 
 export interface ChangesetState {
   preState: PreState | undefined
@@ -8,7 +8,7 @@ export interface ChangesetState {
 }
 
 export default async function readChangesetState(
-  cwd: string = process.cwd(),
+  cwd: string = process.cwd()
 ): Promise<ChangesetState> {
   const preState = await readPreState(cwd)
   const isInPreMode = preState !== undefined && preState.mode === 'pre'
@@ -17,7 +17,7 @@ export default async function readChangesetState(
 
   if (isInPreMode) {
     const changesetsToFilter = new Set(preState.changesets)
-    changesets = changesets.filter(x => !changesetsToFilter.has(x.id))
+    changesets = changesets.filter((x) => !changesetsToFilter.has(x.id))
   }
 
   return {

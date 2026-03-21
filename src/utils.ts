@@ -2,7 +2,6 @@ import { execSync as execSync_ } from 'node:child_process'
 import fs from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
-
 import { getInput } from '@actions/core'
 import { exec } from '@actions/exec'
 import type { Gitlab } from '@gitbeaker/core'
@@ -12,7 +11,6 @@ import { toString as mdastToString } from 'mdast-util-to-string'
 import remarkParse from 'remark-parse'
 import remarkStringify from 'remark-stringify'
 import { unified } from 'unified'
-
 import { env } from './env.js'
 
 export const BumpLevels = {
@@ -24,12 +22,12 @@ export const BumpLevels = {
 
 export async function getVersionsByDirectory(cwd: string) {
   const { packages } = await getPackages(cwd)
-  return new Map(packages.map(x => [x.dir, x.packageJson.version]))
+  return new Map(packages.map((x) => [x.dir, x.packageJson.version]))
 }
 
 export async function getChangedPackages(
   cwd: string,
-  previousVersions: Map<string, string>,
+  previousVersions: Map<string, string>
 ) {
   const { packages } = await getPackages(cwd)
   const changedPackages = new Set<Package>()
@@ -74,9 +72,9 @@ export function getChangelogEntry(changelog: string, version: string) {
         continue
       }
       if (
-        endIndex === undefined &&
-        headingStartInfo !== undefined &&
-        headingStartInfo.depth === node.depth
+        endIndex === undefined
+        && headingStartInfo !== undefined
+        && headingStartInfo.depth === node.depth
       ) {
         endIndex = i
         break
@@ -84,11 +82,7 @@ export function getChangelogEntry(changelog: string, version: string) {
     }
   }
   if (headingStartInfo) {
-    ast.children = ast.children.slice(
-      headingStartInfo.index + 1,
-      // eslint-disable-next-line sonarjs/argument-type
-      endIndex,
-    )
+    ast.children = ast.children.slice(headingStartInfo.index + 1, endIndex)
   }
   return {
     content: unified().use(remarkStringify).stringify(ast),
@@ -99,7 +93,7 @@ export function getChangelogEntry(changelog: string, version: string) {
 export async function execWithOutput(
   command: string,
   args?: string[],
-  options?: { ignoreReturnCode?: boolean; cwd?: string },
+  options?: { ignoreReturnCode?: boolean; cwd?: string }
 ) {
   let myOutput = ''
   let myError = ''
@@ -123,7 +117,7 @@ export async function execWithOutput(
 
 export function sortTheThings(
   a: { private: boolean; highestLevel: number },
-  b: { private: boolean; highestLevel: number },
+  b: { private: boolean; highestLevel: number }
 ) {
   if (a.private === b.private) {
     return b.highestLevel - a.highestLevel
@@ -135,7 +129,7 @@ export function sortTheThings(
 }
 
 export const identify = <T>(
-  _: T,
+  _: T
 ): _ is Exclude<
   T,
   '' | (T extends boolean ? false : boolean) | null | undefined
@@ -144,29 +138,23 @@ export const identify = <T>(
 export async function getAllFiles(dir: string, base = dir): Promise<string[]> {
   const direntList = await fs.promises.readdir(dir, { withFileTypes: true })
   const files = await Promise.all(
-    // eslint-disable-next-line sonarjs/function-return-type
-    direntList.map(dirent => {
+    direntList.map((dirent) => {
       const res = path.resolve(dir, dirent.name)
       return dirent.isDirectory()
         ? getAllFiles(res, base)
         : [path.relative(base, res)]
-    }),
+    })
   )
   return files.flat()
 }
 
 export const execSync = (command: string) =>
-  // eslint-disable-next-line sonarjs/os-command
   execSync_(command, { stdio: 'inherit' })
 
 export const getOptionalInput = (name: string) => getInput(name) || undefined
 
-// eslint-disable-next-line sonarjs/function-return-type
-export const getUsername = (api: Gitlab) => {
-  return (
-    env.GITLAB_CI_USER_NAME ??
-    api.Users.showCurrentUser().then(currentUser => currentUser.username)
-  )
+export const getUsername = async (api: Gitlab): Promise<string> => {
+  return env.GITLAB_CI_USER_NAME ?? (await api.Users.showCurrentUser()).username
 }
 
 export const cjsRequire =

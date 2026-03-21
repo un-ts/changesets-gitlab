@@ -1,14 +1,12 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-
 import { exec } from '@actions/exec'
 import type { Gitlab } from '@gitbeaker/core'
 import type { Package } from '@manypkg/get-packages'
 import { getPackages } from '@manypkg/get-packages'
 import pLimit from 'p-limit'
 import resolveFrom from 'resolve-from'
-import semver from 'semver'
-
+import * as semver from 'semver'
 import { createApi } from './api.ts'
 import * as context from './context.js'
 import * as gitUtils from './git-utils.js'
@@ -16,11 +14,11 @@ import readChangesetState from './read-changeset-state.js'
 import {
   cjsRequire,
   execWithOutput,
+  GITLAB_MAX_TAGS,
   getChangedPackages,
   getChangelogEntry,
   getOptionalInput,
   getVersionsByDirectory,
-  GITLAB_MAX_TAGS,
   sortTheThings,
 } from './utils.js'
 
@@ -28,20 +26,18 @@ const limit = pLimit(2 * 3)
 
 export const createRelease = async (
   api: Gitlab,
-  { pkg, tagName }: { pkg: Package; tagName: string },
+  { pkg, tagName }: { pkg: Package; tagName: string }
 ) => {
   try {
     const changelogFileName = path.join(pkg.dir, 'CHANGELOG.md')
-
     const changelog = await fs.readFile(changelogFileName, 'utf8')
-
     const changelogEntry = getChangelogEntry(changelog, pkg.packageJson.version)
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+
     if (!changelogEntry) {
       // we can find a changelog but not the entry for this version
       // if this is true, something has probably gone wrong
       throw new Error(
-        `Could not find changelog entry for ${pkg.packageJson.name}@${pkg.packageJson.version}`,
+        `Could not find changelog entry for ${pkg.packageJson.name}@${pkg.packageJson.version}`
       )
     }
 
@@ -75,7 +71,6 @@ export type PublishResult =
   | { published: false }
   | { published: true; publishedPackages: PublishedPackage[] }
 
-// eslint-disable-next-line sonarjs/cognitive-complexity
 export async function runPublish({
   script,
   gitlabToken,
@@ -88,16 +83,16 @@ export async function runPublish({
   const changesetPublishOutput = await execWithOutput(
     publishCommand,
     publishArgs,
-    { cwd },
+    { cwd }
   )
 
   const { packages, tool } = await getPackages(cwd)
 
   const pushAllTags =
-    packages.length <= GITLAB_MAX_TAGS ||
-    (await api.FeatureFlags.show(
+    packages.length <= GITLAB_MAX_TAGS
+    || (await api.FeatureFlags.show(
       context.projectId,
-      'git_push_create_all_pipelines',
+      'git_push_create_all_pipelines'
     )
       .then(({ active }) => active)
       .catch(() => false))
@@ -108,11 +103,11 @@ export async function runPublish({
 
   const releasedPackages: Package[] = []
 
-  if (tool === 'root') {
+  if (tool.type === 'root') {
     if (packages.length !== 1) {
       throw new Error(
-        `No package found.` +
-          'This is probably a bug in the action, please open an issue',
+        `No package found.`
+          + 'This is probably a bug in the action, please open an issue'
       )
     }
     const pkg = packages[0]
@@ -131,9 +126,8 @@ export async function runPublish({
       }
     }
   } else {
-    // eslint-disable-next-line regexp/no-misleading-capturing-group, regexp/no-super-linear-backtracking, sonarjs/slow-regex
     const newTagRegex = /New tag:\s+(@[^/]+\/[^@]+|[^/]+)@(\S+)/
-    const packagesByName = new Map(packages.map(x => [x.packageJson.name, x]))
+    const packagesByName = new Map(packages.map((x) => [x.packageJson.name, x]))
 
     for (const line of changesetPublishOutput.stdout.split('\n')) {
       const match = newTagRegex.exec(line)
@@ -144,31 +138,29 @@ export async function runPublish({
       const pkg = packagesByName.get(pkgName)
       if (pkg === undefined) {
         throw new Error(
-          `Package "${pkgName}" not found.` +
-            'This is probably a bug in the action, please open an issue',
+          `Package "${pkgName}" not found.`
+            + 'This is probably a bug in the action, please open an issue'
         )
       }
       releasedPackages.push(pkg)
     }
     if (!pushAllTags) {
       await Promise.all(
-        releasedPackages.map(pkg =>
-          gitUtils.pushTag(
-            `${pkg.packageJson.name}@${pkg.packageJson.version}`,
-          ),
-        ),
+        releasedPackages.map((pkg) =>
+          gitUtils.pushTag(`${pkg.packageJson.name}@${pkg.packageJson.version}`)
+        )
       )
     }
     if (createGitlabReleases) {
       await Promise.all(
-        releasedPackages.map(pkg =>
+        releasedPackages.map((pkg) =>
           limit(() =>
             createRelease(api, {
               pkg,
               tagName: `${pkg.packageJson.name}@${pkg.packageJson.version}`,
-            }),
-          ),
-        ),
+            })
+          )
+        )
       )
     }
   }
@@ -176,7 +168,7 @@ export async function runPublish({
   if (releasedPackages.length > 0) {
     return {
       published: true,
-      publishedPackages: releasedPackages.map(pkg => ({
+      publishedPackages: releasedPackages.map((pkg) => ({
         name: pkg.packageJson.name,
         version: pkg.packageJson.version,
       })),
@@ -194,7 +186,7 @@ const requireChangesetsCliPkgJson = (cwd: string) => {
   } catch (err: unknown) {
     if ((err as { code: string } | undefined)?.code === 'MODULE_NOT_FOUND') {
       throw new Error(
-        `Have you forgotten to install \`@changesets/cli\` in "${cwd}"?`,
+        `Have you forgotten to install \`@changesets/cli\` in "${cwd}"?`
       )
     }
     throw err
@@ -234,7 +226,7 @@ export async function runVersion({
 
   const labels = getOptionalInput('labels')
     ?.split(',')
-    .map(x => x.trim())
+    .map((x) => x.trim())
 
   const versionsByDirectory = await getVersionsByDirectory(cwd)
 
@@ -271,36 +263,34 @@ ${
     : ''
 }
 # Releases
-` +
-    (
+`
+    + (
       await Promise.all(
-        changedPackages.map(async pkg => {
+        changedPackages.map(async (pkg) => {
           const changelogContents = await fs.readFile(
             path.join(pkg.dir, 'CHANGELOG.md'),
-            'utf8',
+            'utf8'
           )
 
           const entry = getChangelogEntry(
             changelogContents,
-            pkg.packageJson.version,
+            pkg.packageJson.version
           )
           return {
             highestLevel: entry.highestLevel,
             private: !!pkg.packageJson.private,
             content:
-              `## ${pkg.packageJson.name}@${pkg.packageJson.version}\n\n` +
-              entry.content,
+              `## ${pkg.packageJson.name}@${pkg.packageJson.version}\n\n`
+              + entry.content,
           }
-        }),
+        })
       )
     )
-      // eslint-disable-next-line unicorn/no-await-expression-member
       .filter(Boolean)
       .sort(sortTheThings)
-      .map(x => x.content)
+      .map((x) => x.content)
       .join('\n '))()
 
-  // eslint-disable-next-line sonarjs/no-nested-template-literals
   const finalMrTitle = `${mrTitle}${preState ? ` (${preState.tag})` : ''}`
 
   // project with `commit: true` setting could have already committed files
@@ -324,7 +314,7 @@ ${
   console.log(JSON.stringify(searchResult, null, 2))
   if (searchResult.length === 0) {
     console.log(
-      `creating merge request from ${versionBranch} to ${mrTargetBranch}.`,
+      `creating merge request from ${versionBranch} to ${mrTargetBranch}.`
     )
     await api.MergeRequests.create(
       context.projectId,
@@ -335,7 +325,7 @@ ${
         description: await mrBodyPromise,
         removeSourceBranch,
         labels,
-      },
+      }
     )
   } else {
     console.log(`updating found merge request !${searchResult[0].iid}`)

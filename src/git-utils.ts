@@ -1,5 +1,4 @@
 import { exec } from '@actions/exec'
-
 import { env } from './env.js'
 import { execWithOutput, identify } from './utils.js'
 
@@ -18,11 +17,11 @@ export const pullBranch = async (branch: string) => {
 
 export const push = async (
   branch: string,
-  { force }: { force?: boolean } = {},
+  { force }: { force?: boolean } = {}
 ) => {
   await exec(
     'git',
-    ['push', 'origin', `HEAD:${branch}`, force && '--force'].filter(identify),
+    ['push', 'origin', `HEAD:${branch}`, force && '--force'].filter(identify)
   )
 }
 
@@ -39,9 +38,8 @@ export const switchToMaybeExistingBranch = async (branch: string) => {
     ignoreReturnCode: true,
   })
   const isCreatingBranch =
-    !stderr.includes(`Switched to branch '${branch}'`) &&
-    // it could be a detached HEAD
-    !stderr.includes(`Switched to a new branch '${branch}'`)
+    !stderr.includes(`Switched to branch '${branch}'`) // it could be a detached HEAD
+    && !stderr.includes(`Switched to a new branch '${branch}'`)
   if (isCreatingBranch) {
     await exec('git', ['checkout', '-b', branch])
   }
@@ -49,7 +47,7 @@ export const switchToMaybeExistingBranch = async (branch: string) => {
 
 export const reset = async (
   pathSpec: string,
-  mode: 'hard' | 'mixed' | 'soft' = 'hard',
+  mode: 'hard' | 'mixed' | 'soft' = 'hard'
 ) => {
   await exec('git', ['reset', `--${mode}`, pathSpec])
 }

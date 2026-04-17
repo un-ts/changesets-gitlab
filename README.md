@@ -29,6 +29,9 @@ GitLab CI cli for [changesets](https://github.com/atlassian/changesets) like its
 - `INPUT_PUBLISHED` - Command executed after published
 - `INPUT_ONLY_CHANGESETS` - Command executed on only changesets detected
 - `INPUT_REMOVE_SOURCE_BRANCH` - Enables the merge request "Delete source branch" checkbox. Default false.
+- `INPUT_MERGE_WHEN_PIPELINE_SUCCEEDS` - Sets auto-merge on the created merge request (merge when all checks pass). If not set, no changes are made.
+- `INPUT_SQUASH` - Enables or disables squash commits for the merge request. If not set, no changes are made.
+- `INPUT_SQUASH_COMMIT_MESSAGE` - The optional squash commit message used when squash is enabled.
 - `INPUT_TARGET_BRANCH` -> The merge request target branch. Defaults to current branch
 - `INPUT_CREATE_GITLAB_RELEASES` - A boolean value to indicate whether to create Gitlab releases after publish or not. Default true.
 - `INPUT_LABELS` - A comma separated string of labels to be added to the version package Gitlab Merge request

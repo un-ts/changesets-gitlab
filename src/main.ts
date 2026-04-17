@@ -13,6 +13,7 @@ import type { MainCommandOptions } from './types.js'
 import {
   execSync,
   FALSY_VALUES,
+  getOptionalBooleanInput,
   getOptionalInput,
   getUsername,
   TRUTHY_VALUES,
@@ -108,7 +109,12 @@ export const main = async ({
         mrTitle: getOptionalInput('title'),
         mrTargetBranch: getOptionalInput('target_branch'),
         commitMessage: getOptionalInput('commit'),
-        removeSourceBranch: getInput('remove_source_branch') === 'true',
+        removeSourceBranch: getOptionalBooleanInput('remove_source_branch'),
+        mergeWhenPipelineSucceeds: getOptionalBooleanInput(
+          'merge_when_pipeline_succeeds',
+        ),
+        squash: getOptionalBooleanInput('squash'),
+        squashCommitMessage: getOptionalInput('squash_commit_message'),
         hasPublishScript,
       })
       if (onlyChangesets) {

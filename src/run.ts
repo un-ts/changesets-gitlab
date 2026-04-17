@@ -2,7 +2,12 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 
 import { exec } from '@actions/exec'
-import type { Gitlab } from '@gitbeaker/core'
+import type {
+  Gitlab,
+  MergeRequestSchema,
+  EditMergeRequestOptions,
+  AcceptMergeRequestOptions,
+} from '@gitbeaker/core'
 import type { Package } from '@manypkg/get-packages'
 import { getPackages } from '@manypkg/get-packages'
 import pLimit from 'p-limit'
@@ -207,6 +212,9 @@ export interface VersionOptions {
   cwd?: string
   mrTitle?: string
   removeSourceBranch?: boolean
+  mergeWhenPipelineSucceeds?: boolean
+  squash?: boolean
+  squashCommitMessage?: string
   mrTargetBranch?: string
   commitMessage?: string
   hasPublishScript?: boolean
@@ -220,6 +228,9 @@ export async function runVersion({
   mrTargetBranch = context.ref,
   commitMessage = 'Version Packages',
   removeSourceBranch = false,
+  mergeWhenPipelineSucceeds,
+  squash,
+  squashCommitMessage,
   hasPublishScript = false,
 }: VersionOptions) {
   const currentBranch = context.ref
@@ -322,28 +333,59 @@ ${
     perPage: 1,
   })
   console.log(JSON.stringify(searchResult, null, 2))
+
+  let mergeRequest: MergeRequestSchema
+  const mergeRequestOptions: EditMergeRequestOptions = {
+    description: await mrBodyPromise,
+    removeSourceBranch,
+    labels,
+    squash,
+  }
   if (searchResult.length === 0) {
     console.log(
       `creating merge request from ${versionBranch} to ${mrTargetBranch}.`,
     )
-    await api.MergeRequests.create(
+    mergeRequest = await api.MergeRequests.create(
       context.projectId,
       versionBranch,
       mrTargetBranch,
       finalMrTitle,
-      {
-        description: await mrBodyPromise,
-        removeSourceBranch,
-        labels,
-      },
+      mergeRequestOptions,
     )
   } else {
     console.log(`updating found merge request !${searchResult[0].iid}`)
-    await api.MergeRequests.edit(context.projectId, searchResult[0].iid, {
-      title: finalMrTitle,
-      description: await mrBodyPromise,
-      removeSourceBranch,
-      labels,
-    })
+    mergeRequestOptions.title = finalMrTitle
+    mergeRequest = await api.MergeRequests.edit(
+      context.projectId,
+      searchResult[0].iid,
+      mergeRequestOptions,
+    )
+  }
+
+  const acceptRequest: AcceptMergeRequestOptions = {}
+  if (
+    mergeWhenPipelineSucceeds !== undefined &&
+    mergeRequest.merge_when_pipeline_succeeds !== mergeWhenPipelineSucceeds
+  ) {
+    acceptRequest.mergeWhenPipelineSucceeds = mergeWhenPipelineSucceeds
+  }
+  if (
+    squash === true &&
+    squashCommitMessage !== undefined &&
+    mergeRequest.squash_commit_message !== squashCommitMessage
+  ) {
+    acceptRequest.squashCommitMessage = squashCommitMessage
+  }
+
+  if (Object.keys(acceptRequest).length > 0) {
+    console.log(
+      `updating merge request !${mergeRequest.iid} with options:`,
+      acceptRequest,
+    )
+    await api.MergeRequests.accept(
+      context.projectId,
+      mergeRequest.iid,
+      acceptRequest,
+    )
   }
 }

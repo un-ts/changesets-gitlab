@@ -159,7 +159,21 @@ export const execSync = (command: string) =>
   // eslint-disable-next-line sonarjs/os-command
   execSync_(command, { stdio: 'inherit' })
 
+export const FALSY_VALUES = new Set(['false', '0'])
+
+export const TRUTHY_VALUES = new Set(['true', '1'])
+
 export const getOptionalInput = (name: string) => getInput(name) || undefined
+export const getOptionalBooleanInput = (name: string): boolean | undefined => {
+  const input = getInput(name)
+  if (TRUTHY_VALUES.has(input)) {
+    return true
+  }
+  if (FALSY_VALUES.has(input)) {
+    return false
+  }
+  return undefined
+}
 
 // eslint-disable-next-line sonarjs/function-return-type
 export const getUsername = (api: Gitlab) => {
@@ -171,10 +185,6 @@ export const getUsername = (api: Gitlab) => {
 
 export const cjsRequire =
   typeof require === 'undefined' ? createRequire(import.meta.url) : require
-
-export const FALSY_VALUES = new Set(['false', '0'])
-
-export const TRUTHY_VALUES = new Set(['true', '1'])
 
 export const GITLAB_MAX_TAGS = 4
 

@@ -1,5 +1,12 @@
 # changesets-gitlab
 
+## 0.13.5
+
+### Patch Changes
+
+- [#241](https://github.com/un-ts/changesets-gitlab/pull/241) [`8d9cd84`](https://github.com/un-ts/changesets-gitlab/commit/8d9cd84abb1d591b11da834a6d787dcca6e3fa56) Thanks [@maxkarkowski](https://github.com/maxkarkowski)! - Upgrade `@actions/core` to resolve security advisories in its Undici
+  dependency.
+
 ## 0.13.4
 
 ### Patch Changes

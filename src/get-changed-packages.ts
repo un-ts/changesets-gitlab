@@ -21,6 +21,12 @@ function fetchFile(path: string) {
   return fs.readFile(path, 'utf8')
 }
 
+export const isFileInPackageDirectory = (
+  filePath: string,
+  packageDirectory: string,
+) =>
+  filePath === packageDirectory || filePath.startsWith(`${packageDirectory}/`)
+
 export const getChangedPackages = async ({
   changedFiles: changedFilesPromise,
 }: {
@@ -183,7 +189,9 @@ export const getChangedPackages = async ({
     changedPackages: (packages.tool === 'root'
       ? packages.packages
       : packages.packages.filter(pkg =>
-          changedFiles.some(changedFile => changedFile.includes(pkg.dir)),
+          changedFiles.some(changedFile =>
+            isFileInPackageDirectory(changedFile, pkg.dir),
+          ),
         )
     )
       .filter(

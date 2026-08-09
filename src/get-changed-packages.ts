@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises'
-import nodePath from 'node:path'
+import path from 'node:path'
 
 import assembleReleasePlan from '@changesets/assemble-release-plan'
 import { parse as parseConfig } from '@changesets/config'
@@ -23,19 +23,18 @@ function fetchFile(path: string) {
 
 export const getChangedPackages = async ({
   changedFiles: changedFilesPromise,
-  cwd = process.cwd(),
+  cwdPrefix = '',
 }: {
   changedFiles: Promise<string[]> | string[]
   api: Gitlab
-  cwd?: string
+  cwdPrefix?: string
   // eslint-disable-next-line sonarjs/cognitive-complexity
 }) => {
   let hasErrored = false
 
   async function fetchJsonFile<T = unknown>(path: string) {
     try {
-      const x = await fetchFile(path)
-      return JSON.parse(x) as T
+      return JSON.parse(await fetchFile(path)) as T
     } catch (err) {
       hasErrored = true
       console.error(err)
@@ -55,7 +54,7 @@ export const getChangedPackages = async ({
 
   async function getPackage(pkgPath: string) {
     const jsonContent = await fetchJsonFile<PackageJSON>(
-      nodePath.join(cwd, pkgPath, 'package.json'),
+      `${cwdPrefix}${pkgPath}/package.json`,
     )
     return {
       packageJson: jsonContent,
@@ -74,12 +73,12 @@ export const getChangedPackages = async ({
         workspaces?: string[]
       }
     }
-  >(nodePath.join(cwd, 'package.json'))
+  >(`${cwdPrefix}package.json`)
   const configPromise = fetchJsonFile<WrittenConfig>(
-    nodePath.join(cwd, '.changeset/config.json'),
+    `${cwdPrefix}.changeset/config.json`,
   )
 
-  const tree = await getAllFiles(cwd)
+  const tree = await getAllFiles(cwdPrefix)
 
   let preStatePromise: Promise<PreState> | undefined
   const changesetPromises: Array<Promise<NewChangeset>> = []
@@ -89,12 +88,12 @@ export const getChangedPackages = async ({
 
   for (const item of tree) {
     if (item.endsWith('/package.json')) {
-      const dirPath = nodePath.dirname(item)
+      const dirPath = path.dirname(item)
       potentialWorkspaceDirectories.push(dirPath)
     } else if (item === 'pnpm-workspace.yaml') {
       isPnpm = true
     } else if (item === '.changeset/pre.json') {
-      preStatePromise = fetchJsonFile(nodePath.join(cwd, '.changeset/pre.json'))
+      preStatePromise = fetchJsonFile(`${cwdPrefix}${item}`)
     } else if (
       item !== '.changeset/README.md' &&
       item.startsWith('.changeset') &&
@@ -107,7 +106,7 @@ export const getChangedPackages = async ({
       }
       const id = res[1]
       changesetPromises.push(
-        fetchTextFile(nodePath.join(cwd, item)).then(text => ({
+        fetchTextFile(`${cwdPrefix}${item}`).then(text => ({
           ...parseChangeset(text),
           id,
         })),
@@ -120,9 +119,7 @@ export const getChangedPackages = async ({
     tool = {
       tool: 'pnpm',
       globs: (
-        parse(
-          await fetchTextFile(nodePath.join(cwd, 'pnpm-workspace.yaml')),
-        ) as {
+        parse(await fetchTextFile(`${cwdPrefix}pnpm-workspace.yaml`)) as {
           packages: string[]
         }
       ).packages,

@@ -225,15 +225,15 @@ async function getNoteInfo(
 
 const hasChangesetBeenAdded = async (
   changedFilesPromise: Promise<CommitDiffSchema[] | MergeRequestDiffSchema[]>,
-  changesetDir: string,
+  changesetDirPrefix: string,
 ) => {
   const changedFiles = await changedFilesPromise
   return changedFiles.some(file => {
     return (
       file.new_file &&
-      file.new_path.startsWith(changesetDir + '/') &&
+      file.new_path.startsWith(changesetDirPrefix) &&
       file.new_path.endsWith('.md') &&
-      file.new_path !== changesetDir + '/README.md'
+      file.new_path !== changesetDirPrefix + 'README.md'
     )
   })
 }
@@ -256,9 +256,11 @@ export const comment = async () => {
     return
   }
 
-  const { relative: relativeCwd, absolute: absoluteCwd } = getCwdInput()
+  const { relative: relativeCwd } = getCwdInput()
 
-  const changesetDir = relativeCwd ? `${relativeCwd}/.changeset` : '.changeset'
+  const cwdPrefix = relativeCwd ? `${relativeCwd}/` : ''
+
+  const changesetDirPrefix = `${cwdPrefix}.changeset/`
 
   const api = createApi()
 
@@ -284,25 +286,22 @@ export const comment = async () => {
       return changes
     })
 
-    const subdirPrefix = relativeCwd ? `${relativeCwd}/` : ''
     const packageChangedFiles = changedFilesPromise.then(changedFiles =>
       changedFiles
-        .filter(
-          ({ new_path }) => !subdirPrefix || new_path.startsWith(subdirPrefix),
-        )
+        .filter(({ new_path }) => !cwdPrefix || new_path.startsWith(cwdPrefix))
         .map(({ new_path }) =>
-          subdirPrefix ? new_path.slice(subdirPrefix.length) : new_path,
+          cwdPrefix ? new_path.slice(cwdPrefix.length) : new_path,
         ),
     )
 
     const [noteInfo, hasChangeset, { changedPackages, releasePlan }] =
       await Promise.all([
         getNoteInfo(api, mrIid, commentType),
-        hasChangesetBeenAdded(changedFilesPromise, changesetDir),
+        hasChangesetBeenAdded(changedFilesPromise, changesetDirPrefix),
         getChangedPackages({
           changedFiles: packageChangedFiles,
           api,
-          cwd: absoluteCwd,
+          cwdPrefix,
         }).catch((err: unknown) => {
           if (err instanceof ValidationError) {
             errFromFetchingChangedFiles = `<details><summary>💥 An error occurred when fetching the changed packages and changesets in this MR</summary>\n\n\`\`\`\n${err.message}\n\`\`\`\n\n</details>\n`
@@ -316,7 +315,7 @@ export const comment = async () => {
         }),
       ] as const)
 
-    const newChangesetFileName = `${changesetDir}/${humanId({
+    const newChangesetFileName = `${changesetDirPrefix}${humanId({
       separator: '-',
       capitalize: false,
     })}.md`

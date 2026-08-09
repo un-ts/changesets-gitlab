@@ -73,11 +73,7 @@ export function getChangelogEntry(changelog: string, version: string) {
         }
         continue
       }
-      if (
-        endIndex === undefined &&
-        headingStartInfo !== undefined &&
-        headingStartInfo.depth === node.depth
-      ) {
+      if (endIndex === undefined && headingStartInfo?.depth === node.depth) {
         endIndex = i
         break
       }
@@ -144,7 +140,7 @@ export const identify = <T>(
 export async function getAllFiles(dir: string, base = dir): Promise<string[]> {
   const direntList = await fs.readdir(dir, { withFileTypes: true })
   const files = await Promise.all(
-    // eslint-disable-next-line sonarjs/function-return-type
+    // eslint-disable-next-line sonarjs/function-return-type, @typescript-eslint/await-thenable
     direntList.map(dirent => {
       const res = path.resolve(dir, dirent.name)
       return dirent.isDirectory()

@@ -11,7 +11,7 @@ export default async function readChangesetState(
   cwd: string = process.cwd(),
 ): Promise<ChangesetState> {
   const preState = await readPreState(cwd)
-  const isInPreMode = preState !== undefined && preState.mode === 'pre'
+  const isInPreMode = preState?.mode === 'pre'
 
   let changesets = await readChangesets(cwd)
 

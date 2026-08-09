@@ -10,26 +10,24 @@ import type {
   NewChangeset,
   WrittenConfig,
 } from '@changesets/types'
-import type { Gitlab } from '@gitbeaker/core'
 import type { Packages, Tool } from '@manypkg/get-packages'
 import micromatch from 'micromatch'
 import { parse } from 'yaml'
 
 import { getAllFiles } from './utils.js'
 
-function fetchFile(path: string) {
-  return fs.readFile(path, 'utf8')
-}
-
 export const getChangedPackages = async ({
   changedFiles: changedFilesPromise,
   cwdPrefix = '',
 }: {
   changedFiles: Promise<string[]> | string[]
-  api: Gitlab
   cwdPrefix?: string
   // eslint-disable-next-line sonarjs/cognitive-complexity
 }) => {
+  function fetchFile(path: string) {
+    return fs.readFile(`${cwdPrefix}${path}`, 'utf8')
+  }
+
   let hasErrored = false
 
   async function fetchJsonFile<T = unknown>(path: string) {
@@ -54,7 +52,7 @@ export const getChangedPackages = async ({
 
   async function getPackage(pkgPath: string) {
     const jsonContent = await fetchJsonFile<PackageJSON>(
-      `${cwdPrefix}${pkgPath}/package.json`,
+      `${pkgPath}/package.json`,
     )
     return {
       packageJson: jsonContent,
@@ -73,10 +71,8 @@ export const getChangedPackages = async ({
         workspaces?: string[]
       }
     }
-  >(`${cwdPrefix}package.json`)
-  const configPromise = fetchJsonFile<WrittenConfig>(
-    `${cwdPrefix}.changeset/config.json`,
-  )
+  >('package.json')
+  const configPromise = fetchJsonFile<WrittenConfig>('.changeset/config.json')
 
   const tree = await getAllFiles(cwdPrefix)
 
@@ -93,7 +89,7 @@ export const getChangedPackages = async ({
     } else if (item === 'pnpm-workspace.yaml') {
       isPnpm = true
     } else if (item === '.changeset/pre.json') {
-      preStatePromise = fetchJsonFile(`${cwdPrefix}${item}`)
+      preStatePromise = fetchJsonFile(item)
     } else if (
       item !== '.changeset/README.md' &&
       item.startsWith('.changeset') &&
@@ -106,7 +102,7 @@ export const getChangedPackages = async ({
       }
       const id = res[1]
       changesetPromises.push(
-        fetchTextFile(`${cwdPrefix}${item}`).then(text => ({
+        fetchTextFile(item).then(text => ({
           ...parseChangeset(text),
           id,
         })),
@@ -119,7 +115,7 @@ export const getChangedPackages = async ({
     tool = {
       tool: 'pnpm',
       globs: (
-        parse(await fetchTextFile(`${cwdPrefix}pnpm-workspace.yaml`)) as {
+        parse(await fetchTextFile('pnpm-workspace.yaml')) as {
           packages: string[]
         }
       ).packages,

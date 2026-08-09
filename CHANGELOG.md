@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.13.6
+
+### Patch Changes
+
+- [#243](https://github.com/un-ts/changesets-gitlab/pull/243) [`83b4ed8`](https://github.com/un-ts/changesets-gitlab/commit/83b4ed802964ba86e7188b833e22878047f69a22) Thanks [@erictheswift](https://github.com/erictheswift)! - Fix changed package detection when one workspace directory prefixes another.
+
 ## 0.13.5
 
 ### Patch Changes

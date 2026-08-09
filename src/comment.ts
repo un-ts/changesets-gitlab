@@ -1,5 +1,3 @@
-import path from 'node:path'
-
 import { ValidationError } from '@changesets/errors'
 import type {
   ComprehensiveRelease,
@@ -227,15 +225,15 @@ async function getNoteInfo(
 
 const hasChangesetBeenAdded = async (
   changedFilesPromise: Promise<CommitDiffSchema[] | MergeRequestDiffSchema[]>,
-  changesetPrefix: string,
+  changesetDir: string,
 ) => {
   const changedFiles = await changedFilesPromise
   return changedFiles.some(file => {
     return (
       file.new_file &&
-      file.new_path.startsWith(changesetPrefix + '/') &&
+      file.new_path.startsWith(changesetDir + '/') &&
       file.new_path.endsWith('.md') &&
-      file.new_path !== changesetPrefix + '/README.md'
+      file.new_path !== changesetDir + '/README.md'
     )
   })
 }
@@ -258,9 +256,9 @@ export const comment = async () => {
     return
   }
 
-  const cwdRel = getCwdInput()
-  const changesetPrefix = cwdRel ? `${cwdRel}/.changeset` : '.changeset'
-  const absoluteCwd = path.resolve(process.cwd(), cwdRel || '.')
+  const { relative: relativeCwd, absolute: absoluteCwd } = getCwdInput()
+
+  const changesetDir = relativeCwd ? `${relativeCwd}/.changeset` : '.changeset'
 
   const api = createApi()
 
@@ -286,7 +284,7 @@ export const comment = async () => {
       return changes
     })
 
-    const subdirPrefix = cwdRel ? `${cwdRel}/` : ''
+    const subdirPrefix = relativeCwd ? `${relativeCwd}/` : ''
     const packageChangedFiles = changedFilesPromise.then(changedFiles =>
       changedFiles
         .filter(
@@ -300,7 +298,7 @@ export const comment = async () => {
     const [noteInfo, hasChangeset, { changedPackages, releasePlan }] =
       await Promise.all([
         getNoteInfo(api, mrIid, commentType),
-        hasChangesetBeenAdded(changedFilesPromise, changesetPrefix),
+        hasChangesetBeenAdded(changedFilesPromise, changesetDir),
         getChangedPackages({
           changedFiles: packageChangedFiles,
           api,
@@ -318,7 +316,7 @@ export const comment = async () => {
         }),
       ] as const)
 
-    const newChangesetFileName = `${changesetPrefix}/${humanId({
+    const newChangesetFileName = `${changesetDir}/${humanId({
       separator: '-',
       capitalize: false,
     })}.md`

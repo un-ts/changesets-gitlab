@@ -1,5 +1,4 @@
 import fs from 'node:fs/promises'
-import path from 'node:path'
 import { URL } from 'node:url'
 
 import { exportVariable, getInput, setOutput } from '@actions/core'
@@ -54,7 +53,7 @@ export const main = async ({
     )
   }
 
-  const cwd = path.resolve(process.cwd(), getCwdInput() || '.')
+  const { absolute: cwd } = getCwdInput()
 
   const { changesets } = await readChangesetState(cwd)
 

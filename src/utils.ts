@@ -157,16 +157,18 @@ export const execSync = (command: string) =>
 
 export const getOptionalInput = (name: string) => getInput(name) || undefined
 
-export const getCwdInput = (): string => {
+export const getCwdInput = (): { relative: string; absolute: string } => {
+  const CWD = process.cwd()
   const input = getOptionalInput('cwd')
   if (!input) {
-    return ''
+    return { relative: '', absolute: CWD }
   }
-  const normalized = input.replace(/^\.\//, '').replace(/\/$/, '')
-  if (path.isAbsolute(normalized) || normalized.split('/').includes('..')) {
+  const absolute = path.resolve(CWD, input)
+  const relative = path.relative(CWD, absolute)
+  if (relative.startsWith('..')) {
     throw new Error(`Invalid cwd input: "${input}"`)
   }
-  return normalized === '.' ? '' : normalized
+  return { relative, absolute }
 }
 
 // eslint-disable-next-line sonarjs/function-return-type

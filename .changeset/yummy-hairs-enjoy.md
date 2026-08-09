@@ -1,5 +1,5 @@
 ---
-"changesets-gitlab": minor
+"changesets-gitlab": patch
 ---
 
-Add support for Trusted Publishers
+fix: support trusted publishing with optional NPM_TOKEN env

@@ -27,9 +27,6 @@ export type Env = GitLabCIPredefinedVariables &
 
     HOME: string
     NPM_TOKEN?: string
-    // Presence of NPM_ID_TOKEN indicates usage of npm Trusted Publishers;
-    // when set we don't require nor create an .npmrc with NPM_TOKEN.
-    NPM_ID_TOKEN?: string
   }
 
 type MergeRequestVariables =

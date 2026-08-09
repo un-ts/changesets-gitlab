@@ -138,6 +138,7 @@ export const identify = <T>(
 > => !!_
 
 export async function getAllFiles(dir: string, base = dir): Promise<string[]> {
+  dir ||= '.'
   const direntList = await fs.readdir(dir, { withFileTypes: true })
   const files = await Promise.all(
     // eslint-disable-next-line sonarjs/function-return-type, @typescript-eslint/await-thenable
@@ -156,6 +157,24 @@ export const execSync = (command: string) =>
   execSync_(command, { stdio: 'inherit' })
 
 export const getOptionalInput = (name: string) => getInput(name) || undefined
+
+export const getCwdInput = (): { relative: string; absolute: string } => {
+  const CWD = process.cwd()
+  const input = getOptionalInput('cwd')
+  if (!input) {
+    return { relative: '', absolute: CWD }
+  }
+  const absolute = path.resolve(CWD, input)
+  const relative = path.relative(CWD, absolute)
+  if (
+    relative === '..' ||
+    relative.startsWith(`..${path.sep}`) ||
+    path.isAbsolute(relative)
+  ) {
+    throw new Error(`Invalid cwd input: "${input}"`)
+  }
+  return { relative, absolute }
+}
 
 // eslint-disable-next-line sonarjs/function-return-type
 export const getUsername = (api: Gitlab) => {

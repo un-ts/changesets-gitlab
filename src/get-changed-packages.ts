@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises'
-import nodePath from 'node:path'
+import path from 'node:path'
 
 import assembleReleasePlan from '@changesets/assemble-release-plan'
 import { parse as parseConfig } from '@changesets/config'
@@ -10,30 +10,29 @@ import type {
   NewChangeset,
   WrittenConfig,
 } from '@changesets/types'
-import type { Gitlab } from '@gitbeaker/core'
 import type { Packages, Tool } from '@manypkg/get-packages'
 import micromatch from 'micromatch'
 import { parse } from 'yaml'
 
 import { getAllFiles } from './utils.js'
 
-function fetchFile(path: string) {
-  return fs.readFile(path, 'utf8')
-}
-
 export const getChangedPackages = async ({
   changedFiles: changedFilesPromise,
+  cwdPrefix = '',
 }: {
   changedFiles: Promise<string[]> | string[]
-  api: Gitlab
+  cwdPrefix?: string
   // eslint-disable-next-line sonarjs/cognitive-complexity
 }) => {
+  function fetchFile(path: string) {
+    return fs.readFile(`${cwdPrefix}${path}`, 'utf8')
+  }
+
   let hasErrored = false
 
   async function fetchJsonFile<T = unknown>(path: string) {
     try {
-      const x = await fetchFile(path)
-      return JSON.parse(x) as T
+      return JSON.parse(await fetchFile(path)) as T
     } catch (err) {
       hasErrored = true
       console.error(err)
@@ -53,7 +52,7 @@ export const getChangedPackages = async ({
 
   async function getPackage(pkgPath: string) {
     const jsonContent = await fetchJsonFile<PackageJSON>(
-      pkgPath + '/package.json',
+      `${pkgPath}/package.json`,
     )
     return {
       packageJson: jsonContent,
@@ -75,7 +74,7 @@ export const getChangedPackages = async ({
   >('package.json')
   const configPromise = fetchJsonFile<WrittenConfig>('.changeset/config.json')
 
-  const tree = await getAllFiles(process.cwd())
+  const tree = await getAllFiles(cwdPrefix)
 
   let preStatePromise: Promise<PreState> | undefined
   const changesetPromises: Array<Promise<NewChangeset>> = []
@@ -85,12 +84,12 @@ export const getChangedPackages = async ({
 
   for (const item of tree) {
     if (item.endsWith('/package.json')) {
-      const dirPath = nodePath.dirname(item)
+      const dirPath = path.dirname(item)
       potentialWorkspaceDirectories.push(dirPath)
     } else if (item === 'pnpm-workspace.yaml') {
       isPnpm = true
     } else if (item === '.changeset/pre.json') {
-      preStatePromise = fetchJsonFile('.changeset/pre.json')
+      preStatePromise = fetchJsonFile(item)
     } else if (
       item !== '.changeset/README.md' &&
       item.startsWith('.changeset') &&

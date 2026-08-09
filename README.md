@@ -32,6 +32,7 @@ GitLab CI cli for [changesets](https://github.com/atlassian/changesets) like its
 - `INPUT_TARGET_BRANCH` -> The merge request target branch. Defaults to current branch
 - `INPUT_CREATE_GITLAB_RELEASES` - A boolean value to indicate whether to create Gitlab releases after publish or not. Default true.
 - `INPUT_LABELS` - A comma separated string of labels to be added to the version package Gitlab Merge request
+- `INPUT_CWD` - A relative path from the repo root to the directory containing `package.json` and `.changeset/`. Use this when your npm/yarn workspace lives in a subdirectory of the git repo. Defaults to the repo root.
 
 ### Outputs
 

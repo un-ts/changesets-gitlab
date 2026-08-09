@@ -15,6 +15,7 @@ import {
   TRUTHY_VALUES,
   execSync,
   fileExists,
+  getCwdInput,
   getOptionalInput,
   getUsername,
 } from './utils.js'
@@ -52,7 +53,9 @@ export const main = async ({
     )
   }
 
-  const { changesets } = await readChangesetState()
+  const { absolute: cwd } = getCwdInput()
+
+  const { changesets } = await readChangesetState(cwd)
 
   const publishScript = getInput('publish')
   const hasChangesets = changesets.length > 0
@@ -111,6 +114,7 @@ export const main = async ({
         createGitlabReleases: !FALSY_VALUES.has(
           getInput('create_gitlab_releases'),
         ),
+        cwd,
       })
 
       if (result.published) {
@@ -133,6 +137,7 @@ export const main = async ({
         commitMessage: getOptionalInput('commit'),
         removeSourceBranch: getInput('remove_source_branch') === 'true',
         hasPublishScript,
+        cwd,
       })
       if (onlyChangesets) {
         execSync(onlyChangesets)

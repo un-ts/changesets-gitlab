@@ -56,7 +56,6 @@ describe('getChangedPackages', () => {
   test('does not match sibling packages with the same prefix', async () => {
     const result = await getChangedPackages({
       changedFiles: ['packages/ui-kit-storybook/src/index.ts'],
-      api: undefined as never,
     })
 
     expect(result.changedPackages).toEqual([])
@@ -65,7 +64,6 @@ describe('getChangedPackages', () => {
   test('matches files within the package directory', async () => {
     const result = await getChangedPackages({
       changedFiles: ['packages/ui-kit/src/index.ts'],
-      api: undefined as never,
     })
 
     expect(result.changedPackages).toEqual(['@example/ui-kit'])

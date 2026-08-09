@@ -1,7 +1,7 @@
-import fs from 'node:fs'
+import fs from 'node:fs/promises'
 import { URL } from 'node:url'
 
-import { getInput, setFailed, setOutput, exportVariable } from '@actions/core'
+import { exportVariable, getInput, setOutput } from '@actions/core'
 import { exec } from '@actions/exec'
 
 import { createApi } from './api.ts'
@@ -11,16 +11,18 @@ import readChangesetState from './read-changeset-state.js'
 import { runPublish, runVersion } from './run.js'
 import type { MainCommandOptions } from './types.js'
 import {
-  execSync,
   FALSY_VALUES,
+  TRUTHY_VALUES,
+  execSync,
+  fileExists,
   getOptionalInput,
   getUsername,
-  TRUTHY_VALUES,
 } from './utils.js'
 
 export const main = async ({
   published,
   onlyChangesets,
+  // eslint-disable-next-line sonarjs/cognitive-complexity
 }: MainCommandOptions = {}) => {
   const { GITLAB_TOKEN, NPM_TOKEN } = env
 
@@ -66,20 +68,41 @@ export const main = async ({
         'No changesets found, attempting to publish any unpublished packages to npm',
       )
 
-      const npmrcPath = `${env.HOME}/.npmrc`
-      if (fs.existsSync(npmrcPath)) {
-        console.log('Found existing .npmrc file')
-      } else if (NPM_TOKEN) {
-        console.log('No .npmrc file found, creating one')
-        await fs.promises.writeFile(
-          npmrcPath,
-          `//registry.npmjs.org/:_authToken=${NPM_TOKEN}`,
-        )
+      if (NPM_TOKEN) {
+        const userNpmrcPath = `${env.HOME}/.npmrc`
+        if (await fileExists(userNpmrcPath)) {
+          console.info('Found existing user .npmrc file')
+          const userNpmrcContent = await fs.readFile(userNpmrcPath, 'utf8')
+          const authLine = userNpmrcContent.split('\n').find(line => {
+            // check based on https://github.com/npm/cli/blob/8f8f71e4dd5ee66b3b17888faad5a7bf6c657eed/test/lib/adduser.js#L103-L105
+            return /^\s*\/\/registry\.npmjs\.org\/:[_-]authToken=/i.test(line)
+          })
+          if (authLine) {
+            console.info(
+              'Found existing auth token for the npm registry in the user .npmrc file',
+            )
+          } else {
+            console.info(
+              "Didn't find existing auth token for the npm registry in the user .npmrc file, creating one",
+            )
+            await fs.appendFile(
+              userNpmrcPath,
+              `\n//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n`,
+            )
+          }
+        } else {
+          console.info(
+            'No user .npmrc file found, creating one with NPM_TOKEN used as auth token',
+          )
+          await fs.writeFile(
+            userNpmrcPath,
+            `//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n`,
+          )
+        }
       } else {
-        setFailed(
-          'No `.npmrc` found nor `NPM_TOKEN` provided, unable to publish packages',
+        console.info(
+          'No NPM_TOKEN found - assuming trusted publishing or npm is already authenticated',
         )
-        return
       }
 
       const result = await runPublish({

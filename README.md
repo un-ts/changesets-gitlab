@@ -89,7 +89,12 @@ release:
 
 #### With Publishing
 
-Before you can setup this action with publishing, you'll need to have an [npm token](https://docs.npmjs.com/creating-and-viewing-authentication-tokens) that can publish the packages in the repo you're setting up the action for and doesn't have 2FA on publish enabled ([2FA on auth can be enabled](https://docs.npmjs.com/about-two-factor-authentication)). You'll also need to [add it as a custom environment variable on your GitLab repo](https://docs.gitlab.com/ee/ci/variables/#custom-cicd-variables) with the name `NPM_TOKEN`. Once you've done that, you can create a file at `.gitlab-ci.yml` with the following content.
+There are two ways to authenticate with npm when publishing:
+
+1. Trusted Publishers (recommended): Configure npm Trusted Publishers for your GitLab pipeline (see the npm docs: <https://docs.npmjs.com/trusted-publishers#supported-cicd-providers>). When the pipeline runs, npm will inject an `NPM_ID_TOKEN`, you do NOT need to set `NPM_TOKEN`, and no `.npmrc` file is required—the npm CLI exchanges the identity token automatically.
+2. Classic Automation Token: Create an [npm automation token](https://docs.npmjs.com/creating-and-viewing-authentication-tokens) (without 2FA on publish) and add it as a [custom environment variable in GitLab](https://docs.gitlab.com/ee/ci/variables/#custom-cicd-variables) named `NPM_TOKEN`.
+
+For any of the methods, create a file at `.gitlab-ci.yml` with the following content:
 
 ```yml
 stages:
@@ -114,7 +119,7 @@ release:
     INPUT_PUBLISH: yarn release
 ```
 
-By default the GitLab CI cli creates a `.npmrc` file with the following content:
+By default the GitLab CI cli creates a `.npmrc` file with the following content when `NPM_TOKEN` is present and no `.npmrc` exists (classic token mode):
 
 ```sh
 //registry.npmjs.org/:_authToken=${process.env.NPM_TOKEN}

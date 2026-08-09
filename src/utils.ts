@@ -1,5 +1,5 @@
 import { execSync as execSync_ } from 'node:child_process'
-import fs from 'node:fs'
+import fs from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 
@@ -142,7 +142,7 @@ export const identify = <T>(
 > => !!_
 
 export async function getAllFiles(dir: string, base = dir): Promise<string[]> {
-  const direntList = await fs.promises.readdir(dir, { withFileTypes: true })
+  const direntList = await fs.readdir(dir, { withFileTypes: true })
   const files = await Promise.all(
     // eslint-disable-next-line sonarjs/function-return-type
     direntList.map(dirent => {
@@ -166,6 +166,13 @@ export const getUsername = (api: Gitlab) => {
   return (
     env.GITLAB_CI_USER_NAME ??
     api.Users.showCurrentUser().then(currentUser => currentUser.username)
+  )
+}
+
+export function fileExists(filePath: string) {
+  return fs.access(filePath, fs.constants.F_OK).then(
+    () => true,
+    () => false,
   )
 }
 

@@ -138,6 +138,7 @@ export const identify = <T>(
 > => !!_
 
 export async function getAllFiles(dir: string, base = dir): Promise<string[]> {
+  dir ||= '.'
   const direntList = await fs.readdir(dir, { withFileTypes: true })
   const files = await Promise.all(
     // eslint-disable-next-line sonarjs/function-return-type, @typescript-eslint/await-thenable
@@ -165,7 +166,11 @@ export const getCwdInput = (): { relative: string; absolute: string } => {
   }
   const absolute = path.resolve(CWD, input)
   const relative = path.relative(CWD, absolute)
-  if (relative.startsWith('..')) {
+  if (
+    relative === '..' ||
+    relative.startsWith(`..${path.sep}`) ||
+    path.isAbsolute(relative)
+  ) {
     throw new Error(`Invalid cwd input: "${input}"`)
   }
   return { relative, absolute }

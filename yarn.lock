@@ -4472,12 +4472,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitest/coverage-istanbul@npm:3.1.2":
-  version: 3.1.2
-  resolution: "@vitest/coverage-istanbul@npm:3.1.2"
+"@vitest/coverage-istanbul@npm:^3.2.7":
+  version: 3.2.7
+  resolution: "@vitest/coverage-istanbul@npm:3.2.7"
   dependencies:
     "@istanbuljs/schema": "npm:^0.1.3"
-    debug: "npm:^4.4.0"
+    debug: "npm:^4.4.1"
     istanbul-lib-coverage: "npm:^3.2.2"
     istanbul-lib-instrument: "npm:^6.0.3"
     istanbul-lib-report: "npm:^3.0.1"
@@ -4487,8 +4487,8 @@ __metadata:
     test-exclude: "npm:^7.0.1"
     tinyrainbow: "npm:^2.0.0"
   peerDependencies:
-    vitest: 3.1.2
-  checksum: 10c0/0b01b9c76495b63d303e34ad113ecd32fc21fcc6f212f9b3dd0771f5f89d8c2726fe2d62c51e88e5a738fa7f7088645d84a7257adaad1e569420a13ee1d1c48a
+    vitest: 3.2.7
+  checksum: 10c0/4a322a9aca6f321efed553c24cff5e02cd2d786bae3d79eadf871cfc22e4d8818e166edc18c0e2826dbbabbbd4c35a89e703b6a0dae2cc6d8c2d40ebf444e06c
   languageName: node
   linkType: hard
 
@@ -5506,7 +5506,7 @@ __metadata:
     "@types/global-agent": "npm:^3.0.0"
     "@types/micromatch": "npm:^4.0.9"
     "@types/web": "npm:^0.0.228"
-    "@vitest/coverage-istanbul": "npm:3.1.2"
+    "@vitest/coverage-istanbul": "npm:^3.2.7"
     clean-pkg-json: "npm:^1.2.1"
     commander: "npm:^13.1.0"
     dotenv: "npm:^16.5.0"
@@ -5531,7 +5531,7 @@ __metadata:
     type-coverage: "npm:^2.29.7"
     typescript: "npm:^5.8.3"
     unified: "npm:^11.0.5"
-    vitest: "npm:^3.1.1"
+    vitest: "npm:^3.2.7"
     yaml: "npm:^2.7.1"
     yarn-berry-deduplicate: "npm:^6.1.1"
     yarn-deduplicate: "npm:^6.0.2"
@@ -13467,7 +13467,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vitest@npm:^3.1.1":
+"vitest@npm:^3.2.7":
   version: 3.2.7
   resolution: "vitest@npm:3.2.7"
   dependencies:

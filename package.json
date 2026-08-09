@@ -96,7 +96,7 @@
     "@types/global-agent": "^3.0.0",
     "@types/micromatch": "^4.0.9",
     "@types/web": "^0.0.228",
-    "@vitest/coverage-istanbul": "3.1.2",
+    "@vitest/coverage-istanbul": "^3.2.7",
     "clean-pkg-json": "^1.2.1",
     "eslint": "^9.24.0",
     "nano-staged": "^0.8.0",
@@ -108,7 +108,7 @@
     "tsx": "^4.19.3",
     "type-coverage": "^2.29.7",
     "typescript": "^5.8.3",
-    "vitest": "^3.1.1",
+    "vitest": "^3.2.7",
     "yarn-berry-deduplicate": "^6.1.1",
     "yarn-deduplicate": "^6.0.2"
   },

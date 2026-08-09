@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.14.0
+
+### Minor Changes
+
+- [#232](https://github.com/un-ts/changesets-gitlab/pull/232) [`bb1bd87`](https://github.com/un-ts/changesets-gitlab/commit/bb1bd87835045dcd7b272b52c9061e3a2fdb7575) Thanks [@bookchris](https://github.com/bookchris)! - feat: add an input to run at a subdirectory of the repo root
+
 ## 0.13.7
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.13.7
+
+### Patch Changes
+
+- [#245](https://github.com/un-ts/changesets-gitlab/pull/245) [`88e100b`](https://github.com/un-ts/changesets-gitlab/commit/88e100b9b49be87a16089e0e23ea4ef92e965cf6) Thanks [@JounQin](https://github.com/JounQin)! - fix: support trusted publishing with optional NPM_TOKEN env
+
 ## 0.13.6
 
 ### Patch Changes

@@ -6,7 +6,7 @@
   "author": "JounQin <admin@1stg.me> (https://www.1stG.me)",
   "funding": "https://opencollective.com/changesets-gitlab",
   "license": "MIT",
-  "packageManager": "yarn@4.9.1",
+  "packageManager": "yarn@4.18.0",
   "engines": {
     "node": ">=18.0.0"
   },

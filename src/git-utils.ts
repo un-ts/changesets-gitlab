@@ -27,11 +27,15 @@ export const push = async (
 }
 
 export const pushTags = async () => {
-  await exec('git', ['push', 'origin', '--tags'])
+  await exec('git', ['push', 'origin', '--tags'], {
+    ignoreReturnCode: true,
+  })
 }
 
 export const pushTag = async (tag: string) => {
-  await exec('git', ['push', 'origin', tag])
+  await exec('git', ['push', 'origin', tag], {
+    ignoreReturnCode: true,
+  })
 }
 
 export const switchToMaybeExistingBranch = async (branch: string) => {

@@ -23,7 +23,6 @@ import {
 export const main = async ({
   published,
   onlyChangesets,
-  // eslint-disable-next-line sonarjs/cognitive-complexity
 }: MainCommandOptions = {}) => {
   const { GITLAB_TOKEN, NPM_TOKEN } = env
 
@@ -67,69 +66,17 @@ export const main = async ({
       return
     }
     case !hasChangesets && hasPublishScript: {
-      console.log(
-        'No changesets found, attempting to publish any unpublished packages to npm',
-      )
-
-      if (NPM_TOKEN) {
-        const userNpmrcPath = `${env.HOME}/.npmrc`
-        if (await fileExists(userNpmrcPath)) {
-          console.info('Found existing user .npmrc file')
-          const userNpmrcContent = await fs.readFile(userNpmrcPath, 'utf8')
-          const authLine = userNpmrcContent.split('\n').find(line => {
-            // check based on https://github.com/npm/cli/blob/8f8f71e4dd5ee66b3b17888faad5a7bf6c657eed/test/lib/adduser.js#L103-L105
-            return /^\s*\/\/registry\.npmjs\.org\/:[_-]authToken=/i.test(line)
-          })
-          if (authLine) {
-            console.info(
-              'Found existing auth token for the npm registry in the user .npmrc file',
-            )
-          } else {
-            console.info(
-              "Didn't find existing auth token for the npm registry in the user .npmrc file, creating one",
-            )
-            await fs.appendFile(
-              userNpmrcPath,
-              `\n//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n`,
-            )
-          }
-        } else {
-          console.info(
-            'No user .npmrc file found, creating one with NPM_TOKEN used as auth token',
-          )
-          await fs.writeFile(
-            userNpmrcPath,
-            `//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n`,
-          )
-        }
-      } else {
-        console.info(
-          'No NPM_TOKEN found - assuming trusted publishing or npm is already authenticated',
-        )
-      }
-
-      const result = await runPublish({
-        script: publishScript,
-        gitlabToken: GITLAB_TOKEN,
-        createGitlabReleases: !FALSY_VALUES.has(
-          getInput('create_gitlab_releases'),
-        ),
+      await runPublishFlow({
+        publishScript,
+        published,
         cwd,
+        GITLAB_TOKEN,
+        NPM_TOKEN,
       })
-
-      if (result.published) {
-        setOutput('published', true)
-        setOutput('publishedPackages', result.publishedPackages)
-        exportVariable('PUBLISHED', true)
-        exportVariable('PUBLISHED_PACKAGES', result.publishedPackages)
-        if (published) {
-          execSync(published)
-        }
-      }
       return
     }
     case hasChangesets: {
-      await runVersion({
+      const result = await runVersion({
         script: getOptionalInput('version'),
         gitlabToken: GITLAB_TOKEN,
         mrTitle: getOptionalInput('title'),
@@ -142,6 +89,94 @@ export const main = async ({
       if (onlyChangesets) {
         execSync(onlyChangesets)
       }
+      // If the version command produced no file changes (e.g. in Changesets v3
+      // when there are no unreleased changesets, or all packages are already
+      // at the target version), fall through to the publish flow instead of
+      // leaving the packages unpublished.
+      if (!result.hasChanges && hasPublishScript) {
+        console.log(
+          'Version command produced no changes, attempting to publish any unpublished packages to npm',
+        )
+        await runPublishFlow({
+          publishScript,
+          published,
+          cwd,
+          GITLAB_TOKEN,
+          NPM_TOKEN,
+        })
+      }
+    }
+  }
+}
+
+async function runPublishFlow({
+  publishScript,
+  published,
+  cwd,
+  GITLAB_TOKEN,
+  NPM_TOKEN,
+}: {
+  publishScript: string
+  published?: string
+  cwd: string
+  GITLAB_TOKEN: string
+  NPM_TOKEN?: string
+}) {
+  console.log(
+    'No changesets found, attempting to publish any unpublished packages to npm',
+  )
+
+  if (NPM_TOKEN) {
+    const userNpmrcPath = `${env.HOME}/.npmrc`
+    if (await fileExists(userNpmrcPath)) {
+      console.info('Found existing user .npmrc file')
+      const userNpmrcContent = await fs.readFile(userNpmrcPath, 'utf8')
+      const authLine = userNpmrcContent.split('\n').find(line => {
+        // check based on https://github.com/npm/cli/blob/8f8f71e4dd5ee66b3b17888faad5a7bf6c657eed/test/lib/adduser.js#L103-L105
+        return /^\s*\/\/registry\.npmjs\.org\/:[_-]authToken=/i.test(line)
+      })
+      if (authLine) {
+        console.info(
+          'Found existing auth token for the npm registry in the user .npmrc file',
+        )
+      } else {
+        console.info(
+          "Didn't find existing auth token for the npm registry in the user .npmrc file, creating one",
+        )
+        await fs.appendFile(
+          userNpmrcPath,
+          `\n//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n`,
+        )
+      }
+    } else {
+      console.info(
+        'No user .npmrc file found, creating one with NPM_TOKEN used as auth token',
+      )
+      await fs.writeFile(
+        userNpmrcPath,
+        `//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n`,
+      )
+    }
+  } else {
+    console.info(
+      'No NPM_TOKEN found - assuming trusted publishing or npm is already authenticated',
+    )
+  }
+
+  const result = await runPublish({
+    script: publishScript,
+    gitlabToken: GITLAB_TOKEN,
+    createGitlabReleases: !FALSY_VALUES.has(getInput('create_gitlab_releases')),
+    cwd,
+  })
+
+  if (result.published) {
+    setOutput('published', true)
+    setOutput('publishedPackages', result.publishedPackages)
+    exportVariable('PUBLISHED', true)
+    exportVariable('PUBLISHED_PACKAGES', result.publishedPackages)
+    if (published) {
+      execSync(published)
     }
   }
 }

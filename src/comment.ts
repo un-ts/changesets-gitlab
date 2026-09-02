@@ -1,4 +1,4 @@
-import { ValidationError } from '@changesets/errors'
+import { ExitError } from '@changesets/errors'
 import type {
   ComprehensiveRelease,
   ReleasePlan,
@@ -302,7 +302,7 @@ export const comment = async () => {
           changedFiles: packageChangedFiles,
           cwdPrefix,
         }).catch((err: unknown) => {
-          if (err instanceof ValidationError) {
+          if (err instanceof ExitError) {
             errFromFetchingChangedFiles = `<details><summary>💥 An error occurred when fetching the changed packages and changesets in this MR</summary>\n\n\`\`\`\n${err.message}\n\`\`\`\n\n</details>\n`
           } else {
             console.error(err)

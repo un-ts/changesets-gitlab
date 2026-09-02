@@ -215,7 +215,7 @@ export async function runPublish({
     }
   } else {
     // Changesets v2: fall back to stdout "New tag:" parsing
-    if (tool === 'root') {
+    if (tool.type === 'root') {
       if (packages.length !== 1) {
         throw new Error(
           `No package found.` +
@@ -270,7 +270,7 @@ export async function runPublish({
           createRelease(api, {
             pkg,
             tagName:
-              tool === 'root'
+              tool.type === 'root'
                 ? `v${pkg.packageJson.version}`
                 : `${pkg.packageJson.name}@${pkg.packageJson.version}`,
           }),

@@ -1,16 +1,16 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
-import assembleReleasePlan from '@changesets/assemble-release-plan'
-import { parse as parseConfig } from '@changesets/config'
-import parseChangeset from '@changesets/parse'
+import { assembleReleasePlan } from '@changesets/assemble-release-plan'
+import { validateConfig as parseConfig } from '@changesets/config'
+import { parseChangesetFile as parseChangeset } from '@changesets/parse'
 import type {
   PackageJSON,
   PreState,
   NewChangeset,
   WrittenConfig,
 } from '@changesets/types'
-import type { Packages, Tool } from '@manypkg/get-packages'
+import type { Package, Packages, Tool } from '@manypkg/get-packages'
 import micromatch from 'micromatch'
 import { parse } from 'yaml'
 
@@ -50,13 +50,14 @@ export const getChangedPackages = async ({
     }
   }
 
-  async function getPackage(pkgPath: string) {
+  async function getPackage(pkgPath: string): Promise<Package> {
     const jsonContent = await fetchJsonFile<PackageJSON>(
       `${pkgPath}/package.json`,
     )
     return {
       packageJson: jsonContent,
       dir: pkgPath,
+      relativeDir: pkgPath,
     }
   }
 
@@ -109,11 +110,11 @@ export const getChangedPackages = async ({
       )
     }
   }
-  let tool: { tool: Tool; globs: string[] } | undefined
+  let tool: { toolType: string; globs: string[] } | undefined
 
   if (isPnpm) {
     tool = {
-      tool: 'pnpm',
+      toolType: 'pnpm',
       globs: (
         parse(await fetchTextFile('pnpm-workspace.yaml')) as {
           packages: string[]
@@ -125,14 +126,14 @@ export const getChangedPackages = async ({
 
     if (rootPackageJsonContent.workspaces) {
       tool = {
-        tool: 'yarn',
+        toolType: 'yarn',
         globs: Array.isArray(rootPackageJsonContent.workspaces)
           ? rootPackageJsonContent.workspaces
           : rootPackageJsonContent.workspaces.packages,
       }
     } else if (rootPackageJsonContent.bolt?.workspaces) {
       tool = {
-        tool: 'bolt',
+        toolType: 'bolt',
         globs: rootPackageJsonContent.bolt.workspaces,
       }
     }
@@ -140,12 +141,16 @@ export const getChangedPackages = async ({
 
   const rootPackageJsonContent = await rootPackageJsonContentsPromise
 
+  const rootPackage: Package = {
+    dir: '/',
+    relativeDir: '.',
+    packageJson: rootPackageJsonContent,
+  }
+
   const packages: Packages = {
-    root: {
-      dir: '/',
-      packageJson: rootPackageJsonContent,
-    },
-    tool: tool ? tool.tool : 'root',
+    rootDir: '/',
+    rootPackage,
+    tool: { type: tool ? tool.toolType : 'root' } as Tool,
     packages: [],
   }
 
@@ -160,16 +165,22 @@ export const getChangedPackages = async ({
     const matches = micromatch(potentialWorkspaceDirectories, tool.globs)
     packages.packages = await Promise.all(matches.map(dir => getPackage(dir)))
   } else {
-    packages.packages.push(packages.root)
+    packages.packages.push(rootPackage)
   }
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- https://github.com/microsoft/TypeScript/issues/9998
   if (hasErrored) {
     throw new Error('an error occurred when fetching files')
   }
 
-  const config = await configPromise.then(rawConfig =>
-    parseConfig(rawConfig, packages),
-  )
+  const config = await configPromise.then(rawConfig => {
+    const result = parseConfig(rawConfig, packages)
+    if (result.errors) {
+      throw new Error(
+        `Failed to parse changeset config: ${result.errors.join(', ')}`,
+      )
+    }
+    return result.config
+  })
 
   const releasePlan = assembleReleasePlan(
     await Promise.all(changesetPromises),
@@ -179,7 +190,7 @@ export const getChangedPackages = async ({
   )
 
   return {
-    changedPackages: (packages.tool === 'root'
+    changedPackages: (packages.tool.type === 'root'
       ? packages.packages
       : packages.packages.filter(pkg =>
           changedFiles.some(

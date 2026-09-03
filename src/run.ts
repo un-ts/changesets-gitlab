@@ -1,4 +1,6 @@
+import { randomUUID } from 'node:crypto'
 import fs from 'node:fs/promises'
+import os from 'node:os'
 import path from 'node:path'
 
 import { exec } from '@actions/exec'
@@ -72,10 +74,75 @@ export interface PublishedPackage {
 }
 
 export type PublishResult =
-  | { published: false }
-  | { published: true; publishedPackages: PublishedPackage[] }
+  | {
+      published: false
+      exitCode: number
+    }
+  | {
+      published: true
+      publishedPackages: PublishedPackage[]
+      exitCode: number
+    }
 
-// eslint-disable-next-line sonarjs/cognitive-complexity
+interface ChangesetsOutputEvent {
+  type: string
+  tag: string
+  packageName: string
+}
+
+function isChangesetsOutputEvent(
+  value: unknown,
+): value is ChangesetsOutputEvent {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'type' in value &&
+    value.type === 'git-tag' &&
+    'tag' in value &&
+    typeof value.tag === 'string' &&
+    'packageName' in value &&
+    typeof value.packageName === 'string'
+  )
+}
+
+async function readChangesetsOutput(
+  outputPath: string,
+): Promise<ChangesetsOutputEvent[]> {
+  let rawOutput: string
+  try {
+    rawOutput = await fs.readFile(outputPath, 'utf8')
+  } catch (err: unknown) {
+    if ((err as { code?: string }).code === 'ENOENT') {
+      return []
+    }
+    throw err
+  }
+
+  const events: ChangesetsOutputEvent[] = []
+
+  for (const line of rawOutput.split('\n')) {
+    if (!line.trim()) {
+      continue
+    }
+
+    let event: unknown
+    try {
+      event = JSON.parse(line)
+    } catch {
+      console.warn(`Ignoring malformed Changesets output line: ${line}`)
+      continue
+    }
+
+    if (isChangesetsOutputEvent(event)) {
+      events.push(event)
+    } else {
+      console.warn(`Ignoring unrecognized Changesets output event: ${line}`)
+    }
+  }
+
+  return events
+}
+
 export async function runPublish({
   script,
   gitlabToken,
@@ -85,71 +152,59 @@ export async function runPublish({
   const api = createApi(gitlabToken)
   const [publishCommand, ...publishArgs] = script.split(/\s+/)
 
-  const changesetPublishOutput = await execWithOutput(
-    publishCommand,
-    publishArgs,
-    { cwd },
+  // Changesets v3 uses a shared output file (via CHANGESETS_OUTPUT env var)
+  // to report published packages as NDJSON events.
+  const outputFile = path.join(
+    os.tmpdir(),
+    `changesets-output-${randomUUID()}.ndjson`,
   )
 
-  const { packages, tool } = await getPackages(cwd)
-
-  const pushAllTags =
-    packages.length <= GITLAB_MAX_TAGS ||
-    (await api.FeatureFlags.show(
-      context.projectId,
-      'git_push_create_all_pipelines',
-    )
-      .then(({ active }) => active)
-      .catch(() => false))
-
-  if (pushAllTags) {
-    await gitUtils.pushTags()
+  let changesetPublishOutput: {
+    code: number
+    stdout: string
+    stderr: string
   }
 
-  const releasedPackages: Package[] = []
+  try {
+    changesetPublishOutput = await execWithOutput(publishCommand, publishArgs, {
+      cwd,
+      ignoreReturnCode: true,
+      env: {
+        ...process.env,
+        CHANGESETS_OUTPUT: outputFile,
+      },
+    })
+    const { packages, tool } = await getPackages(cwd)
 
-  if (tool === 'root') {
-    if (packages.length !== 1) {
-      throw new Error(
-        `No package found.` +
-          'This is probably a bug in the action, please open an issue',
+    const pushAllTags =
+      packages.length <= GITLAB_MAX_TAGS ||
+      (await api.FeatureFlags.show(
+        context.projectId,
+        'git_push_create_all_pipelines',
       )
-    }
-    const pkg = packages[0]
-    const newTagRegex = /New tag:/
+        .then(({ active }) => active)
+        .catch(() => false))
 
-    for (const line of changesetPublishOutput.stdout.split('\n')) {
-      const match = newTagRegex.exec(line)
-
-      if (match) {
-        releasedPackages.push(pkg)
-        const tagName = `v${pkg.packageJson.version}`
-        if (createGitlabReleases) {
-          await createRelease(api, { pkg, tagName })
-        }
-        break
-      }
+    if (pushAllTags) {
+      await gitUtils.pushTags()
     }
-  } else {
-    // eslint-disable-next-line regexp/no-misleading-capturing-group, regexp/no-super-linear-backtracking, sonarjs/slow-regex
-    const newTagRegex = /New tag:\s+(@[^/]+\/[^@]+|[^/]+)@(\S+)/
+
+    const outputEvents = await readChangesetsOutput(outputFile)
     const packagesByName = new Map(packages.map(x => [x.packageJson.name, x]))
 
-    for (const line of changesetPublishOutput.stdout.split('\n')) {
-      const match = newTagRegex.exec(line)
-      if (match === null) {
-        continue
-      }
-      const pkgName = match[1]
-      const pkg = packagesByName.get(pkgName)
+    const releasedPackages: Package[] = []
+
+    for (const event of outputEvents) {
+      const pkg = packagesByName.get(event.packageName)
       if (pkg === undefined) {
         throw new Error(
-          `Package "${pkgName}" not found.` +
+          `Package "${event.packageName}" not found.` +
             'This is probably a bug in the action, please open an issue',
         )
       }
       releasedPackages.push(pkg)
     }
+
     if (!pushAllTags) {
       await Promise.all(
         releasedPackages.map(pkg =>
@@ -165,25 +220,32 @@ export async function runPublish({
           limit(() =>
             createRelease(api, {
               pkg,
-              tagName: `${pkg.packageJson.name}@${pkg.packageJson.version}`,
+              tagName:
+                tool.type === 'root'
+                  ? `v${pkg.packageJson.version}`
+                  : `${pkg.packageJson.name}@${pkg.packageJson.version}`,
             }),
           ),
         ),
       )
     }
-  }
 
-  if (releasedPackages.length > 0) {
-    return {
-      published: true,
-      publishedPackages: releasedPackages.map(pkg => ({
-        name: pkg.packageJson.name,
-        version: pkg.packageJson.version,
-      })),
+    if (releasedPackages.length > 0) {
+      return {
+        published: true,
+        publishedPackages: releasedPackages.map(pkg => ({
+          name: pkg.packageJson.name,
+          version: pkg.packageJson.version,
+        })),
+        exitCode: changesetPublishOutput.code,
+      }
     }
-  }
 
-  return { published: false }
+    return { published: false, exitCode: changesetPublishOutput.code }
+  } finally {
+    // Clean up the temp file on both success and failure
+    await fs.rm(outputFile, { force: true })
+  }
 }
 
 const requireChangesetsCliPkgJson = (cwd: string) => {
@@ -212,6 +274,11 @@ export interface VersionOptions {
   hasPublishScript?: boolean
 }
 
+export interface VersionResult {
+  /** Whether the version command produced any file changes */
+  hasChanges: boolean
+}
+
 export async function runVersion({
   script,
   gitlabToken,
@@ -221,7 +288,7 @@ export async function runVersion({
   commitMessage = 'Version Packages',
   removeSourceBranch = false,
   hasPublishScript = false,
-}: VersionOptions) {
+}: VersionOptions): Promise<VersionResult> {
   const currentBranch = context.ref
   const versionBranch = `changeset-release/${currentBranch}`
 
@@ -238,9 +305,11 @@ export async function runVersion({
 
   const versionsByDirectory = await getVersionsByDirectory(cwd)
 
+  // Changesets v3 exits with code 1 when there are no unreleased changesets,
+  // so we ignore the return code and check for actual file changes instead.
   if (script) {
     const [versionCommand, ...versionArgs] = script.split(/\s+/)
-    await exec(versionCommand, versionArgs, { cwd })
+    await exec(versionCommand, versionArgs, { cwd, ignoreReturnCode: true })
   } else {
     const changesetsCliPkgJson = requireChangesetsCliPkgJson(cwd)
     const cmd = semver.lt(changesetsCliPkgJson.version, '2.0.0')
@@ -248,7 +317,20 @@ export async function runVersion({
       : 'version'
     await exec('node', [resolveFrom(cwd, '@changesets/cli/bin.js'), cmd], {
       cwd,
+      ignoreReturnCode: true,
     })
+  }
+
+  // After running the version command, check if there are actual file changes.
+  // In Changesets v3, the version command may exit with code 1 when there are
+  // no unreleased changesets. Even if it exits 0, it might produce no file
+  // changes if all packages are already at the target version.
+  // In either case, we should not create or update an empty release MR.
+  if (await gitUtils.checkIfClean()) {
+    console.log(
+      'No file changes after running version command, skipping merge request creation',
+    )
+    return { hasChanges: false }
   }
 
   const changedPackages = await getChangedPackages(cwd, versionsByDirectory)
@@ -346,4 +428,6 @@ ${
       labels,
     })
   }
+
+  return { hasChanges: true }
 }

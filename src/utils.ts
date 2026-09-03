@@ -95,7 +95,11 @@ export function getChangelogEntry(changelog: string, version: string) {
 export async function execWithOutput(
   command: string,
   args?: string[],
-  options?: { ignoreReturnCode?: boolean; cwd?: string },
+  options?: {
+    ignoreReturnCode?: boolean
+    cwd?: string
+    env?: Record<string, string>
+  },
 ) {
   let myOutput = ''
   let myError = ''

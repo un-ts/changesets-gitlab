@@ -174,77 +174,78 @@ export async function runPublish({
         CHANGESETS_OUTPUT: outputFile,
       },
     })
+    const { packages, tool } = await getPackages(cwd)
+
+    const pushAllTags =
+      packages.length <= GITLAB_MAX_TAGS ||
+      (await api.FeatureFlags.show(
+        context.projectId,
+        'git_push_create_all_pipelines',
+      )
+        .then(({ active }) => active)
+        .catch(() => false))
+
+    if (pushAllTags) {
+      await gitUtils.pushTags()
+    }
+
+    const outputEvents = await readChangesetsOutput(outputFile)
+    const packagesByName = new Map(packages.map(x => [x.packageJson.name, x]))
+
+    const releasedPackages: Package[] = []
+
+    for (const event of outputEvents) {
+      const pkg = packagesByName.get(event.packageName)
+      if (pkg === undefined) {
+        throw new Error(
+          `Package "${event.packageName}" not found.` +
+            'This is probably a bug in the action, please open an issue',
+        )
+      }
+      releasedPackages.push(pkg)
+    }
+
+    if (!pushAllTags) {
+      await Promise.all(
+        releasedPackages.map(pkg =>
+          gitUtils.pushTag(
+            `${pkg.packageJson.name}@${pkg.packageJson.version}`,
+          ),
+        ),
+      )
+    }
+    if (createGitlabReleases) {
+      await Promise.all(
+        releasedPackages.map(pkg =>
+          limit(() =>
+            createRelease(api, {
+              pkg,
+              tagName:
+                tool.type === 'root'
+                  ? `v${pkg.packageJson.version}`
+                  : `${pkg.packageJson.name}@${pkg.packageJson.version}`,
+            }),
+          ),
+        ),
+      )
+    }
+
+    if (releasedPackages.length > 0) {
+      return {
+        published: true,
+        publishedPackages: releasedPackages.map(pkg => ({
+          name: pkg.packageJson.name,
+          version: pkg.packageJson.version,
+        })),
+        exitCode: changesetPublishOutput.code,
+      }
+    }
+
+    return { published: false, exitCode: changesetPublishOutput.code }
   } finally {
     // Clean up the temp file on both success and failure
     await fs.rm(outputFile, { force: true })
   }
-
-  const { packages, tool } = await getPackages(cwd)
-
-  const pushAllTags =
-    packages.length <= GITLAB_MAX_TAGS ||
-    (await api.FeatureFlags.show(
-      context.projectId,
-      'git_push_create_all_pipelines',
-    )
-      .then(({ active }) => active)
-      .catch(() => false))
-
-  if (pushAllTags) {
-    await gitUtils.pushTags()
-  }
-
-  const outputEvents = await readChangesetsOutput(outputFile)
-  const packagesByName = new Map(packages.map(x => [x.packageJson.name, x]))
-
-  const releasedPackages: Package[] = []
-
-  for (const event of outputEvents) {
-    const pkg = packagesByName.get(event.packageName)
-    if (pkg === undefined) {
-      throw new Error(
-        `Package "${event.packageName}" not found.` +
-          'This is probably a bug in the action, please open an issue',
-      )
-    }
-    releasedPackages.push(pkg)
-  }
-
-  if (!pushAllTags) {
-    await Promise.all(
-      releasedPackages.map(pkg =>
-        gitUtils.pushTag(`${pkg.packageJson.name}@${pkg.packageJson.version}`),
-      ),
-    )
-  }
-  if (createGitlabReleases) {
-    await Promise.all(
-      releasedPackages.map(pkg =>
-        limit(() =>
-          createRelease(api, {
-            pkg,
-            tagName:
-              tool.type === 'root'
-                ? `v${pkg.packageJson.version}`
-                : `${pkg.packageJson.name}@${pkg.packageJson.version}`,
-          }),
-        ),
-      ),
-    )
-  }
-
-  if (releasedPackages.length > 0) {
-    return {
-      published: true,
-      publishedPackages: releasedPackages.map(pkg => ({
-        name: pkg.packageJson.name,
-        version: pkg.packageJson.version,
-      })),
-      exitCode: changesetPublishOutput.code,
-    }
-  }
-
-  return { published: false, exitCode: changesetPublishOutput.code }
 }
 
 const requireChangesetsCliPkgJson = (cwd: string) => {

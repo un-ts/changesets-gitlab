@@ -177,5 +177,9 @@ async function runPublishFlow({
     if (published) {
       execSync(published)
     }
+  } else if (result.exitCode !== 0) {
+    console.warn(
+      `Publish command exited with code ${result.exitCode} and no packages were published`,
+    )
   }
 }

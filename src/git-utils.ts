@@ -27,9 +27,14 @@ export const push = async (
 }
 
 export const pushTags = async () => {
-  await exec('git', ['push', 'origin', '--tags'], {
-    ignoreReturnCode: true,
-  })
+  const { stderr, code } = await execWithOutput(
+    'git',
+    ['push', 'origin', '--tags'],
+    { ignoreReturnCode: true },
+  )
+  if (code !== 0 && !stderr.includes('already exists')) {
+    throw new Error(`Failed to push tags: ${stderr}`)
+  }
 }
 
 export const pushTag = async (tag: string) => {
@@ -37,15 +42,22 @@ export const pushTag = async (tag: string) => {
   // In Changesets v3, the git-tag command may report tags that were
   // "skipped (already exist)" on the remote but don't exist locally,
   // causing `git push origin <tag>` to fail with "src refspec does not match".
-  const { code } = await execWithOutput('git', ['tag', '-l', tag], {
-    ignoreReturnCode: true,
-  })
-  if (code !== 0) {
+  const { code: tagListCode } = await execWithOutput(
+    'git',
+    ['tag', '-l', tag],
+    { ignoreReturnCode: true },
+  )
+  if (tagListCode !== 0) {
     return
   }
-  await exec('git', ['push', 'origin', tag], {
-    ignoreReturnCode: true,
-  })
+  const { stderr, code } = await execWithOutput(
+    'git',
+    ['push', 'origin', tag],
+    { ignoreReturnCode: true },
+  )
+  if (code !== 0 && !stderr.includes('already exists')) {
+    throw new Error(`Failed to push tag ${tag}: ${stderr}`)
+  }
 }
 
 export const switchToMaybeExistingBranch = async (branch: string) => {

@@ -1,4 +1,3 @@
-import { ExitError } from '@changesets/errors'
 import type {
   ComprehensiveRelease,
   ReleasePlan,
@@ -302,11 +301,7 @@ export const comment = async () => {
           changedFiles: packageChangedFiles,
           cwdPrefix,
         }).catch((err: unknown) => {
-          if (err instanceof ExitError) {
-            errFromFetchingChangedFiles = `<details><summary>💥 An error occurred when fetching the changed packages and changesets in this MR</summary>\n\n\`\`\`\n${err.message}\n\`\`\`\n\n</details>\n`
-          } else {
-            console.error(err)
-          }
+          errFromFetchingChangedFiles = `<details><summary>💥 An error occurred when fetching the changed packages and changesets in this MR</summary>\n\n\`\`\`\n${err instanceof Error ? err.message : String(err)}\n\`\`\`\n\n</details>\n`
           return {
             changedPackages: ['@fake-scope/fake-pkg'],
             releasePlan: null,

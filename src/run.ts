@@ -120,16 +120,8 @@ async function readChangesetsOutput(
 
   const events: ChangesetsOutputEvent[] = []
 
-  let lineStart = 0
-  while (lineStart <= rawOutput.length) {
-    let lineEnd = rawOutput.indexOf('\n', lineStart)
-    if (lineEnd === -1) {
-      lineEnd = rawOutput.length
-    }
-    const line = rawOutput.slice(lineStart, lineEnd)
-    lineStart = lineEnd + 1
-
-    if (/^\s*$/.test(line)) {
+  for (const line of rawOutput.split('\n')) {
+    if (!line.trim()) {
       continue
     }
 
@@ -137,18 +129,20 @@ async function readChangesetsOutput(
     try {
       event = JSON.parse(line)
     } catch {
+      console.warn(`Ignoring malformed Changesets output line: ${line}`)
       continue
     }
 
     if (isChangesetsOutputEvent(event)) {
       events.push(event)
+    } else {
+      console.warn(`Ignoring unrecognized Changesets output event: ${line}`)
     }
   }
 
   return events
 }
 
-// eslint-disable-next-line sonarjs/cognitive-complexity
 export async function runPublish({
   script,
   gitlabToken,
@@ -159,26 +153,31 @@ export async function runPublish({
   const [publishCommand, ...publishArgs] = script.split(/\s+/)
 
   // Changesets v3 uses a shared output file (via CHANGESETS_OUTPUT env var)
-  // to report published packages, instead of printing "New tag:" to stdout.
-  // We set up a temp file and pass it through, then fall back to stdout
-  // parsing for Changesets v2 compatibility.
+  // to report published packages as NDJSON events.
   const outputFile = path.join(
     os.tmpdir(),
     `changesets-output-${randomUUID()}.ndjson`,
   )
 
-  const changesetPublishOutput = await execWithOutput(
-    publishCommand,
-    publishArgs,
-    {
+  let changesetPublishOutput: {
+    code: number
+    stdout: string
+    stderr: string
+  }
+
+  try {
+    changesetPublishOutput = await execWithOutput(publishCommand, publishArgs, {
       cwd,
       ignoreReturnCode: true,
       env: {
         ...process.env,
         CHANGESETS_OUTPUT: outputFile,
       },
-    },
-  )
+    })
+  } finally {
+    // Clean up the temp file on both success and failure
+    await fs.rm(outputFile, { force: true })
+  }
 
   const { packages, tool } = await getPackages(cwd)
 
@@ -195,65 +194,20 @@ export async function runPublish({
     await gitUtils.pushTags()
   }
 
-  // Try reading the Changesets v3 output file first
   const outputEvents = await readChangesetsOutput(outputFile)
+  const packagesByName = new Map(packages.map(x => [x.packageJson.name, x]))
 
   const releasedPackages: Package[] = []
 
-  if (outputEvents.length > 0) {
-    // Changesets v3: use output file events
-    const packagesByName = new Map(packages.map(x => [x.packageJson.name, x]))
-    for (const event of outputEvents) {
-      const pkg = packagesByName.get(event.packageName)
-      if (pkg === undefined) {
-        throw new Error(
-          `Package "${event.packageName}" not found.` +
-            'This is probably a bug in the action, please open an issue',
-        )
-      }
-      releasedPackages.push(pkg)
+  for (const event of outputEvents) {
+    const pkg = packagesByName.get(event.packageName)
+    if (pkg === undefined) {
+      throw new Error(
+        `Package "${event.packageName}" not found.` +
+          'This is probably a bug in the action, please open an issue',
+      )
     }
-  } else {
-    // Changesets v2: fall back to stdout "New tag:" parsing
-    if (tool.type === 'root') {
-      if (packages.length !== 1) {
-        throw new Error(
-          `No package found.` +
-            'This is probably a bug in the action, please open an issue',
-        )
-      }
-      const pkg = packages[0]
-      const newTagRegex = /New tag:/
-
-      for (const line of changesetPublishOutput.stdout.split('\n')) {
-        const match = newTagRegex.exec(line)
-
-        if (match) {
-          releasedPackages.push(pkg)
-          break
-        }
-      }
-    } else {
-      // eslint-disable-next-line regexp/no-misleading-capturing-group, regexp/no-super-linear-backtracking, sonarjs/slow-regex
-      const newTagRegex = /New tag:\s+(@[^/]+\/[^@]+|[^/]+)@(\S+)/
-      const packagesByName = new Map(packages.map(x => [x.packageJson.name, x]))
-
-      for (const line of changesetPublishOutput.stdout.split('\n')) {
-        const match = newTagRegex.exec(line)
-        if (match === null) {
-          continue
-        }
-        const pkgName = match[1]
-        const pkg = packagesByName.get(pkgName)
-        if (pkg === undefined) {
-          throw new Error(
-            `Package "${pkgName}" not found.` +
-              'This is probably a bug in the action, please open an issue',
-          )
-        }
-        releasedPackages.push(pkg)
-      }
-    }
+    releasedPackages.push(pkg)
   }
 
   if (!pushAllTags) {

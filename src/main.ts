@@ -66,6 +66,9 @@ export const main = async ({
       return
     }
     case !hasChangesets && hasPublishScript: {
+      console.log(
+        'No changesets found, attempting to publish any unpublished packages to npm',
+      )
       await runPublishFlow({
         publishScript,
         published,
@@ -122,10 +125,6 @@ async function runPublishFlow({
   GITLAB_TOKEN: string
   NPM_TOKEN?: string
 }) {
-  console.log(
-    'No changesets found, attempting to publish any unpublished packages to npm',
-  )
-
   if (NPM_TOKEN) {
     const userNpmrcPath = `${env.HOME}/.npmrc`
     if (await fileExists(userNpmrcPath)) {

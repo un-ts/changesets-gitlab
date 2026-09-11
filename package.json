@@ -108,7 +108,7 @@
     "tsx": "^4.19.3",
     "type-coverage": "^2.29.7",
     "typescript": "^5.8.3",
-    "vitest": "^3.2.7",
+    "vitest": "^4.0.0",
     "yarn-berry-deduplicate": "^6.1.1",
     "yarn-deduplicate": "^6.0.2"
   },

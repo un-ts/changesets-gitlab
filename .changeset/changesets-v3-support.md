@@ -13,7 +13,7 @@ Breaking changes:
 Bug fixes for Changesets v3 compatibility:
 
 - Handle the new `changeset version` exit code 1 when no unreleased changesets exist
-- Detect published packages via the `CHANGESETS_OUTPUT` env var (NDJSON format), falling back to stdout "New tag:" parsing for Changesets v2
+- Detect published packages via the `CHANGESETS_OUTPUT` env var (NDJSON format) from Changesets v3
 - Prevent creating empty release MRs when the version command produces no file changes — fall through to publish instead
 - Use `ignoreReturnCode: true` on version and publish commands since v3 may exit non-zero in valid scenarios
 - Releases for a single-package (root) repository now consistently use a `v<version>` tag, matching Changesets v3 output

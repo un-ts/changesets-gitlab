@@ -32,6 +32,9 @@ export const pushTags = async () => {
     ['push', 'origin', '--tags'],
     { ignoreReturnCode: true },
   )
+  // Changesets may have already pushed some of these tags on a previous run,
+  // so a nonzero exit caused only by "already exists" rejections is expected
+  // and safe to ignore. Any other failure is a real error.
   if (code !== 0 && !stderr.includes('already exists')) {
     throw new Error(`Failed to push tags: ${stderr}`)
   }

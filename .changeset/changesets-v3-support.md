@@ -1,5 +1,5 @@
 ---
-"changesets-gitlab": major
+"changesets-gitlab": minor
 ---
 
 Drop support for Changesets v2 and Node < 22. Bump all `@changesets/*` dependencies to v3 and `@manypkg/get-packages` to v3.
@@ -16,3 +16,4 @@ Bug fixes for Changesets v3 compatibility:
 - Detect published packages via the `CHANGESETS_OUTPUT` env var (NDJSON format), falling back to stdout "New tag:" parsing for Changesets v2
 - Prevent creating empty release MRs when the version command produces no file changes — fall through to publish instead
 - Use `ignoreReturnCode: true` on version and publish commands since v3 may exit non-zero in valid scenarios
+- Releases for a single-package (root) repository now consistently use a `v<version>` tag, matching Changesets v3 output

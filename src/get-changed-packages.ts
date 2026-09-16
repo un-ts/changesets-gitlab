@@ -110,11 +110,11 @@ export const getChangedPackages = async ({
       )
     }
   }
-  let tool: { toolType: string; globs: string[] } | undefined
+  let tool: { type: string; globs: string[] } | undefined
 
   if (isPnpm) {
     tool = {
-      toolType: 'pnpm',
+      type: 'pnpm',
       globs: (
         parse(await fetchTextFile('pnpm-workspace.yaml')) as {
           packages: string[]
@@ -126,14 +126,14 @@ export const getChangedPackages = async ({
 
     if (rootPackageJsonContent.workspaces) {
       tool = {
-        toolType: 'yarn',
+        type: 'yarn',
         globs: Array.isArray(rootPackageJsonContent.workspaces)
           ? rootPackageJsonContent.workspaces
           : rootPackageJsonContent.workspaces.packages,
       }
     } else if (rootPackageJsonContent.bolt?.workspaces) {
       tool = {
-        toolType: 'bolt',
+        type: 'bolt',
         globs: rootPackageJsonContent.bolt.workspaces,
       }
     }
@@ -150,7 +150,7 @@ export const getChangedPackages = async ({
   const packages: Packages = {
     rootDir: '/',
     rootPackage,
-    tool: { type: tool ? tool.toolType : 'root' } as Tool,
+    tool: { type: tool ? tool.type : 'root' } as Tool,
     packages: [],
   }
 

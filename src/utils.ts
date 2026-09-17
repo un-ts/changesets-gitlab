@@ -145,7 +145,7 @@ export async function getAllFiles(dir: string, base = dir): Promise<string[]> {
   dir ||= '.'
   const direntList = await fs.readdir(dir, { withFileTypes: true })
   const files = await Promise.all(
-    // eslint-disable-next-line sonarjs/function-return-type, @typescript-eslint/await-thenable
+    // eslint-disable-next-line @typescript-eslint/await-thenable
     direntList.map(dirent => {
       const res = path.resolve(dir, dirent.name)
       return dirent.isDirectory()
@@ -157,7 +157,6 @@ export async function getAllFiles(dir: string, base = dir): Promise<string[]> {
 }
 
 export const execSync = (command: string) =>
-  // eslint-disable-next-line sonarjs/os-command
   execSync_(command, { stdio: 'inherit' })
 
 export const getOptionalInput = (name: string) => getInput(name) || undefined
@@ -180,7 +179,6 @@ export const getCwdInput = (): { relative: string; absolute: string } => {
   return { relative, absolute }
 }
 
-// eslint-disable-next-line sonarjs/function-return-type
 export const getUsername = (api: Gitlab) => {
   return (
     env.GITLAB_CI_USER_NAME ??

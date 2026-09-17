@@ -257,6 +257,7 @@ const requireChangesetsCliPkgJson = (cwd: string) => {
     if ((err as { code: string } | undefined)?.code === 'MODULE_NOT_FOUND') {
       throw new Error(
         `Have you forgotten to install \`@changesets/cli\` in "${cwd}"?`,
+        { cause: err },
       )
     }
     throw err
@@ -376,7 +377,7 @@ ${
         }),
       )
     )
-      // eslint-disable-next-line unicorn/no-await-expression-member
+      // eslint-disable-next-line unicorn-x/no-await-expression-member
       .filter(Boolean)
       .sort(sortTheThings)
       .map(x => x.content)

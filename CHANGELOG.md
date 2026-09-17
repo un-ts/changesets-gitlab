@@ -1,5 +1,40 @@
 # changesets-gitlab
 
+## 0.15.0
+
+### Minor Changes
+
+- [#252](https://github.com/un-ts/changesets-gitlab/pull/252) [`9e4fcec`](https://github.com/un-ts/changesets-gitlab/commit/9e4fcec78587e573f53cb6161eec0a072963651b) Thanks [@philibea](https://github.com/philibea)! - Drop support for Changesets v2 and Node < 22. Bump all `@changesets/*` dependencies to v3 and `@manypkg/get-packages` to v3.
+
+  Breaking changes:
+
+  - **Node engine requirement** bumped from `>=18.0.0` to `^22.12 || ^24 || >=26` to match Changesets v3
+  - **`@changesets/*` dependencies** bumped to v3 versions, which are ESM-only
+  - **`@manypkg/get-packages`** bumped to v3, changing the `Packages` and `Package` types (`tool` is now an object with `type` property, `root` renamed to `rootPackage`, `Package` now requires `relativeDir`)
+
+  Bug fixes for Changesets v3 compatibility:
+
+  - Handle the new `changeset version` exit code 1 when no unreleased changesets exist
+  - Detect published packages via the `CHANGESETS_OUTPUT` env var (NDJSON format) from Changesets v3
+  - Prevent creating empty release MRs when the version command produces no file changes — fall through to publish instead
+  - Use `ignoreReturnCode: true` on version and publish commands since v3 may exit non-zero in valid scenarios
+  - Releases for a single-package (root) repository now consistently use a `v<version>` tag, matching Changesets v3 output
+
+- [#220](https://github.com/un-ts/changesets-gitlab/pull/220) [`15840f3`](https://github.com/un-ts/changesets-gitlab/commit/15840f3504480690fcad3f71e77263703bf98364) Thanks [@JounQin](https://github.com/JounQin)! - Refresh dependencies, including several major upgrades:
+
+  - `@actions/core` v2 → v3 and `@actions/exec` v1 → v3
+  - `@gitbeaker/rest` v42 → v43 — request error messages now include only the description context
+  - `commander` v13 → v15 — now ESM-only and requires Node.js ≥ 22.12 (`require(esm)`); the deprecated `commander/esm.mjs` export was removed
+  - `dotenv` v16 → v17
+  - `global-agent` v3 → v4
+  - `p-limit` v6 → v7
+
+  Minimum supported Node.js raised from `^22.11` to `^22.12` to satisfy `commander` v15's `require(esm)` support.
+
+  This refresh also resolves security advisories in the runtime `qs` dependency (via `@gitbeaker/rest`, `qs` 6.15.3 → 6.16.0) and in the development-only `vitest`/`@vitest/mocker` and `minimatch` dependencies.
+
+  Dev tooling majors were upgraded as well (`eslint` v10, `typescript` v6 / native preview, `vitest` v5, `size-limit` v14, `@pkgr/rollup` v7, `npm-run-all2` v9, `nano-staged` v1).
+
 ## 0.14.0
 
 ### Minor Changes

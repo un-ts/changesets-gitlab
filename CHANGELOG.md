@@ -20,7 +20,7 @@
   - Use `ignoreReturnCode: true` on version and publish commands since v3 may exit non-zero in valid scenarios
   - Releases for a single-package (root) repository now consistently use a `v<version>` tag, matching Changesets v3 output
 
-- [#256](https://github.com/un-ts/changesets-gitlab/pull/256) [`6083d75`](https://github.com/un-ts/changesets-gitlab/commit/6083d75f465b1913a881cdd281389d7f0a723d20) Thanks [@JounQin](https://github.com/JounQin)! - Refresh dependencies, including several major upgrades:
+- [#220](https://github.com/un-ts/changesets-gitlab/pull/220) [`15840f3`](https://github.com/un-ts/changesets-gitlab/commit/15840f3504480690fcad3f71e77263703bf98364) Thanks [@JounQin](https://github.com/JounQin)! - Refresh dependencies, including several major upgrades:
 
   - `@actions/core` v2 → v3 and `@actions/exec` v1 → v3
   - `@gitbeaker/rest` v42 → v43 — request error messages now include only the description context

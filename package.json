@@ -8,7 +8,7 @@
   "license": "MIT",
   "packageManager": "yarn@4.18.0",
   "engines": {
-    "node": "^22.11 || ^24 || >=26"
+    "node": "^22.12 || ^24 || >=26"
   },
   "bin": "lib/cli.js",
   "main": "./lib/index.cjs",

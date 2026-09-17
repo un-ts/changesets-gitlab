@@ -6,7 +6,7 @@ Drop support for Changesets v2 and Node < 22. Bump all `@changesets/*` dependenc
 
 Breaking changes:
 
-- **Node engine requirement** bumped from `>=18.0.0` to `^22.11 || ^24 || >=26` to match Changesets v3
+- **Node engine requirement** bumped from `>=18.0.0` to `^22.12 || ^24 || >=26` to match Changesets v3
 - **`@changesets/*` dependencies** bumped to v3 versions, which are ESM-only
 - **`@manypkg/get-packages`** bumped to v3, changing the `Packages` and `Package` types (`tool` is now an object with `type` property, `root` renamed to `rootPackage`, `Package` now requires `relativeDir`)
 

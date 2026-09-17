@@ -1,5 +1,5 @@
 import { readPreState } from '@changesets/pre'
-import readChangesets from '@changesets/read'
+import { readChangesets } from '@changesets/read'
 import type { PreState, NewChangeset } from '@changesets/types'
 
 export interface ChangesetState {
@@ -16,8 +16,10 @@ export default async function readChangesetState(
   let changesets = await readChangesets(cwd)
 
   if (isInPreMode) {
-    const changesetsToFilter = new Set(preState.changesets)
-    changesets = changesets.filter(x => !changesetsToFilter.has(x.id))
+    // In Changesets v3, versioned prerelease changesets are stored in
+    // `.changeset/pre/` and have IDs starting with `pre/`. These should
+    // be filtered out when in pre mode, as they are already consumed.
+    changesets = changesets.filter(x => !x.id.startsWith('pre/'))
   }
 
   return {

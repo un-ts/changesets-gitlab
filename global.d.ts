@@ -8,4 +8,5 @@ declare global {
   }
 }
 
+// eslint-disable-next-line unicorn-x/require-module-specifiers
 export {}

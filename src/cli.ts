@@ -27,7 +27,7 @@ const run = async () => {
   return program.showHelpAfterError().parseAsync()
 }
 
-// eslint-disable-next-line unicorn/prefer-top-level-await
+// eslint-disable-next-line unicorn-x/prefer-top-level-await
 run().catch((err: Error) => {
   console.error(err)
   process.exitCode = 1

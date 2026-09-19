@@ -178,14 +178,20 @@ export class GitLab {
   }
 
   async prepareBranch(branch: string, baseBranch: string) {
+    // `baseBranch` comes from the CI environment, so reject anything that Git
+    // could parse as an option (e.g. `--upload-pack`) before fetching it.
+    if (baseBranch.startsWith('-')) {
+      throw new Error(`Invalid base branch "${baseBranch}"`)
+    }
     await switchToMaybeExistingBranch(branch, { cwd: this.cwd })
-    // Fetch through an explicit refspec so `baseBranch` cannot be interpreted
-    // as a `git fetch` option (e.g. `--upload-pack`).
+    // Fetch through an explicit refspec so the remote-tracking branch is
+    // updated for the `reset` below.
     await exec(
       'git',
       [
         'fetch',
         'origin',
+        '--',
         `+refs/heads/${baseBranch}:refs/remotes/origin/${baseBranch}`,
       ],
       {

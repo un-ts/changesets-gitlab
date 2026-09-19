@@ -241,7 +241,6 @@ export async function runPublish({
         ? gitlab.pushTags(tags)
         : Promise.all(tags.map(tag => gitlab.pushTag(tag))))
     }
-
     if (createGitlabReleases) {
       await Promise.all(
         releases.map(({ pkg, tag }) =>

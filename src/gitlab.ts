@@ -171,25 +171,31 @@ export class GitLab {
       await Promise.all(tags.map(tag => this.pushTag(tag)))
       return
     }
-    // Push only the reported tags, in a single command, using fully-qualified
-    // refspecs so they cannot be interpreted as `git push` options.
-    const { stderr, exitCode } = await getExecOutput(
-      'git',
-      ['push', 'origin', ...tags.map(tag => `refs/tags/${tag}`)],
-      {
-        cwd: this.cwd,
-        ignoreReturnCode: true,
-        env: {
-          ...process.env,
-          ...(await this.#getCliAuthEnv()),
-        } as Record<string, string>,
-      },
-    )
-    // Changesets may have already pushed some of these tags on a previous run,
-    // so a nonzero exit caused only by "already exists" rejections is expected
-    // and safe to ignore. Any other failure is a real error.
-    if (exitCode !== 0 && !stderr.includes('already exists')) {
-      throw new Error(`Failed to push tags: ${stderr}`)
+    try {
+      // Push only the reported tags, in a single command, using
+      // fully-qualified refspecs so they cannot be interpreted as `git push`
+      // options.
+      await exec(
+        'git',
+        ['push', 'origin', ...tags.map(tag => `refs/tags/${tag}`)],
+        {
+          cwd: this.cwd,
+          env: {
+            ...process.env,
+            ...(await this.#getCliAuthEnv()),
+          } as Record<string, string>,
+        },
+      )
+    } catch (err) {
+      core.warning(
+        `Failed to push git tags ${tags
+          .map(tag => `"${tag}"`)
+          .join(
+            ', ',
+          )}. Assuming they were manually pushed by the publish script: ${
+          (err as Error).message
+        }`,
+      )
     }
   }
 

@@ -167,6 +167,10 @@ export class GitLab {
     if (tags.length === 0) {
       return
     }
+    if (!this.pushWithGitCli) {
+      await Promise.all(tags.map(tag => this.pushTag(tag)))
+      return
+    }
     // Push only the reported tags, in a single command, using fully-qualified
     // refspecs so they cannot be interpreted as `git push` options.
     const { stderr, exitCode } = await getExecOutput(

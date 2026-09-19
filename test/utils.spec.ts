@@ -65,6 +65,20 @@ describe('utils', () => {
       expect(entry.content).toContain('- Released')
       expect(entry.content).toContain('## 1.0.0')
     })
+
+    test('ignores headings inside tilde fences', () => {
+      const withTildeFence = `## 1.0.0
+
+~~~md
+## 1.0.0
+~~~
+
+- Released
+`
+      const entry = getChangelogEntry(withTildeFence, '1.0.0')
+      expect(entry.content).toContain('- Released')
+      expect(entry.content).toContain('## 1.0.0')
+    })
   })
 
   describe('getCwdInput', () => {

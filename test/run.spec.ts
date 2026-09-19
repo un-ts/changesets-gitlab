@@ -338,19 +338,28 @@ describe('GitLab.prepareBranch', () => {
     execFileSync('git', ['commit', '-am', 'newer'], { cwd, stdio: 'pipe' })
     expect(revParseHead()).not.toBe(triggerSha)
 
+    const originalSha = process.env.CI_COMMIT_SHA
     process.env.CI_COMMIT_SHA = triggerSha
     vi.resetModules()
-    const { GitLab } = await import('../src/gitlab.js')
-    const gitlab = new GitLab({ gitlabToken: 'token', cwd })
+    try {
+      const { GitLab } = await import('../src/gitlab.js')
+      const gitlab = new GitLab({ gitlabToken: 'token', cwd })
 
-    await gitlab.prepareBranch('changeset-release/main')
+      await gitlab.prepareBranch('changeset-release/main')
 
-    expect(revParseHead()).toBe(triggerSha)
-    expect(
-      // eslint-disable-next-line sonarjs/no-os-command-from-path
-      execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd })
-        .toString()
-        .trim(),
-    ).toBe('changeset-release/main')
+      expect(revParseHead()).toBe(triggerSha)
+      expect(
+        // eslint-disable-next-line sonarjs/no-os-command-from-path
+        execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd })
+          .toString()
+          .trim(),
+      ).toBe('changeset-release/main')
+    } finally {
+      if (originalSha === undefined) {
+        delete process.env.CI_COMMIT_SHA
+      } else {
+        process.env.CI_COMMIT_SHA = originalSha
+      }
+    }
   })
 })

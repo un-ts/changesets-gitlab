@@ -19,7 +19,7 @@ Sync with `changesets/action` v2 (structure, behaviour and fixes).
 **Changed**
 
 - Use the exact tags reported by `CHANGESETS_OUTPUT`, support the built-in `changeset publish` (`--from-pack-dir`) and run custom scripts and callbacks through `@actions/exec`
-- `getChangelogEntry` matches upstream (`1d54b9e`): parse with a regex and return the raw changelog slice instead of re-serializing it through `remark`, dropping the `remark`/`unified` dependencies
+- `getChangelogEntry` follows upstream (`1d54b9e`): parse with a regex and return the raw changelog slice instead of re-serializing it through `remark`, dropping the `remark`/`unified` dependencies. It also recognizes `~~~` fences, keeping the edge case the previous `remark` implementation handled
 - The split `version`/`publish` commands read `script` like the upstream sub-actions (falling back to `version-script`/`publish-script`)
 - `pr-draft` mirrors upstream: `create`/`always` open a new merge request as draft, and only `always` converts an existing one (GitLab marks drafts with a `Draft:` title prefix)
 - npm authentication is left to npm (Trusted Publishing/OIDC, otherwise `NODE_AUTH_TOKEN`); removed the `.npmrc`/`NPM_TOKEN` handling

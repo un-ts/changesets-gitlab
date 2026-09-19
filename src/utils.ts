@@ -59,7 +59,7 @@ export function getChangelogEntry(changelog: string, version: string) {
   let endIndex: number | undefined
 
   // Iterate through each heading and code block (for skipping its contents)
-  const regex = /^(#{1,6})\s(.*)$|^(`{3,})/gm
+  const regex = /^(#{1,6})\s(.*)$|^([`~]{3,})/gm
   let match: RegExpExecArray | null
   while ((match = regex.exec(changelog)) != null) {
     // Skip over code blocks so we don't match any headings inside of them

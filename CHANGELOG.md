@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.15.1
+
+### Patch Changes
+
+- [#257](https://github.com/un-ts/changesets-gitlab/pull/257) [`5346423`](https://github.com/un-ts/changesets-gitlab/commit/53464239533a744f7bd94a5736aa1c05537a6ee3) Thanks [@JounQin](https://github.com/JounQin)! - fix: default to the root package when `pnpm-workspace.yaml` has no `packages` field, and include private packages opted into versioning in the comment template
+
 ## 0.15.0
 
 ### Minor Changes

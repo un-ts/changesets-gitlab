@@ -68,6 +68,32 @@ Always run `yarn lint` and `yarn test` before committing. CI runs `yarn run-s bu
 | `src/index.ts`                      | Public exports                                                              |
 | `test/*.spec.ts`                    | Vitest specs (+ `fixtures/`, `__snapshots__/`)                              |
 
+## Upstream File Mapping
+
+`changesets/action` lives in a sibling checkout (usually `../action`). Its root action is `src/index.ts` and each sub-action is `src/<name>/index.ts` (built to `dist/<name>.js`); this port exposes those entry points as CLI commands. Keep the mapping in mind when syncing changes from upstream:
+
+| `changesets/action`                                                     | `changesets-gitlab`                                                                |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `action.yml` + `src/index.ts` (root action)                             | `src/main.ts` (`main` command) + `src/cli.ts`                                      |
+| `src/version/index.ts` / `src/publish/index.ts` / `src/pack/index.ts`   | `src/version.ts` / `src/publish.ts` / `src/pack.ts`                                |
+| `src/select-mode/index.ts`                                              | `src/select-mode.ts`                                                               |
+| `src/pr-status/index.ts` (+ `message.ts`, `template.ts`, `worktree.ts`) | `src/pr-status.ts` + `src/comment.ts`                                              |
+| `src/pr-comment/index.ts`                                               | `src/pr-comment.ts`                                                                |
+| `src/run.ts`                                                            | `src/run.ts`                                                                       |
+| `src/utils.ts` (+ `getChangedPackages`)                                 | `src/utils.ts` + `src/get-changed-packages.ts`                                     |
+| `src/readChangesetState.ts`                                             | `src/read-changeset-state.ts`                                                      |
+| `src/github.ts`                                                         | `src/gitlab.ts`                                                                    |
+| `src/octokit.ts`                                                        | `src/api.ts`                                                                       |
+| `@actions/github` `context` / `core.getInput`                           | `src/context.ts` / `src/env.ts`                                                    |
+| — (Changesets bot posts the comment)                                    | `src/comment.ts` (GitLab MR comment shared by `comment` and `pr-status`)           |
+| — (no `action.yml`, no library entry)                                   | `src/cli.ts`, `src/index.ts` (library exports), `src/constants.ts`, `src/types.ts` |
+
+Notes:
+
+- There is no `action.yml` here. Upstream input/default changes land in `src/env.ts` / `src/utils.ts` and the user-facing contract in `README.md`; sub-action entry changes land in the matching `src/*.ts` command module and `src/cli.ts`.
+- `src/index.ts` in this repo is a library barrel and does **not** correspond to upstream's `src/index.ts` — that role belongs to `src/main.ts`.
+- When syncing, diff `src/run.ts`, `src/utils.ts` and `src/read-changeset-state.ts` first (they are near-copies of upstream), then re-apply the GitLab-specific parts in `src/gitlab.ts`, `src/api.ts`, `src/env.ts`, `src/context.ts` and `src/comment.ts`.
+
 ## Conventions
 
 - Keep diffs minimal and behavior close to upstream. `README.md` is the user-facing contract for inputs, outputs and commands.
@@ -135,7 +161,7 @@ The package is both a CLI and a library.
 
 ## Reusing This Guide
 
-The **Stack and Tooling**, **Commands**, **Conventions**, **Changesets and Commits** and **Git and PRs** sections describe the shared `@1stg` + Yarn 4 setup and can be copied into sibling repositories mostly unchanged. The **Project Overview**, **Project Structure**, **Testing**, **Gotchas** and **Reusing the Package** sections are specific to `changesets-gitlab` and should be rewritten per project.
+The **Stack and Tooling**, **Commands**, **Conventions**, **Changesets and Commits** and **Git and PRs** sections describe the shared `@1stg` + Yarn 4 setup and can be copied into sibling repositories mostly unchanged. The **Project Overview**, **Project Structure**, **Upstream File Mapping**, **Testing**, **Gotchas** and **Reusing the Package** sections are specific to `changesets-gitlab` and should be rewritten per project.
 
 ## User Override
 

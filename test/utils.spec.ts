@@ -8,10 +8,39 @@ import {
   getBooleanInput,
   getChangelogEntry,
   getCwdInput,
+  resolveChangesetsCliFile,
   setOutput,
   throwOnRemovedCommitModeInput,
   throwOnRenamedInputs,
 } from '../src/utils.js'
+
+const { globalPackagesDir, tmpBase } = vi.hoisted(() => {
+  const tmpBase = `${process.cwd()}/.tmp-changesets-gitlab-resolve`
+  return { globalPackagesDir: `${tmpBase}/global/node_modules`, tmpBase }
+})
+
+vi.mock('global-directory', () => ({
+  default: {
+    npm: { packages: globalPackagesDir },
+    yarn: { packages: globalPackagesDir },
+    pnpm: { packages: globalPackagesDir },
+  },
+}))
+
+beforeAll(() => {
+  fs.mkdirSync(path.join(globalPackagesDir, '@changesets/cli'), {
+    recursive: true,
+  })
+  fs.writeFileSync(
+    path.join(globalPackagesDir, '@changesets/cli/package.json'),
+    JSON.stringify({ name: '@changesets/cli', version: '3.0.0' }),
+  )
+  fs.writeFileSync(path.join(globalPackagesDir, '@changesets/cli/bin.js'), '')
+})
+
+afterAll(() => {
+  fs.rmSync(tmpBase, { recursive: true, force: true })
+})
 
 describe('utils', () => {
   test('getAllFiles', async () => {
@@ -241,6 +270,34 @@ describe('utils', () => {
       expect(() => throwOnRenamedInputs({ publish: 'publish-script' })).toThrow(
         '- "INPUT_PUBLISH" -> "INPUT_PUBLISH_SCRIPT"',
       )
+    })
+  })
+
+  describe('resolveChangesetsCliFile', () => {
+    test('prefers a repository-local `@changesets/cli`', () => {
+      const cwd = path.join(tmpBase, 'cwd-with-cli')
+      const cliDir = path.join(cwd, 'node_modules/@changesets/cli')
+      fs.mkdirSync(cliDir, { recursive: true })
+      fs.writeFileSync(path.join(cliDir, 'bin.js'), '')
+
+      expect(resolveChangesetsCliFile('@changesets/cli/bin.js', cwd)).toBe(
+        path.join(cliDir, 'bin.js'),
+      )
+    })
+
+    test('falls back to the globally installed `@changesets/cli`', () => {
+      // Use a cwd outside the repository so the lookup cannot walk up into
+      // the repository's own `node_modules`.
+      const cwd = fs.mkdtempSync(
+        path.join(os.tmpdir(), 'changesets-gitlab-cwd-'),
+      )
+      try {
+        expect(resolveChangesetsCliFile('@changesets/cli/bin.js', cwd)).toBe(
+          path.join(globalPackagesDir, '@changesets/cli/bin.js'),
+        )
+      } finally {
+        fs.rmSync(cwd, { recursive: true, force: true })
+      }
     })
   })
 })

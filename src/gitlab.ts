@@ -138,8 +138,8 @@ export class GitLab {
     })
   }
 
-  async pushTag(tag: string) {
-    await this.pushTags([tag])
+  pushTag(tag: string) {
+    return this.pushTags([tag])
   }
 
   async pushTags(tags: string[]) {

@@ -70,6 +70,7 @@
     "@changesets/parse": "^1.0.0",
     "@changesets/pre": "^3.0.0",
     "@changesets/read": "^1.0.1",
+    "@changesets/should-skip-package": "^1.0.0",
     "@gitbeaker/rest": "^43.8.0",
     "@manypkg/get-packages": "^3.1.0",
     "commander": "^15.0.0",

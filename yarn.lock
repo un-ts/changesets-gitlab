@@ -5757,6 +5757,7 @@ __metadata:
     "@changesets/parse": "npm:^1.0.0"
     "@changesets/pre": "npm:^3.0.0"
     "@changesets/read": "npm:^1.0.1"
+    "@changesets/should-skip-package": "npm:^1.0.0"
     "@commitlint/cli": "npm:^21.2.2"
     "@gitbeaker/rest": "npm:^43.8.0"
     "@manypkg/get-packages": "npm:^3.1.0"

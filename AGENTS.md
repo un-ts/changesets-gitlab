@@ -17,7 +17,7 @@ This document helps AI agents (and humans) understand and work with this reposit
 - Yarn 4 (Berry, `node-modules` linker, pinned in `.yarnrc.yml`) — use `yarn`, not `npm`/`pnpm`
 - Lint: `@1stg/eslint-config` + `tsc --noEmit`; format: `@1stg/prettier-config`
 - Tests: Vitest (Istanbul coverage); type coverage: `type-coverage` at **100%**
-- Build: `@pkgr/rollup` (`r -f cjs`) + `tsc -p tsconfig.lib.json` → `lib/`
+- Build: `tsc -p tsconfig.lib.json` → `lib/`
 - Hooks: `simple-git-hooks` → `nano-staged` (pre-commit) and `commitlint` (commit-msg)
 
 ## Commands
@@ -27,8 +27,7 @@ corepack enable && yarn --immutable # install
 
 yarn lint       # eslint + tsc --noEmit
 yarn test       # vitest run (coverage enabled)
-yarn build      # build lib/ (rollup + tsc)
-yarn build:ts   # type-check and emit only declarations
+yarn build      # build lib/ (tsc)
 yarn cli        # run the CLI from source (tsx src/cli)
 yarn format     # prettier --write .
 yarn typecov    # type-coverage; must stay at 100%

@@ -139,39 +139,22 @@ export class GitLab {
   }
 
   async pushTag(tag: string) {
-    try {
-      if (!this.pushWithGitCli) {
-        await this.api.Tags.create(context.projectId, tag, context.sha)
-        return
-      }
-      // The fully-qualified refspec keeps a tag coming from
-      // `CHANGESETS_OUTPUT` from being parsed as a `git push` option
-      // (e.g. `--upload-pack`).
-      await exec('git', ['push', 'origin', `refs/tags/${tag}`], {
-        cwd: this.cwd,
-        env: {
-          ...process.env,
-          ...(await this.#getCliAuthEnv()),
-        } as Record<string, string>,
-      })
-    } catch (err) {
-      core.warning(
-        `Failed to create git tag "${tag}". Assuming it was manually pushed by the publish script: ${
-          (err as Error).message
-        }`,
-      )
-    }
+    await this.pushTags([tag])
   }
 
   async pushTags(tags: string[]) {
     if (tags.length === 0) {
       return
     }
-    if (!this.pushWithGitCli) {
-      await Promise.all(tags.map(tag => this.pushTag(tag)))
-      return
-    }
     try {
+      if (!this.pushWithGitCli) {
+        await Promise.all(
+          tags.map(tag =>
+            this.api.Tags.create(context.projectId, tag, context.sha),
+          ),
+        )
+        return
+      }
       // Push only the reported tags, in a single command, using
       // fully-qualified refspecs so they cannot be interpreted as `git push`
       // options.
@@ -187,14 +170,12 @@ export class GitLab {
         },
       )
     } catch (err) {
+      const tagList = tags.map(tag => `"${tag}"`).join(', ')
+      const isSingleTag = tags.length === 1
+      const action = isSingleTag ? 'create git tag' : 'push git tags'
+      const subject = isSingleTag ? 'it was' : 'they were'
       core.warning(
-        `Failed to push git tags ${tags
-          .map(tag => `"${tag}"`)
-          .join(
-            ', ',
-          )}. Assuming they were manually pushed by the publish script: ${
-          (err as Error).message
-        }`,
+        `Failed to ${action} ${tagList}. Assuming ${subject} manually pushed by the publish script: ${(err as Error).message}`,
       )
     }
   }

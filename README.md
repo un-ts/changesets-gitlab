@@ -49,6 +49,8 @@ GitLab CI cli for [changesets](https://changesets.dev), like its [GitHub Action]
 
 The CLI exposes separate commands, mirroring the `changesets/action` sub-actions. The default `main` command runs the whole release flow and is what most projects need; the others can be used to split the release across stages.
 
+Run them with whichever package manager installed the CLI: the examples below use `npx`, and `yarn changesets-gitlab` / `pnpm changesets-gitlab` work the same.
+
 - `comment` - Comment on the merge request (like <https://github.com/changesets/bot>)
 - `pr-status` - Generate changeset status in merge requests, and set the `comment-body` output
 - `pr-comment` - Create or update comments on merge requests from `INPUT_BODY`, matched by the marker derived from `INPUT_UPDATE_ID` (default `changesets-gitlab-pr-comment`), and set the `comment-id` output
@@ -118,13 +120,13 @@ comment:
   stage: comment
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-  script: npx changesets-gitlab comment # comment automatically like https://github.com/changesets/bot
+  script: yarn changesets-gitlab comment # comment automatically like https://github.com/changesets/bot
 
 release:
   image: node:lts-alpine
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  script: npx changesets-gitlab
+  script: yarn changesets-gitlab
 ```
 
 #### With Publishing
@@ -160,7 +162,7 @@ comment:
   stage: comment
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-  script: npx changesets-gitlab comment
+  script: yarn changesets-gitlab comment
 
 release:
   image: node:lts-alpine
@@ -169,7 +171,7 @@ release:
   id_tokens:
     NPM_ID_TOKEN:
       aud: npm:registry.npmjs.org
-  script: npx changesets-gitlab
+  script: yarn changesets-gitlab
   variables:
     INPUT_PUBLISH_SCRIPT: yarn release
 ```
@@ -192,13 +194,13 @@ comment:
   stage: comment
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-  script: npx changesets-gitlab comment
+  script: yarn changesets-gitlab comment
 
 release:
   image: node:lts-alpine
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  script: npx changesets-gitlab
+  script: yarn changesets-gitlab
   variables:
     INPUT_VERSION_SCRIPT: yarn version
 ```
@@ -219,13 +221,13 @@ comment:
   stage: comment
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-  script: npx changesets-gitlab comment
+  script: yarn changesets-gitlab comment
 
 release:
   image: node:lts-alpine
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  script: npx changesets-gitlab
+  script: yarn changesets-gitlab
   variables:
     INPUT_VERSION_SCRIPT: yarn changeset version
 ```
@@ -237,7 +239,7 @@ release:
   image: node:lts-alpine
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  script: npx changesets-gitlab
+  script: yarn changesets-gitlab
   variables:
     YARN_ENABLE_IMMUTABLE_INSTALLS: 'false'
     INPUT_VERSION_SCRIPT: yarn update-versions

@@ -17,7 +17,7 @@ GitLab CI cli for [changesets](https://changesets.dev), like its [GitHub Action]
 
 ### Requirements
 
-- The repo checked out and `@changesets/cli` v3 installed
+- The repo checked out and `@changesets/cli` v3 installed — resolved from the repository first, with the package manager's global directory (npm/Yarn/pnpm) as a fallback
 - `GITLAB_TOKEN` with permission to push, publish to the package registry and use the merge request API (the `CI_JOB_TOKEN` is not sufficient)
 - A branch pipeline on the default branch for releasing, and a merge request pipeline for the `comment` command
 
@@ -49,7 +49,7 @@ GitLab CI cli for [changesets](https://changesets.dev), like its [GitHub Action]
 
 The CLI exposes separate commands, mirroring the `changesets/action` sub-actions. The default `main` command runs the whole release flow and is what most projects need; the others can be used to split the release across stages.
 
-Run them with whichever package manager installed the CLI: the examples below use `npx`, and `yarn changesets-gitlab` / `pnpm changesets-gitlab` work the same.
+Run them with whichever package manager installed the CLI: the examples below use `npx`, and `yarn changesets-gitlab` / `pnpm changesets-gitlab` work the same. The Changesets CLI is resolved from the repository when present, so a globally installed `changesets-gitlab` also works.
 
 - `comment` - Comment on the merge request (like <https://github.com/changesets/bot>)
 - `pr-status` - Generate changeset status in merge requests, and set the `comment-body` output

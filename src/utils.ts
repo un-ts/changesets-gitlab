@@ -17,6 +17,7 @@ import {
 } from '@gitbeaker/rest'
 import type { Package } from '@manypkg/get-packages'
 import { getPackages } from '@manypkg/get-packages'
+import globalDirectory from 'global-directory'
 import major from 'semver/functions/major.js'
 import subset from 'semver/ranges/subset.js'
 
@@ -406,6 +407,22 @@ const changesetsCliCompatibilityError =
   'This version of changesets-gitlab is designed to work with Changesets CLI v3. ' +
   'Changesets CLI v2 is not supported; use changesets-gitlab v0.14 or earlier instead.'
 
+const globalPackageDirs = [
+  globalDirectory.npm.packages,
+  globalDirectory.yarn.packages,
+  globalDirectory.pnpm.packages,
+]
+
+// Changesets is usually installed in the repository, but `changesets-gitlab`
+// can also be installed globally, in which case `@changesets/cli` lives in the
+// package manager's global directory. Prefer the repository copy, then fall
+// back to the global ones.
+export function resolveChangesetsCliFile(request: string, cwd: string) {
+  return require.resolve(request, {
+    paths: [cwd, ...globalPackageDirs],
+  })
+}
+
 export async function validateChangesetsCliVersion(cwd: string) {
   const { rootPackage } = await getPackages(cwd)
   const packageJson = rootPackage?.packageJson
@@ -437,7 +454,7 @@ export async function validateChangesetsCliVersion(cwd: string) {
 
   try {
     cliPackageJson = require(
-      require.resolve('@changesets/cli/package.json', { paths: [cwd] }),
+      resolveChangesetsCliFile('@changesets/cli/package.json', cwd),
     ) as { version?: string }
   } catch {
     return
@@ -452,9 +469,7 @@ export async function validateChangesetsCliVersion(cwd: string) {
 }
 
 function resolveChangesetsCli(cwd: string) {
-  return require.resolve('@changesets/cli/bin.js', {
-    paths: [cwd],
-  })
+  return resolveChangesetsCliFile('@changesets/cli/bin.js', cwd)
 }
 
 interface ExecOptions extends Omit<ActionsExecOptions, 'env'> {

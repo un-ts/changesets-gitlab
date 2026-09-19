@@ -333,8 +333,7 @@ export const getUsername = (api: Gitlab) => {
   return usernamePromise
 }
 
-export const cjsRequire =
-  typeof require === 'undefined' ? createRequire(import.meta.url) : require
+export const require = createRequire(import.meta.url)
 
 export function isErrorWithCode(err: unknown, code: string) {
   return (
@@ -437,8 +436,8 @@ export async function validateChangesetsCliVersion(cwd: string) {
   let cliPackageJson: { version?: string }
 
   try {
-    cliPackageJson = cjsRequire(
-      cjsRequire.resolve('@changesets/cli/package.json', { paths: [cwd] }),
+    cliPackageJson = require(
+      require.resolve('@changesets/cli/package.json', { paths: [cwd] }),
     ) as { version?: string }
   } catch {
     return
@@ -453,7 +452,7 @@ export async function validateChangesetsCliVersion(cwd: string) {
 }
 
 function resolveChangesetsCli(cwd: string) {
-  return cjsRequire.resolve('@changesets/cli/bin.js', {
+  return require.resolve('@changesets/cli/bin.js', {
     paths: [cwd],
   })
 }

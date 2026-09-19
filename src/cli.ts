@@ -12,13 +12,11 @@ import { prComment } from './pr-comment.js'
 import { prStatus } from './pr-status.js'
 import { publish } from './publish.js'
 import { selectMode } from './select-mode.js'
-import { cjsRequire, getOptionalInput } from './utils.js'
+import { require, getOptionalInput } from './utils.js'
 import { version } from './version.js'
 
 const run = async () => {
-  program.version(
-    (cjsRequire('../package.json') as { version: string }).version,
-  )
+  program.version((require('../package.json') as { version: string }).version)
 
   program.command('comment').action(async () => {
     await comment()

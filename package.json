@@ -11,28 +11,17 @@
     "node": "^22.12 || ^24 || >=26"
   },
   "bin": "lib/cli.js",
-  "main": "./lib/index.cjs",
-  "types": "./index.d.cts",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "module": "./lib/index.js",
   "exports": {
     ".": {
-      "import": {
-        "types": "./lib/index.d.ts",
-        "default": "./lib/index.js"
-      },
-      "module-sync": {
-        "types": "./lib/index.d.ts",
-        "default": "./lib/index.js"
-      },
-      "require": {
-        "types": "./index.d.cts",
-        "default": "./lib/index.cjs"
-      }
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
     },
     "./package.json": "./package.json"
   },
   "files": [
-    "index.d.cts",
     "lib"
   ],
   "keywords": [
@@ -48,9 +37,7 @@
     "release-plz"
   ],
   "scripts": {
-    "build": "run-p 'build:*'",
-    "build:r": "r -f cjs",
-    "build:ts": "tsc -p tsconfig.lib.json",
+    "build": "tsc -p tsconfig.lib.json",
     "cli": "tsx src/cli",
     "format": "prettier --write .",
     "lint": "run-p 'lint:*'",
@@ -80,7 +67,6 @@
     "markdown-table": "^3.0.4",
     "micromatch": "^4.0.8",
     "p-limit": "^7.3.2",
-    "resolve-from": "^5.0.0",
     "semver": "^7.8.5",
     "yaml": "^2.9.1"
   },
@@ -89,7 +75,6 @@
     "@changesets/changelog-github": "^1.0.1",
     "@changesets/cli": "^3.0.3",
     "@commitlint/cli": "^21.2.2",
-    "@pkgr/rollup": "^7.1.0",
     "@types/global-agent": "^3.0.0",
     "@types/micromatch": "^4.0.10",
     "@types/web": "^0.0.356",

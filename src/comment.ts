@@ -91,7 +91,7 @@ ${getReleasePlanMessage(releasePlan)}
 ${
   customLinks
     ? customLinks.replace(ADD_CHANGESET_URL_PLACEHOLDER_REGEXP, addChangesetUrl)
-    : `[Click here to learn what changesets are, and how to add one](https://github.com/changesets/changesets/blob/main/docs/adding-a-changeset.md).
+    : `[Click here to learn what changesets are, and how to add one](https://changesets.dev/faq).
 
 [Click here if you're a maintainer who wants to add a changeset to this MR](${addChangesetUrl})`
 }
@@ -117,7 +117,7 @@ ${getReleasePlanMessage(releasePlan)}
 ${
   customLinks
     ? customLinks.replace(ADD_CHANGESET_URL_PLACEHOLDER_REGEXP, addChangesetUrl)
-    : `Not sure what this means? [Click here to learn what changesets are](https://github.com/changesets/changesets/blob/main/docs/adding-a-changeset.md).
+    : `Not sure what this means? [Click here to learn what changesets are](https://changesets.dev/faq).
 
 [Click here if you're a maintainer who wants to add another changeset to this MR](${addChangesetUrl})`
 }

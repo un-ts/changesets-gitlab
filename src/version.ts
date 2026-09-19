@@ -34,7 +34,9 @@ export const version = async (): Promise<void> => {
   })
 
   const { pullRequestNumber } = await runVersion({
-    script: getOptionalInput('version-script'),
+    // `script` matches the upstream `/version` sub-action, the root action uses
+    // `version-script`; accept both for convenience.
+    script: getOptionalInput('script') ?? getOptionalInput('version-script'),
     gitlab,
     cwd,
     mrTitle: getOptionalInput('pr-title'),

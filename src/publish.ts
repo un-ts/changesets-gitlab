@@ -39,7 +39,9 @@ export const publish = async (
   })
 
   const result = await runPublish({
-    script: getOptionalInput('publish-script'),
+    // `script` matches the upstream `/publish` sub-action, the root action uses
+    // `publish-script`; accept both for convenience.
+    script: getOptionalInput('script') ?? getOptionalInput('publish-script'),
     gitlab,
     ...getPublishFlags(),
     cwd,

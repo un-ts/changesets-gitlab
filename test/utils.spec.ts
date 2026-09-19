@@ -3,8 +3,10 @@ import os from 'node:os'
 import path from 'node:path'
 
 import {
+  BumpLevels,
   getAllFiles,
   getBooleanInput,
+  getChangelogEntry,
   getCwdInput,
   setOutput,
   throwOnRemovedCommitModeInput,
@@ -21,6 +23,62 @@ describe('utils', () => {
     // Should treat empty string as cwd and not throw
     expect(Array.isArray(files)).toBe(true)
     expect(files.length).toBeGreaterThan(0)
+  })
+
+  describe('getChangelogEntry', () => {
+    const changelog = `# pkg
+
+## 3.0.1
+
+### Patch Changes
+
+- Fixed a thing
+
+## 3.0.0
+
+### Major Changes
+
+- Broke a thing
+`
+
+    test('returns the raw entry for the requested version', () => {
+      expect(getChangelogEntry(changelog, '3.0.1')).toEqual({
+        content: '### Patch Changes\n\n- Fixed a thing',
+        highestLevel: BumpLevels.patch,
+      })
+      expect(getChangelogEntry(changelog, '3.0.0')).toEqual({
+        content: '### Major Changes\n\n- Broke a thing',
+        highestLevel: BumpLevels.major,
+      })
+    })
+
+    test('ignores headings inside code fences', () => {
+      const withCodeFence = `## 1.0.0
+
+\`\`\`md
+## 1.0.0
+\`\`\`
+
+- Released
+`
+      const entry = getChangelogEntry(withCodeFence, '1.0.0')
+      expect(entry.content).toContain('- Released')
+      expect(entry.content).toContain('## 1.0.0')
+    })
+
+    test('ignores headings inside tilde fences', () => {
+      const withTildeFence = `## 1.0.0
+
+~~~md
+## 1.0.0
+~~~
+
+- Released
+`
+      const entry = getChangelogEntry(withTildeFence, '1.0.0')
+      expect(entry.content).toContain('- Released')
+      expect(entry.content).toContain('## 1.0.0')
+    })
   })
 
   describe('getCwdInput', () => {

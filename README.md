@@ -55,9 +55,9 @@ Run them with whichever package manager installed the CLI: the examples below us
 - `pr-status` - Generate changeset status in merge requests, and set the `comment-body` output
 - `pr-comment` - Create or update comments on merge requests from `INPUT_BODY`, matched by the marker derived from `INPUT_UPDATE_ID` (default `changesets-gitlab-pr-comment`), and set the `comment-id` output
 - `select-mode` - Select the mode to run a changesets workflow. Sets the `mode` (and `publish-plan-path` when publishing) outputs; pass `INPUT_PUBLISH_PLAN_PATH` to pin the plan to a fixed path
-- `version` - Version packages and create or update a merge request with the changes
+- `version` - Version packages and create or update a merge request with the changes. Reads `INPUT_SCRIPT` like the upstream `/version` sub-action, falling back to `INPUT_VERSION_SCRIPT`
 - `pack` - Pack publishable packages into tarballs. Accepts `--publish-plan <path>` and `--out-dir <dir>`, and sets the `pack-dir` output
-- `publish` - Publish packages to npm. Accepts `--from-pack-dir <dir>`
+- `publish` - Publish packages to npm. Accepts `--from-pack-dir <dir>`. Reads `INPUT_SCRIPT` like the upstream `/publish` sub-action, falling back to `INPUT_PUBLISH_SCRIPT`
 - `main` - The default full flow (select-mode + version + publish)
 
 ```sh
@@ -90,6 +90,13 @@ GLOBAL_AGENT_NO_PROXY    # Like above but for no proxied requests
 # http_proxy, https_proxy, no_proxy environment variables are supported at the same time
 
 GITLAB_HOST # optional, if you're using custom GitLab host, will fallback to `CI_SERVER_URL` if not provided
+
+CI_COMMIT_SHA      # required, the pipeline trigger commit; used to reset the release branch and to attribute API pushes/tags
+CI_COMMIT_REF_NAME # required, the pipeline branch name, used as the default merge request base branch
+CI_PROJECT_ID      # required, the project id used by the GitLab API
+
+# The CI_* variables above are injected automatically by GitLab CI, but may be
+# unavailable by default in other CI environments, where they must be set explicitly.
 
 GITLAB_TOKEN                           # required, token with accessibility to push, package registries, and merge request APIs. Note the CI_JOB_TOKEN does not have sufficient permissions
 GITLAB_TOKEN_TYPE                      # optional, type of the provided token in GITLAB_TOKEN. defaults to personal access token. Can be `oauth` if you use Gitlab Oauth (personal access) token

@@ -31,7 +31,11 @@ const files = new Map([
   ],
   [
     'packages/ui-kit-storybook/package.json',
-    JSON.stringify({ name: '@example/ui-kit-storybook', private: true }),
+    JSON.stringify({
+      name: '@example/ui-kit-storybook',
+      version: '1.0.0',
+      private: true,
+    }),
   ],
 ])
 
@@ -53,6 +57,20 @@ beforeEach(() => {
 })
 
 describe('getChangedPackages', () => {
+  const mockFiles = (overrides: Record<string, string>) => {
+    const overridden = new Map(files)
+    for (const [file, contents] of Object.entries(overrides)) {
+      overridden.set(file, contents)
+    }
+    mocks.readFile.mockImplementation((path: string) => {
+      const contents = overridden.get(path)
+      if (contents === undefined) {
+        throw new Error(`Unexpected path: ${path}`)
+      }
+      return Promise.resolve(contents)
+    })
+  }
+
   test('does not match sibling packages with the same prefix', async () => {
     const result = await getChangedPackages({
       changedFiles: ['packages/ui-kit-storybook/src/index.ts'],
@@ -67,5 +85,70 @@ describe('getChangedPackages', () => {
     })
 
     expect(result.changedPackages).toEqual(['@example/ui-kit'])
+  })
+
+  test('falls back to the root package when pnpm-workspace.yaml has no packages field', async () => {
+    mockFiles({
+      'package.json': JSON.stringify({
+        name: 'root-package',
+        version: '1.0.0',
+      }),
+      'pnpm-workspace.yaml': 'onlyBuiltDependencies:\n  - esbuild\n',
+    })
+
+    const result = await getChangedPackages({
+      changedFiles: ['src/index.ts'],
+    })
+
+    expect(result.changedPackages).toEqual(['root-package'])
+  })
+
+  test('skips packages without a version', async () => {
+    mockFiles({
+      'package.json': JSON.stringify({ name: 'versionless-package' }),
+      'pnpm-workspace.yaml': 'onlyBuiltDependencies:\n  - esbuild\n',
+    })
+
+    const result = await getChangedPackages({
+      changedFiles: ['src/index.ts'],
+    })
+
+    expect(result.changedPackages).toEqual([])
+  })
+
+  test('includes private packages when privatePackages.version is enabled', async () => {
+    mockFiles({
+      '.changeset/config.json': JSON.stringify({
+        ...JSON.parse(files.get('.changeset/config.json')!),
+        privatePackages: { version: true, tag: false },
+      }),
+    })
+
+    const result = await getChangedPackages({
+      changedFiles: ['packages/ui-kit-storybook/src/index.ts'],
+    })
+
+    expect(result.changedPackages).toEqual(['@example/ui-kit-storybook'])
+  })
+
+  test('uses the private root package when pnpm workspace omits packages and private versioning is enabled', async () => {
+    mockFiles({
+      '.changeset/config.json': JSON.stringify({
+        ...JSON.parse(files.get('.changeset/config.json')!),
+        privatePackages: { version: true, tag: false },
+      }),
+      'package.json': JSON.stringify({
+        name: 'yourpackagename',
+        version: '1.0.0',
+        private: true,
+      }),
+      'pnpm-workspace.yaml': 'onlyBuiltDependencies:\n  - esbuild\n',
+    })
+
+    const result = await getChangedPackages({
+      changedFiles: ['src/index.ts'],
+    })
+
+    expect(result.changedPackages).toEqual(['yourpackagename'])
   })
 })

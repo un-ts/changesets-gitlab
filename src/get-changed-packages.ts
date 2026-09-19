@@ -4,6 +4,7 @@ import path from 'node:path'
 import { assembleReleasePlan } from '@changesets/assemble-release-plan'
 import { validateConfig as parseConfig } from '@changesets/config'
 import { parseChangesetFile as parseChangeset } from '@changesets/parse'
+import { shouldSkipPackage } from '@changesets/should-skip-package'
 import type {
   PackageJSON,
   PreState,
@@ -113,13 +114,18 @@ export const getChangedPackages = async ({
   let tool: { type: string; globs: string[] } | undefined
 
   if (isPnpm) {
-    tool = {
-      type: 'pnpm',
-      globs: (
-        parse(await fetchTextFile('pnpm-workspace.yaml')) as {
-          packages: string[]
-        }
-      ).packages,
+    const pnpmWorkspace = parse(await fetchTextFile('pnpm-workspace.yaml')) as {
+      packages?: string[]
+    }
+
+    // If the `packages` field is omitted, only the root package is included in
+    // the workspace, so fall back to the root package detection below.
+    // https://pnpm.io/pnpm-workspace_yaml
+    if (pnpmWorkspace.packages) {
+      tool = {
+        type: 'pnpm',
+        globs: pnpmWorkspace.packages,
+      }
     }
   } else {
     const rootPackageJsonContent = await rootPackageJsonContentsPromise
@@ -199,10 +205,18 @@ export const getChangedPackages = async ({
           ),
         )
     )
+      // Reuse the same predicate Changesets uses to decide whether a package is
+      // versionable: it skips ignored packages, private packages that haven't
+      // opted into versioning via `privatePackages.version`, and packages
+      // without a `version`. This keeps the suggested changeset from producing
+      // the "Mixed changesets that contain both ignored and not ignored packages
+      // are not allowed" error (https://github.com/changesets/bot/issues/44).
       .filter(
         pkg =>
-          pkg.packageJson.private !== true &&
-          !config.ignore.includes(pkg.packageJson.name),
+          !shouldSkipPackage(pkg, {
+            ignore: config.ignore,
+            allowPrivatePackages: config.privatePackages.version,
+          }),
       )
       .map(x => x.packageJson.name),
     releasePlan,

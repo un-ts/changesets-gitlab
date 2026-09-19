@@ -11,33 +11,74 @@
 [![Code Style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 [![changesets](https://img.shields.io/badge/maintained%20with-changesets-176de3.svg)](https://github.com/atlassian/changesets)
 
-GitLab CI cli for [changesets](https://github.com/atlassian/changesets) like its [GitHub Action](https://github.com/changesets/action), it creates a merge request with all of the package versions updated and changelogs updated and when there are new changesets on master, the MR will be updated. When you're ready, you can merge the merge request and you can either publish the packages to npm manually or setup the action to do it for you.
+GitLab CI cli for [changesets](https://changesets.dev), like its [GitHub Action](https://github.com/changesets/action), it creates a merge request with all of the package versions and changelogs updated and updates it when there are new changesets on the default branch. When you're ready, you can merge the merge request and either publish the packages to npm manually or set it up to publish automatically. Check out the [Automating Changesets](https://changesets.dev/guide/automating) guide to learn more.
 
 ## Usage
 
+### Requirements
+
+- The repo checked out and `@changesets/cli` v3 installed
+- `GITLAB_TOKEN` with permission to push, publish to the package registry and use the merge request API (the `CI_JOB_TOKEN` is not sufficient)
+- A branch pipeline on the default branch for releasing, and a merge request pipeline for the `comment` command
+
 ### Inputs
 
-> Note: environment variables are case-sensitive
+> Note: environment variables are case-sensitive. Input names follow the same kebab-case as [`changesets/action`](https://github.com/changesets/action); because GitLab CI/CD variable names cannot contain hyphens, they are set through the underscore-normalized `INPUT_*` variable (`publish-script` is `INPUT_PUBLISH_SCRIPT`). Boolean inputs accept `true`/`false` (any YAML spelling) and GitLab-style `1`/`0`.
 
-- `INPUT_PUBLISH` - The command to use to build and publish packages
-- `INPUT_VERSION` - The command to update version, edit CHANGELOG, read and delete changesets. Default to `changeset version` if not provided
-- `INPUT_COMMIT` - The commit message to use. Default to `Version Packages`
-- `INPUT_TITLE` - The merge request title. Default to `Version Packages`
+- `INPUT_PUBLISH_SCRIPT` - The command to use to build and publish packages
+- `INPUT_VERSION_SCRIPT` - The command to update version, edit CHANGELOG, read and delete changesets. Default to `changeset version` if not provided
+- `INPUT_COMMIT_MESSAGE` - The commit message. Default to `Version Packages`
+- `INPUT_PR_TITLE` - The merge request title. Default to `Version Packages`
+- `INPUT_PR_DRAFT` - Controls draft MR behavior. Use `create` to create new version MRs as draft, or `always` to also convert existing version MRs back to draft when updating them
+- `INPUT_PR_BASE_BRANCH` - Sets the base branch of the merge request. Defaults to `CI_COMMIT_REF_NAME`
+- `INPUT_CREATE_GITLAB_RELEASES` - Whether to create GitLab releases after publish
+- `INPUT_PUSH_GIT_TAGS` - Whether to create git tags after publish. If `INPUT_CREATE_GITLAB_RELEASES` is `true`, this option will also always be `true`
+- `INPUT_PUSH_WITH_GIT_CLI` - Whether to use the Git CLI instead of the GitLab API to push release commits and tags. Defaults to `true`. When using the GitLab API, commits and tags are attributed to the owner of `GITLAB_TOKEN`, and signed only if the instance signs commits
+- `INPUT_CWD` - The working directory to execute Changesets in. Defaults to the root of the repository
 
 #### Only available in `changesets-gitlab`
 
-- `INPUT_PUBLISHED` - Command executed after published
-- `INPUT_ONLY_CHANGESETS` - Command executed on only changesets detected
-- `INPUT_REMOVE_SOURCE_BRANCH` - Enables the merge request "Delete source branch" checkbox. Default false.
-- `INPUT_TARGET_BRANCH` -> The merge request target branch. Defaults to current branch
-- `INPUT_CREATE_GITLAB_RELEASES` - A boolean value to indicate whether to create Gitlab releases after publish or not. Default true.
-- `INPUT_LABELS` - A comma separated string of labels to be added to the version package Gitlab Merge request
-- `INPUT_CWD` - A relative path from the repo root to the directory containing `package.json` and `.changeset/`. Use this when your npm/yarn workspace lives in a subdirectory of the git repo. Defaults to the repo root.
+- `INPUT_PUBLISHED` - Command executed after publishing (receives `PUBLISHED` and `PUBLISHED_PACKAGES`)
+- `INPUT_ONLY_CHANGESETS` - Command executed when changesets are detected
+- `INPUT_REMOVE_SOURCE_BRANCH` - Enables the merge request "Delete source branch" checkbox. Default `false`
+- `INPUT_LABELS` - Comma-separated labels for the version merge request
+
+> Inputs renamed to match `changesets/action`: `INPUT_PUBLISH`, `INPUT_VERSION`, `INPUT_COMMIT`, `INPUT_TITLE` and `INPUT_TARGET_BRANCH` must be renamed (they now error with the variable to use). Inputs whose normalized variable is unchanged (`INPUT_CREATE_GITLAB_RELEASES`, `INPUT_REMOVE_SOURCE_BRANCH`, `INPUT_ONLY_CHANGESETS`) keep working.
+
+### Commands
+
+The CLI exposes separate commands, mirroring the `changesets/action` sub-actions. The default `main` command runs the whole release flow and is what most projects need; the others can be used to split the release across stages.
+
+Run them with whichever package manager installed the CLI: the examples below use `npx`, and `yarn changesets-gitlab` / `pnpm changesets-gitlab` work the same.
+
+- `comment` - Comment on the merge request (like <https://github.com/changesets/bot>)
+- `pr-status` - Generate changeset status in merge requests, and set the `comment-body` output
+- `pr-comment` - Create or update comments on merge requests from `INPUT_BODY`, matched by the marker derived from `INPUT_UPDATE_ID` (default `changesets-gitlab-pr-comment`), and set the `comment-id` output
+- `select-mode` - Select the mode to run a changesets workflow. Sets the `mode` (and `publish-plan-path` when publishing) outputs; pass `INPUT_PUBLISH_PLAN_PATH` to pin the plan to a fixed path
+- `version` - Version packages and create or update a merge request with the changes
+- `pack` - Pack publishable packages into tarballs. Accepts `--publish-plan <path>` and `--out-dir <dir>`, and sets the `pack-dir` output
+- `publish` - Publish packages to npm. Accepts `--from-pack-dir <dir>`
+- `main` - The default full flow (select-mode + version + publish)
+
+```sh
+# Split the release across stages, using fixed paths so they can be shared
+export INPUT_PUBLISH_PLAN_PATH="$CI_PROJECT_DIR/.changeset-publish-plan/publish-plan.json"
+npx changesets-gitlab select-mode
+npx changesets-gitlab version
+npx changesets-gitlab pack --publish-plan "$INPUT_PUBLISH_PLAN_PATH" --out-dir "$CI_PROJECT_DIR/.changeset-pack"
+npx changesets-gitlab publish --from-pack-dir "$CI_PROJECT_DIR/.changeset-pack"
+```
 
 ### Outputs
 
-- `PUBLISHED` - A boolean value to indicate whether a publishing is happened or not
-- `PUBLISHED_PACKAGES` - A JSON array to present the published packages. The format is `[{"name": "@xx/xx", "version": "1.2.0"}, {"name": "@xx/xy", "version": "0.8.9"}]`
+Every output is set with `@actions/core`. On GitHub Actions that writes the native `$GITHUB_OUTPUT` file; elsewhere it falls back to `~/.changesets-gitlab.outputs` (same `KEY<<delimiter` format), so a later step in the same job can read the values. Set `$GITHUB_OUTPUT` to an empty string to opt out of the fallback.
+
+- `published` - A "true" or "false" string value to indicate whether a publishing is happened or not
+- `published-packages` - A JSON array to present the published packages. The format is `[{"name": "@xx/xx", "version": "1.2.0"}, {"name": "@xx/xy", "version": "0.8.9"}]`
+- `has-changesets` - A "true" or "false" string value about whether there were changesets. Useful if you want to create your own publishing functionality
+- `pr-number` - The merge request number that was created or updated
+
+The `select-mode` (`mode`, `publish-plan-path`), `pack` (`pack-dir`), `pr-status` (`comment-body`) and `pr-comment` (`comment-id`) commands expose their outputs the same way. The `INPUT_PUBLISHED` command is run with `PUBLISHED` and `PUBLISHED_PACKAGES` set in its environment; prefer explicit paths/options when a later job needs a value.
 
 ### Environment Variables
 
@@ -58,7 +99,7 @@ GITLAB_COMMENT_TYPE                    # optional, type of the comment. defaults
 GITLAB_COMMENT_DISCUSSION_AUTO_RESOLVE # optional, automatically resolve added discussion when changeset is present, if you want to always resolve the discussion, you should actually use `GITLAB_COMMENT_TYPE=note` instead, default `true`
 GITLAB_COMMENT_CUSTOM_LINKS            # optional, override the links content referenced in the cli bot comment, use {{ addChangesetUrl }} placeholder for the dynamic URL to add a changeset
 GITLAB_ADD_CHANGESET_MESSAGE           # optional, default commit message for adding changesets on GitLab Web UI
-DEBUG_GITLAB_CREDENTIAL                # optional, whether to log when setting remote url with sensitive `token` displayed
+DEBUG_GITLAB_CREDENTIAL                # optional, set to `1`/`true` to echo the remote URL when debugging git authentication; WARNING: the remote URL may contain credentials
 ```
 
 ### Example workflow
@@ -90,12 +131,24 @@ release:
 
 #### With Publishing
 
-There are two ways to authenticate with npm when publishing:
+npm authentication is left to npm itself (the CLI never touches `~/.npmrc`). Use one of:
 
-1. Trusted Publishers (recommended): Configure npm Trusted Publishers for your GitLab pipeline (see the npm docs: <https://docs.npmjs.com/trusted-publishers#supported-cicd-providers>). When the pipeline runs, npm will inject an `NPM_ID_TOKEN`, you do NOT need to set `NPM_TOKEN`, and no `.npmrc` file is required—the npm CLI exchanges the identity token automatically.
-2. Classic Automation Token: Create an [npm automation token](https://docs.npmjs.com/creating-and-viewing-authentication-tokens) (without 2FA on publish) and add it as a [custom environment variable in GitLab](https://docs.gitlab.com/ee/ci/variables/#custom-cicd-variables) named `NPM_TOKEN`.
+1. **Trusted Publishing / OIDC (preferred)**: configure npm Trusted Publishers for your GitLab pipeline (see the npm docs: <https://docs.npmjs.com/trusted-publishers#supported-cicd-providers>) and request `NPM_ID_TOKEN` in the release job with `id_tokens` (as in the example below). No token or `.npmrc` is needed.
+2. **Classic automation token**: create an [npm automation token](https://docs.npmjs.com/creating-and-viewing-authentication-tokens) and expose it to the pipeline as `NODE_AUTH_TOKEN`:
 
-For any of the methods, create a file at `.gitlab-ci.yml` with the following content:
+   ```yml
+   release:
+     variables:
+       NODE_AUTH_TOKEN: $NPM_TOKEN # a masked/protected GitLab CI variable
+   ```
+
+   If your npm version does not pick up `NODE_AUTH_TOKEN` on its own, reference it from a committed project `.npmrc`:
+
+   ```sh
+   //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
+   ```
+
+For either method, create a file at `.gitlab-ci.yml` with the following content:
 
 ```yml
 stages:
@@ -115,26 +168,12 @@ release:
   image: node:lts-alpine
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  id_tokens:
+    NPM_ID_TOKEN:
+      aud: npm:registry.npmjs.org
   script: yarn changesets-gitlab
   variables:
-    INPUT_PUBLISH: yarn release
-```
-
-By default the GitLab CI cli creates a `.npmrc` file with the following content when `NPM_TOKEN` is present and no `.npmrc` exists (classic token mode):
-
-```sh
-//registry.npmjs.org/:_authToken=${process.env.NPM_TOKEN}
-```
-
-However, if a `.npmrc` file is found, the GitLab CI cli does not recreate the file. This is useful if you need to configure the `.npmrc` file on your own.
-For example, you can add a step before running the Changesets GitLab CI cli:
-
-```yml
-script: |
-  cat << EOF > "$HOME/.npmrc"
-    email=my@email.com
-    //registry.npmjs.org/:_authToken=$NPM_TOKEN
-  EOF
+    INPUT_PUBLISH_SCRIPT: yarn release
 ```
 
 #### With version script
@@ -163,7 +202,7 @@ release:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   script: yarn changesets-gitlab
   variables:
-    INPUT_VERSION: yarn version
+    INPUT_VERSION_SCRIPT: yarn version
 ```
 
 #### With Yarn 2 / Plug'n'Play
@@ -190,10 +229,10 @@ release:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   script: yarn changesets-gitlab
   variables:
-    INPUT_VERSION: yarn changeset version
+    INPUT_VERSION_SCRIPT: yarn changeset version
 ```
 
-You may also want to run `yarn install` after the `changeset verion` command to update the `yarn.lock` in the version MR. You need to disable immutable lock file setting using an env variable:
+You may also want to run `yarn install` after the `changeset version` command to update the `yarn.lock` in the version MR. You need to disable immutable lock file setting using an env variable:
 
 ```yml
 release:
@@ -203,7 +242,7 @@ release:
   script: yarn changesets-gitlab
   variables:
     YARN_ENABLE_IMMUTABLE_INSTALLS: 'false'
-    INPUT_VERSION: yarn update-versions
+    INPUT_VERSION_SCRIPT: yarn update-versions
 ```
 
 And your `update-versions` script would be:

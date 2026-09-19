@@ -3,33 +3,36 @@ import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 
-import { exec } from '@actions/exec'
-import type { Gitlab } from '@gitbeaker/core'
+import * as core from '@actions/core'
+import { exec, getExecOutput } from '@actions/exec'
 import type { Package } from '@manypkg/get-packages'
 import { getPackages } from '@manypkg/get-packages'
 import pLimit from 'p-limit'
-import resolveFrom from 'resolve-from'
-import semver from 'semver'
 
-import { createApi } from './api.ts'
+import type { GitLabApi } from './api.js'
 import * as context from './context.js'
-import * as gitUtils from './git-utils.js'
+import type { GitLab } from './gitlab.js'
 import readChangesetState from './read-changeset-state.js'
 import {
-  cjsRequire,
-  execWithOutput,
+  execChangesetsCli,
   getChangedPackages,
   getChangelogEntry,
+  getExecOutputChangesetsCli,
   getOptionalInput,
   getVersionsByDirectory,
-  GITLAB_MAX_TAGS,
+  isErrorWithCode,
   sortTheThings,
 } from './utils.js'
 
 const limit = pLimit(2 * 3)
 
+// With more packages than this, tags are pushed individually (unless the
+// `git_push_create_all_pipelines` feature flag is enabled) to avoid triggering
+// one pipeline per tag.
+const GITLAB_MAX_TAGS = 4
+
 export const createRelease = async (
-  api: Gitlab,
+  api: GitLabApi,
   { pkg, tagName }: { pkg: Package; tagName: string },
 ) => {
   try {
@@ -55,16 +58,18 @@ export const createRelease = async (
     })
   } catch (err: unknown) {
     // if we can't find a changelog, the user has probably disabled changelogs
-    if ((err as { code: string }).code !== 'ENOENT') {
+    if (!isErrorWithCode(err, 'ENOENT')) {
       throw err
     }
   }
 }
 
 export interface PublishOptions {
-  script: string
-  gitlabToken: string
+  script?: string
+  fromPackDir?: string
   createGitlabReleases?: boolean
+  pushGitTags?: boolean
+  gitlab: GitLab
   cwd?: string
 }
 
@@ -105,17 +110,19 @@ function isChangesetsOutputEvent(
   )
 }
 
+class ChangesetsOutputReadError extends Error {}
+
 async function readChangesetsOutput(
   outputPath: string,
 ): Promise<ChangesetsOutputEvent[]> {
   let rawOutput: string
   try {
     rawOutput = await fs.readFile(outputPath, 'utf8')
-  } catch (err: unknown) {
-    if ((err as { code?: string }).code === 'ENOENT') {
-      return []
-    }
-    throw err
+  } catch (err) {
+    throw new ChangesetsOutputReadError(
+      `Failed to read changesets output at ${outputPath}`,
+      { cause: err },
+    )
   }
 
   const events: ChangesetsOutputEvent[] = []
@@ -128,15 +135,14 @@ async function readChangesetsOutput(
     let event: unknown
     try {
       event = JSON.parse(line)
-    } catch {
-      console.warn(`Ignoring malformed Changesets output line: ${line}`)
-      continue
+    } catch (err) {
+      throw new Error(`Failed to parse changesets output event: ${line}`, {
+        cause: err,
+      })
     }
 
     if (isChangesetsOutputEvent(event)) {
       events.push(event)
-    } else {
-      console.warn(`Ignoring unrecognized Changesets output event: ${line}`)
     }
   }
 
@@ -145,12 +151,17 @@ async function readChangesetsOutput(
 
 export async function runPublish({
   script,
-  gitlabToken,
+  fromPackDir,
+  gitlab,
   createGitlabReleases = true,
+  pushGitTags = true,
   cwd = process.cwd(),
 }: PublishOptions): Promise<PublishResult> {
-  const api = createApi(gitlabToken)
-  const [publishCommand, ...publishArgs] = script.split(/\s+/)
+  const { api } = gitlab
+  // Changesets creates annotated tags locally, including when the action pushes
+  // those tags through the GitLab API. It might also be important for custom
+  // publish scripts to have a valid git user configured.
+  await gitlab.ensureGitUser()
 
   // Changesets v3 uses a shared output file (via CHANGESETS_OUTPUT env var)
   // to report published packages as NDJSON events.
@@ -159,146 +170,145 @@ export async function runPublish({
     `changesets-output-${randomUUID()}.ndjson`,
   )
 
-  let changesetPublishOutput: {
-    code: number
-    stdout: string
-    stderr: string
-  }
+  let changesetPublishExitCode: number
 
   try {
-    changesetPublishOutput = await execWithOutput(publishCommand, publishArgs, {
+    const execOptions = {
       cwd,
       ignoreReturnCode: true,
       env: {
         ...process.env,
         CHANGESETS_OUTPUT: outputFile,
       },
-    })
+    }
+    if (script) {
+      const output = await getExecOutput(script, undefined, execOptions)
+      changesetPublishExitCode = output.exitCode
+    } else {
+      const args = ['publish']
+      if (fromPackDir) {
+        args.push('--from-pack-dir', fromPackDir)
+      }
+      const output = await getExecOutputChangesetsCli(args, execOptions)
+      changesetPublishExitCode = output.exitCode
+    }
+
     const { packages, tool } = await getPackages(cwd)
 
     const pushAllTags =
-      packages.length <= GITLAB_MAX_TAGS ||
-      (await api.FeatureFlags.show(
-        context.projectId,
-        'git_push_create_all_pipelines',
+      gitlab.pushWithGitCli &&
+      (packages.length <= GITLAB_MAX_TAGS ||
+        (await api.FeatureFlags.show(
+          context.projectId,
+          'git_push_create_all_pipelines',
+        )
+          .then(({ active }) => active)
+          .catch(() => false)))
+
+    let outputEvents: ChangesetsOutputEvent[]
+    try {
+      outputEvents = await readChangesetsOutput(outputFile)
+    } catch (err) {
+      if (!script || !(err instanceof ChangesetsOutputReadError)) {
+        throw err
+      }
+      core.warning(
+        `${err.message}. GitLab releases and git tags cannot be created without this output. Ensure the custom publish script passes CHANGESETS_OUTPUT to the Changesets CLI.`,
       )
-        .then(({ active }) => active)
-        .catch(() => false))
-
-    if (pushAllTags) {
-      await gitUtils.pushTags()
+      outputEvents = []
     }
-
-    const outputEvents = await readChangesetsOutput(outputFile)
     const packagesByName = new Map(packages.map(x => [x.packageJson.name, x]))
 
-    const releasedPackages: Package[] = []
-
-    for (const event of outputEvents) {
+    const releases = outputEvents.map(event => {
       const pkg = packagesByName.get(event.packageName)
       if (pkg === undefined) {
         throw new Error(
-          `Package "${event.packageName}" not found.` +
-            'This is probably a bug in the action, please open an issue',
+          `Package "${event.packageName}" not found. This is probably a bug in the action, please open an issue.`,
         )
       }
-      releasedPackages.push(pkg)
+      return { pkg, tag: event.tag }
+    })
+
+    if (tool.type === 'root' && packages.length === 0) {
+      throw new Error(
+        'No package found. This is probably a bug in the action, please open an issue.',
+      )
     }
 
-    if (!pushAllTags) {
-      await Promise.all(
-        releasedPackages.map(pkg =>
-          gitUtils.pushTag(
-            `${pkg.packageJson.name}@${pkg.packageJson.version}`,
-          ),
-        ),
-      )
+    if (createGitlabReleases || pushGitTags) {
+      const tags = releases.map(({ tag }) => tag)
+      await (pushAllTags
+        ? gitlab.pushTags(tags)
+        : Promise.all(tags.map(tag => gitlab.pushTag(tag))))
     }
     if (createGitlabReleases) {
       await Promise.all(
-        releasedPackages.map(pkg =>
-          limit(() =>
-            createRelease(api, {
-              pkg,
-              tagName:
-                tool.type === 'root'
-                  ? `v${pkg.packageJson.version}`
-                  : `${pkg.packageJson.name}@${pkg.packageJson.version}`,
-            }),
-          ),
+        releases.map(({ pkg, tag }) =>
+          limit(() => createRelease(api, { pkg, tagName: tag })),
         ),
       )
     }
 
-    if (releasedPackages.length > 0) {
+    if (releases.length > 0) {
       return {
         published: true,
-        publishedPackages: releasedPackages.map(pkg => ({
+        publishedPackages: releases.map(({ pkg }) => ({
           name: pkg.packageJson.name,
           version: pkg.packageJson.version,
         })),
-        exitCode: changesetPublishOutput.code,
+        exitCode: changesetPublishExitCode,
       }
     }
 
-    return { published: false, exitCode: changesetPublishOutput.code }
+    return { published: false, exitCode: changesetPublishExitCode }
   } finally {
     // Clean up the temp file on both success and failure
     await fs.rm(outputFile, { force: true })
   }
 }
 
-const requireChangesetsCliPkgJson = (cwd: string) => {
-  try {
-    return cjsRequire(resolveFrom(cwd, '@changesets/cli/package.json')) as {
-      version: string
-    }
-  } catch (err: unknown) {
-    if ((err as { code: string } | undefined)?.code === 'MODULE_NOT_FOUND') {
-      throw new Error(
-        `Have you forgotten to install \`@changesets/cli\` in "${cwd}"?`,
-        { cause: err },
-      )
-    }
-    throw err
-  }
-}
-
 export interface VersionOptions {
   script?: string
-  gitlabToken: string
+  gitlab: GitLab
   cwd?: string
   mrTitle?: string
-  removeSourceBranch?: boolean
-  mrTargetBranch?: string
   commitMessage?: string
   hasPublishScript?: boolean
+  prDraft?: 'always' | 'create'
+  mrTargetBranch?: string
+  removeSourceBranch?: boolean
 }
 
-export interface VersionResult {
-  /** Whether the version command produced any file changes */
-  hasChanges: boolean
+export interface RunVersionResult {
+  /** The merge request number that was created or updated, if any */
+  pullRequestNumber?: number
+}
+
+const DRAFT_PREFIX_PATTERN = /^(?:Draft:|WIP:)\s*/i
+
+const withDraftPrefix = (title: string, draft: boolean) => {
+  const stripped = title.replace(DRAFT_PREFIX_PATTERN, '')
+  return draft ? `Draft: ${stripped}` : stripped
 }
 
 export async function runVersion({
   script,
-  gitlabToken,
+  gitlab,
   cwd = process.cwd(),
   mrTitle = 'Version Packages',
-  mrTargetBranch = context.ref,
   commitMessage = 'Version Packages',
-  removeSourceBranch = false,
   hasPublishScript = false,
-}: VersionOptions): Promise<VersionResult> {
+  prDraft,
+  mrTargetBranch = context.ref,
+  removeSourceBranch = false,
+}: VersionOptions): Promise<RunVersionResult> {
   const currentBranch = context.ref
   const versionBranch = `changeset-release/${currentBranch}`
 
-  const api = createApi(gitlabToken)
+  const { api } = gitlab
   const { preState } = await readChangesetState(cwd)
 
-  await gitUtils.switchToMaybeExistingBranch(versionBranch)
-  await exec('git', ['fetch', 'origin', currentBranch])
-  await gitUtils.reset(`origin/${currentBranch}`)
+  await gitlab.prepareBranch(versionBranch, currentBranch)
 
   const labels = getOptionalInput('labels')
     ?.split(',')
@@ -306,95 +316,79 @@ export async function runVersion({
 
   const versionsByDirectory = await getVersionsByDirectory(cwd)
 
-  // Changesets v3 exits with code 1 when there are no unreleased changesets,
-  // so we ignore the return code and check for actual file changes instead.
-  if (script) {
-    const [versionCommand, ...versionArgs] = script.split(/\s+/)
-    await exec(versionCommand, versionArgs, { cwd, ignoreReturnCode: true })
-  } else {
-    const changesetsCliPkgJson = requireChangesetsCliPkgJson(cwd)
-    const cmd = semver.lt(changesetsCliPkgJson.version, '2.0.0')
-      ? 'bump'
-      : 'version'
-    await exec('node', [resolveFrom(cwd, '@changesets/cli/bin.js'), cmd], {
-      cwd,
-      ignoreReturnCode: true,
-    })
-  }
-
-  // After running the version command, check if there are actual file changes.
-  // In Changesets v3, the version command may exit with code 1 when there are
-  // no unreleased changesets. Even if it exits 0, it might produce no file
-  // changes if all packages are already at the target version.
-  // In either case, we should not create or update an empty release MR.
-  if (await gitUtils.checkIfClean()) {
-    console.log(
-      'No file changes after running version command, skipping merge request creation',
-    )
-    return { hasChanges: false }
-  }
+  await (script
+    ? exec(script, undefined, { cwd })
+    : execChangesetsCli(['version'], { cwd }))
 
   const changedPackages = await getChangedPackages(cwd, versionsByDirectory)
 
-  const mrBodyPromise = (async () =>
-    `This MR was opened by the [changesets-gitlab](https://github.com/un-ts/changesets-gitlab) GitLab CI script. When you're ready to do a release, you can merge this and ${
-      hasPublishScript
-        ? 'the packages will be published to npm automatically'
-        : 'publish to npm yourself or [setup this action to publish automatically](https://github.com/un-ts/changesets-gitlab#with-publishing)'
-    }. If you're not ready to do a release yet, that's fine, whenever you add more changesets to ${currentBranch}, this MR will be updated.
-${
-  preState
-    ? `
+  // GitLab errors when creating a merge request whose source branch has no
+  // commits relative to the target, so skip it when nothing was bumped. Unlike
+  // checking the worktree, the version diff also holds when the version command
+  // committed the changes itself (`.changeset/config.json` `commit`).
+  if (changedPackages.length === 0) {
+    core.info(
+      'No packages were bumped after running version command, skipping merge request creation',
+    )
+    return {}
+  }
+
+  const mrBodyPromise = (async () => {
+    const changedPackagesInfo = await Promise.all(
+      changedPackages.map(async pkg => {
+        const changelogContents = await fs.readFile(
+          path.join(pkg.dir, 'CHANGELOG.md'),
+          'utf8',
+        )
+
+        const entry = getChangelogEntry(
+          changelogContents,
+          pkg.packageJson.version,
+        )
+        return {
+          highestLevel: entry.highestLevel,
+          private: !!pkg.packageJson.private,
+          content:
+            `## ${pkg.packageJson.name}@${pkg.packageJson.version}\n\n` +
+            entry.content,
+        }
+      }),
+    )
+
+    const releasesInfo = changedPackagesInfo
+      .filter(Boolean)
+      .sort(sortTheThings)
+      .map(x => x.content)
+      .join('\n ')
+
+    const preStateMessage = preState
+      ? `
 ⚠️⚠️⚠️⚠️⚠️⚠️
 
 \`${currentBranch}\` is currently in **pre mode** so this branch has prereleases rather than normal releases. If you want to exit prereleases, run \`changeset pre exit\` on \`${currentBranch}\`.
 
 ⚠️⚠️⚠️⚠️⚠️⚠️
 `
-    : ''
-}
+      : ''
+
+    return `This MR was opened by the [changesets-gitlab](https://github.com/un-ts/changesets-gitlab) GitLab CI script. When you're ready to do a release, you can merge this and ${
+      hasPublishScript
+        ? 'the packages will be published to npm automatically'
+        : 'publish to npm yourself or [setup this action to publish automatically](https://github.com/un-ts/changesets-gitlab#with-publishing)'
+    }. If you're not ready to do a release yet, that's fine, whenever you add more changesets to ${currentBranch}, this MR will be updated.
+${preStateMessage}
 # Releases
-` +
-    (
-      await Promise.all(
-        changedPackages.map(async pkg => {
-          const changelogContents = await fs.readFile(
-            path.join(pkg.dir, 'CHANGELOG.md'),
-            'utf8',
-          )
+${releasesInfo}`
+  })()
 
-          const entry = getChangelogEntry(
-            changelogContents,
-            pkg.packageJson.version,
-          )
-          return {
-            highestLevel: entry.highestLevel,
-            private: !!pkg.packageJson.private,
-            content:
-              `## ${pkg.packageJson.name}@${pkg.packageJson.version}\n\n` +
-              entry.content,
-          }
-        }),
-      )
-    )
-      // eslint-disable-next-line unicorn-x/no-await-expression-member
-      .filter(Boolean)
-      .sort(sortTheThings)
-      .map(x => x.content)
-      .join('\n '))()
+  const preStateSuffix = preState ? ` (${preState.tag})` : ''
+  const baseMrTitle = `${mrTitle}${preStateSuffix}`
 
-  // eslint-disable-next-line sonarjs/no-nested-template-literals
-  const finalMrTitle = `${mrTitle}${preState ? ` (${preState.tag})` : ''}`
-
-  // project with `commit: true` setting could have already committed files
-  if (!(await gitUtils.checkIfClean())) {
-    const finalCommitMessage = `${commitMessage}${
-      preState ? ` (${preState.tag})` : ''
-    }`
-    await gitUtils.commitAll(finalCommitMessage)
-  }
-
-  await gitUtils.push(versionBranch, { force: true })
+  const finalCommitMessage = `${commitMessage}${preStateSuffix}`
+  await gitlab.pushChanges({
+    branch: versionBranch,
+    message: finalCommitMessage,
+  })
 
   const searchResult = await api.MergeRequests.all({
     projectId: context.projectId,
@@ -404,12 +398,17 @@ ${
     maxPages: 1,
     perPage: 1,
   })
-  console.log(JSON.stringify(searchResult, null, 2))
+  core.debug(JSON.stringify(searchResult, null, 2))
+  let pullRequestNumber: number
   if (searchResult.length === 0) {
-    console.log(
-      `creating merge request from ${versionBranch} to ${mrTargetBranch}.`,
+    const finalMrTitle = withDraftPrefix(
+      baseMrTitle,
+      prDraft === 'create' || prDraft === 'always',
     )
-    await api.MergeRequests.create(
+    core.info(
+      `Creating merge request from ${versionBranch} to ${mrTargetBranch}`,
+    )
+    const mergeRequest = await api.MergeRequests.create(
       context.projectId,
       versionBranch,
       mrTargetBranch,
@@ -420,9 +419,17 @@ ${
         labels,
       },
     )
+    pullRequestNumber = mergeRequest.iid
   } else {
-    console.log(`updating found merge request !${searchResult[0].iid}`)
-    await api.MergeRequests.edit(context.projectId, searchResult[0].iid, {
+    pullRequestNumber = searchResult[0].iid
+    // `create` only applies to new MRs, so an existing one keeps its state
+    // unless `always` is requested.
+    const finalMrTitle = withDraftPrefix(
+      baseMrTitle,
+      prDraft === 'always' || DRAFT_PREFIX_PATTERN.test(searchResult[0].title),
+    )
+    core.info(`Updating found merge request !${pullRequestNumber}`)
+    await api.MergeRequests.edit(context.projectId, pullRequestNumber, {
       title: finalMrTitle,
       description: await mrBodyPromise,
       removeSourceBranch,
@@ -430,5 +437,5 @@ ${
     })
   }
 
-  return { hasChanges: true }
+  return { pullRequestNumber }
 }

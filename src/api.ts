@@ -10,6 +10,24 @@ const PROXY_PROPS = ['http_proxy', 'https_proxy', 'no_proxy'] as const
 
 let bootstrapped = false
 
+const createGitlab = (token: string) => {
+  const host = env.GITLAB_HOST
+
+  if (env.GITLAB_TOKEN_TYPE === 'oauth') {
+    return new Gitlab({
+      host,
+      oauthToken: token,
+    })
+  }
+
+  return new Gitlab({
+    host,
+    token,
+  })
+}
+
+const apiCache = new Map<string, ReturnType<typeof createGitlab>>()
+
 export const createApi = (gitlabToken?: string) => {
   if (!bootstrapped) {
     bootstrapped = true
@@ -26,17 +44,12 @@ export const createApi = (gitlabToken?: string) => {
   }
 
   const token = gitlabToken || env.GITLAB_TOKEN
-  const host = env.GITLAB_HOST
-
-  if (env.GITLAB_TOKEN_TYPE === 'oauth') {
-    return new Gitlab({
-      host,
-      oauthToken: token,
-    })
+  let api = apiCache.get(token)
+  if (!api) {
+    api = createGitlab(token)
+    apiCache.set(token, api)
   }
-
-  return new Gitlab({
-    host,
-    token,
-  })
+  return api
 }
+
+export type GitLabApi = ReturnType<typeof createApi>

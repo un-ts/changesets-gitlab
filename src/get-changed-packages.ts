@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
+import * as core from '@actions/core'
 import { assembleReleasePlan } from '@changesets/assemble-release-plan'
 import { validateConfig as parseConfig } from '@changesets/config'
 import { parseChangesetFile as parseChangeset } from '@changesets/parse'
@@ -36,7 +37,7 @@ export const getChangedPackages = async ({
       return JSON.parse(await fetchFile(path)) as T
     } catch (err) {
       hasErrored = true
-      console.error(err)
+      core.error(err as Error | string)
       return {} as unknown as T
     }
   }
@@ -46,7 +47,7 @@ export const getChangedPackages = async ({
       return await fetchFile(path)
     } catch (err) {
       hasErrored = true
-      console.error(err)
+      core.error(err as Error | string)
       return ''
     }
   }
@@ -196,23 +197,22 @@ export const getChangedPackages = async ({
   )
 
   return {
-    changedPackages: (packages.tool.type === 'root'
-      ? packages.packages
-      : packages.packages.filter(pkg =>
-          changedFiles.some(
-            changedFile =>
-              changedFile === pkg.dir || changedFile.startsWith(`${pkg.dir}/`),
-          ),
-        )
-    )
-      // Reuse the same predicate Changesets uses to decide whether a package is
-      // versionable: it skips ignored packages, private packages that haven't
-      // opted into versioning via `privatePackages.version`, and packages
-      // without a `version`. This keeps the suggested changeset from producing
-      // the "Mixed changesets that contain both ignored and not ignored packages
-      // are not allowed" error (https://github.com/changesets/bot/issues/44).
+    changedPackages: packages.packages
       .filter(
         pkg =>
+          (packages.tool.type === 'root' ||
+            changedFiles.some(
+              changedFile =>
+                changedFile === pkg.dir ||
+                changedFile.startsWith(`${pkg.dir}/`),
+            )) &&
+          // Reuse the same predicate Changesets uses to decide whether a
+          // package is versionable: it skips ignored packages, private packages
+          // that haven't opted into versioning via `privatePackages.version`,
+          // and packages without a `version`. This keeps the suggested changeset
+          // from producing the "Mixed changesets that contain both ignored and
+          // not ignored packages are not allowed" error
+          // (https://github.com/changesets/bot/issues/44).
           !shouldSkipPackage(pkg, {
             ignore: config.ignore,
             allowPrivatePackages: config.privatePackages.version,

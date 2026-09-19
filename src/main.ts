@@ -1,185 +1,162 @@
-import fs from 'node:fs/promises'
-import { URL } from 'node:url'
-
-import { exportVariable, getInput, setOutput } from '@actions/core'
+import * as core from '@actions/core'
 import { exec } from '@actions/exec'
 
-import { createApi } from './api.ts'
 import { env } from './env.js'
-import { setupUser } from './git-utils.js'
+import { GitLab } from './gitlab.js'
 import readChangesetState from './read-changeset-state.js'
-import { runPublish, runVersion } from './run.js'
+import { type PublishResult, runPublish, runVersion } from './run.js'
 import type { MainCommandOptions } from './types.js'
 import {
-  FALSY_VALUES,
-  TRUTHY_VALUES,
-  execSync,
-  fileExists,
+  getBooleanInput,
   getCwdInput,
   getOptionalInput,
-  getUsername,
+  setOutput,
+  throwOnRemovedCommitModeInput,
+  throwOnRenamedInputs,
+  validateChangesetsCliVersion,
 } from './utils.js'
 
 export const main = async ({
   published,
   onlyChangesets,
 }: MainCommandOptions = {}) => {
-  const { GITLAB_TOKEN, NPM_TOKEN } = env
-
-  setOutput('published', false)
-  setOutput('publishedPackages', [])
-
-  if (env.CI) {
-    console.log('setting git user')
-    await setupUser()
-
-    const url = new URL(env.GITLAB_HOST)
-
-    console.log('setting GitLab credentials')
-    const username = await getUsername(createApi())
-
-    await exec(
-      'git',
-      [
-        'remote',
-        'set-url',
-        'origin',
-        `${url.protocol}//${encodeURIComponent(username)}:${GITLAB_TOKEN}@${
-          url.host
-        }${url.pathname.replace(/\/$/, '')}/${env.CI_PROJECT_PATH}.git`,
-      ],
-      { silent: !TRUTHY_VALUES.has(env.DEBUG_GITLAB_CREDENTIAL!) },
-    )
-  }
+  const { GITLAB_TOKEN } = env
 
   const { absolute: cwd } = getCwdInput()
 
+  await validateChangesetsCliVersion(cwd)
+
+  // Inputs were renamed to match `changesets/action`. Both the old and the new
+  // snake_case/kebab-case spellings normalize to the same `INPUT_*` variable
+  // whenever they only differ by the separator, so only guard the ones that
+  // actually moved to a different variable.
+  throwOnRenamedInputs({
+    publish: 'publish-script',
+    version: 'version-script',
+    commit: 'commit-message',
+    title: 'pr-title',
+    target_branch: 'pr-base-branch',
+  })
+  throwOnRemovedCommitModeInput()
+
+  const pushWithGitCli = getBooleanInput('push-with-git-cli', true)
+
+  const gitlab = new GitLab({ gitlabToken: GITLAB_TOKEN, cwd, pushWithGitCli })
+
   const { changesets } = await readChangesetState(cwd)
 
-  const publishScript = getInput('publish')
+  const publishScript = getOptionalInput('publish-script')
   const hasChangesets = changesets.length > 0
+  const hasNonEmptyChangesets = changesets.some(
+    changeset => changeset.releases.length > 0,
+  )
   const hasPublishScript = !!publishScript
+
+  setOutput('published', false)
+  setOutput('published-packages', [])
+  setOutput('has-changesets', hasChangesets)
 
   switch (true) {
     case !hasChangesets && !hasPublishScript: {
-      console.log('No changesets found')
+      core.info(
+        'No changesets present or were removed by merging version MR. Not publishing because publish-script is not set.',
+      )
       return
     }
     case !hasChangesets && hasPublishScript: {
-      console.log(
-        'No changesets found, attempting to publish any unpublished packages to npm',
+      core.info(
+        'No changesets found. Attempting to publish any unpublished packages to npm',
       )
-      await runPublishFlow({
-        publishScript,
-        published,
+
+      const result = await runPublish({
+        script: publishScript,
+        gitlab,
+        ...getPublishFlags(),
         cwd,
-        GITLAB_TOKEN,
-        NPM_TOKEN,
       })
+
+      await handlePublishResult(result, published)
+      return
+    }
+    case hasChangesets && !hasNonEmptyChangesets: {
+      core.info('All changesets are empty. Not creating MR')
       return
     }
     case hasChangesets: {
-      const result = await runVersion({
-        script: getOptionalInput('version'),
-        gitlabToken: GITLAB_TOKEN,
-        mrTitle: getOptionalInput('title'),
-        mrTargetBranch: getOptionalInput('target_branch'),
-        commitMessage: getOptionalInput('commit'),
-        removeSourceBranch: getInput('remove_source_branch') === 'true',
-        hasPublishScript,
+      const { pullRequestNumber } = await runVersion({
+        script: getOptionalInput('version-script'),
+        gitlab,
         cwd,
+        mrTitle: getOptionalInput('pr-title'),
+        commitMessage: getOptionalInput('commit-message'),
+        hasPublishScript,
+        prDraft: getPrDraftInput(),
+        mrTargetBranch: getOptionalInput('pr-base-branch'),
+        removeSourceBranch: getBooleanInput('remove-source-branch'),
       })
       if (onlyChangesets) {
-        execSync(onlyChangesets)
+        await exec(onlyChangesets)
       }
-      // If the version command produced no file changes (e.g. in Changesets v3
-      // when there are no unreleased changesets, or all packages are already
-      // at the target version), fall through to the publish flow instead of
-      // leaving the packages unpublished.
-      if (!result.hasChanges && hasPublishScript) {
-        console.log(
-          'Version command produced no changes, attempting to publish any unpublished packages to npm',
-        )
-        await runPublishFlow({
-          publishScript,
-          published,
-          cwd,
-          GITLAB_TOKEN,
-          NPM_TOKEN,
-        })
+      if (pullRequestNumber !== undefined) {
+        setOutput('pr-number', pullRequestNumber)
       }
+      return
     }
   }
 }
 
-async function runPublishFlow({
-  publishScript,
-  published,
-  cwd,
-  GITLAB_TOKEN,
-  NPM_TOKEN,
-}: {
-  publishScript: string
-  published?: string
-  cwd: string
-  GITLAB_TOKEN: string
-  NPM_TOKEN?: string
-}) {
-  if (NPM_TOKEN) {
-    const userNpmrcPath = `${env.HOME}/.npmrc`
-    if (await fileExists(userNpmrcPath)) {
-      console.info('Found existing user .npmrc file')
-      const userNpmrcContent = await fs.readFile(userNpmrcPath, 'utf8')
-      const authLine = userNpmrcContent.split('\n').find(line => {
-        // check based on https://github.com/npm/cli/blob/8f8f71e4dd5ee66b3b17888faad5a7bf6c657eed/test/lib/adduser.js#L103-L105
-        return /^\s*\/\/registry\.npmjs\.org\/:[_-]authToken=/i.test(line)
-      })
-      if (authLine) {
-        console.info(
-          'Found existing auth token for the npm registry in the user .npmrc file',
-        )
-      } else {
-        console.info(
-          "Didn't find existing auth token for the npm registry in the user .npmrc file, creating one",
-        )
-        await fs.appendFile(
-          userNpmrcPath,
-          `\n//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n`,
-        )
-      }
-    } else {
-      console.info(
-        'No user .npmrc file found, creating one with NPM_TOKEN used as auth token',
-      )
-      await fs.writeFile(
-        userNpmrcPath,
-        `//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n`,
-      )
-    }
-  } else {
-    console.info(
-      'No NPM_TOKEN found - assuming trusted publishing or npm is already authenticated',
+export function getPrDraftInput(): 'always' | 'create' | undefined {
+  const prDraft = getOptionalInput('pr-draft')
+  if (prDraft !== undefined && prDraft !== 'always' && prDraft !== 'create') {
+    throw new Error(`Invalid pr-draft input: ${prDraft}`)
+  }
+  return prDraft
+}
+
+export function getPublishFlags() {
+  const createGitlabReleases = getBooleanInput('create-gitlab-releases', true)
+  const pushGitTags = getBooleanInput('push-git-tags', true)
+  if (createGitlabReleases && !pushGitTags) {
+    throw new Error(
+      'The input "create-gitlab-releases" is set to true, but "push-git-tags" is set to false. ' +
+        'Creating GitLab releases requires pushing git tags. Please set "push-git-tags" to true ' +
+        'or set "create-gitlab-releases" to false.',
     )
   }
+  return { createGitlabReleases, pushGitTags }
+}
 
-  const result = await runPublish({
-    script: publishScript,
-    gitlabToken: GITLAB_TOKEN,
-    createGitlabReleases: !FALSY_VALUES.has(getInput('create_gitlab_releases')),
-    cwd,
-  })
-
+// GitLab counterpart of the `if (result.published)`/`if (result.exitCode !== 0)`
+// blocks in `changesets/action`'s `src/index.ts`. As well as the
+// GitHub-compatible outputs it runs the optional post-publish command with
+// `PUBLISHED`/`PUBLISHED_PACKAGES` set, which is a GitLab-only feature.
+export async function handlePublishResult(
+  result: PublishResult,
+  published?: string,
+) {
   if (result.published) {
     setOutput('published', true)
-    setOutput('publishedPackages', result.publishedPackages)
-    exportVariable('PUBLISHED', true)
-    exportVariable('PUBLISHED_PACKAGES', result.publishedPackages)
+    setOutput('published-packages', result.publishedPackages)
     if (published) {
-      execSync(published)
+      await exec(published, undefined, {
+        env: {
+          ...process.env,
+          PUBLISHED: 'true',
+          PUBLISHED_PACKAGES: JSON.stringify(result.publishedPackages),
+        },
+      })
     }
-  } else if (result.exitCode !== 0) {
-    console.warn(
-      `Publish command exited with code ${result.exitCode} and no packages were published`,
+  }
+
+  if (result.exitCode !== 0) {
+    throw new Error(
+      `Publish command exited with code ${result.exitCode}${
+        result.published
+          ? `, but some packages were published: ${result.publishedPackages
+              .map(p => `${p.name}@${p.version}`)
+              .join(', ')}`
+          : ''
+      }`,
     )
   }
 }

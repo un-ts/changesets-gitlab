@@ -1,18 +1,31 @@
-import { execSync as execSync_ } from 'node:child_process'
+import { writeFileSync } from 'node:fs'
 import fs from 'node:fs/promises'
 import { createRequire } from 'node:module'
+import os from 'node:os'
 import path from 'node:path'
 
-import { getInput } from '@actions/core'
-import { exec } from '@actions/exec'
-import type { Gitlab } from '@gitbeaker/core'
+import * as core from '@actions/core'
+import {
+  exec,
+  getExecOutput,
+  type ExecOptions as ActionsExecOptions,
+} from '@actions/exec'
+import {
+  type CommitAction,
+  type Gitlab,
+  GitbeakerRequestError,
+} from '@gitbeaker/rest'
 import type { Package } from '@manypkg/get-packages'
 import { getPackages } from '@manypkg/get-packages'
 import { toString as mdastToString } from 'mdast-util-to-string'
 import remarkParse from 'remark-parse'
 import remarkStringify from 'remark-stringify'
+import major from 'semver/functions/major.js'
+import subset from 'semver/ranges/subset.js'
 import { unified } from 'unified'
 
+import type { GitLabApi } from './api.js'
+import { FALSY_VALUES, TRUTHY_VALUES } from './constants.js'
 import { env } from './env.js'
 
 export const BumpLevels = {
@@ -92,35 +105,6 @@ export function getChangelogEntry(changelog: string, version: string) {
   }
 }
 
-export async function execWithOutput(
-  command: string,
-  args?: string[],
-  options?: {
-    ignoreReturnCode?: boolean
-    cwd?: string
-    env?: Record<string, string>
-  },
-) {
-  let myOutput = ''
-  let myError = ''
-
-  return {
-    code: await exec(command, args, {
-      listeners: {
-        stdout: (data: Buffer) => {
-          myOutput += data.toString()
-        },
-        stderr: (data: Buffer) => {
-          myError += data.toString()
-        },
-      },
-      ...options,
-    }),
-    stdout: myOutput,
-    stderr: myError,
-  }
-}
-
 export function sortTheThings(
   a: { private: boolean; highestLevel: number },
   b: { private: boolean; highestLevel: number },
@@ -133,13 +117,6 @@ export function sortTheThings(
   }
   return -1
 }
-
-export const identify = <T>(
-  _: T,
-): _ is Exclude<
-  T,
-  '' | (T extends boolean ? false : boolean) | null | undefined
-> => !!_
 
 export async function getAllFiles(dir: string, base = dir): Promise<string[]> {
   dir ||= '.'
@@ -156,10 +133,161 @@ export async function getAllFiles(dir: string, base = dir): Promise<string[]> {
   return files.flat()
 }
 
-export const execSync = (command: string) =>
-  execSync_(command, { stdio: 'inherit' })
+// GitLab counterpart of `@changesets/ghcommit`'s `commitChangesSinceBase` used
+// by `changesets/action` in API push mode: derive the file changes since the
+// base commit and commit them through the GitLab API.
+export async function commitChangesSinceBase({
+  api,
+  projectId,
+  branch,
+  message,
+  base,
+  force,
+  cwd,
+}: {
+  api: GitLabApi
+  projectId: number | string
+  branch: string
+  message: string
+  base: { commit: string }
+  force: boolean
+  cwd: string
+}) {
+  const actions = await getCommitActions(cwd, base.commit)
+  if (actions.length === 0) {
+    return
+  }
+  await api.Commits.create(projectId, branch, message, actions, {
+    startSha: base.commit,
+    force,
+  })
+}
 
-export const getOptionalInput = (name: string) => getInput(name) || undefined
+async function getCommitActions(
+  cwd: string,
+  baseCommit: string,
+): Promise<CommitAction[]> {
+  const { stdout: gitRoot } = await getExecOutput(
+    'git',
+    ['rev-parse', '--show-toplevel'],
+    { cwd },
+  )
+  // `git diff` paths are relative to the repository root, while `ls-files`
+  // needs `--full-name` to match; both are scoped to `cwd`.
+  const { stdout: diffOutput } = await getExecOutput(
+    'git',
+    ['diff', '--name-status', '--no-renames', baseCommit, '--', '.'],
+    { cwd },
+  )
+  const { stdout: untrackedOutput } = await getExecOutput(
+    'git',
+    ['ls-files', '--others', '--exclude-standard', '--full-name', '--', '.'],
+    { cwd },
+  )
+
+  const rootDir = gitRoot.trim()
+  const actions: CommitAction[] = []
+  const seen = new Set<string>()
+
+  const addAction = async (
+    filePath: string,
+    action: CommitAction['action'],
+  ) => {
+    if (seen.has(filePath)) {
+      return
+    }
+    seen.add(filePath)
+    if (action === 'delete') {
+      actions.push({ action, filePath })
+    } else {
+      const content = await fs.readFile(
+        path.resolve(rootDir, filePath),
+        'base64',
+      )
+      actions.push({ action, filePath, content, encoding: 'base64' })
+    }
+  }
+
+  for (const line of diffOutput.split('\n')) {
+    if (!line) {
+      continue
+    }
+    const [status, filePath] = line.split('\t')
+    if (!filePath) {
+      continue
+    }
+    let action: CommitAction['action'] = 'update'
+    if (status === 'A') {
+      action = 'create'
+    } else if (status === 'D') {
+      action = 'delete'
+    }
+    await addAction(filePath, action)
+  }
+
+  for (const filePath of untrackedOutput.split('\n')) {
+    if (filePath) {
+      await addAction(filePath, 'create')
+    }
+  }
+
+  return actions
+}
+
+// GitLab CI/CD variable names cannot contain hyphens, so kebab-case input names
+// (matching `changesets/action`) are read from their underscore-normalized
+// `INPUT_*` variables.
+const normalizeInputName = (name: string) => name.replaceAll('-', '_')
+
+const toInputEnvName = (name: string) =>
+  `INPUT_${normalizeInputName(name).toUpperCase()}`
+
+export const getOptionalInput = (name: string) =>
+  core.getInput(normalizeInputName(name)) || undefined
+
+export function getRequiredInput(name: string) {
+  // it's just a small utility wrapper, mainly introduced for usage parity with our custom `getOptionalInput`
+  return core.getInput(normalizeInputName(name), { required: true })
+}
+
+// GitLab has no `action.yml` to declare input defaults, so fall back to
+// `defaultValue` when the input is unset instead of throwing like
+// `core.getBooleanInput` would.
+export function getBooleanInput(name: string, defaultValue = false) {
+  const normalizedName = normalizeInputName(name)
+  const value = core.getInput(normalizedName)
+  if (!value) {
+    return defaultValue
+  }
+  // The sets cover the YAML 1.2 boolean spellings plus the GitLab-style
+  // `1`/`0` that `core.getBooleanInput` rejects, and are case-sensitive.
+  if (TRUTHY_VALUES.has(value)) {
+    return true
+  }
+  if (FALSY_VALUES.has(value)) {
+    return false
+  }
+  return core.getBooleanInput(normalizedName)
+}
+
+let ensuredOutputFile: string | undefined
+
+// GitLab has no `@actions/core` outputs, so fall back to
+// `~/.changesets-gitlab.outputs` so later steps can read the values. Set
+// `$GITHUB_OUTPUT` to an empty string to opt out of the fallback.
+export function setOutput(name: string, value: unknown) {
+  const outputFile = (process.env.GITHUB_OUTPUT ??= path.join(
+    os.homedir(),
+    '.changesets-gitlab.outputs',
+  ))
+  if (outputFile && ensuredOutputFile !== outputFile) {
+    ensuredOutputFile = outputFile
+    // `@actions/core` requires the output file to already exist; `a` creates it
+    // without truncating values written by earlier CLI runs.
+    writeFileSync(outputFile, '', { flag: 'a' })
+  }
+  core.setOutput(name, value)
+}
 
 export const getCwdInput = (): { relative: string; absolute: string } => {
   const CWD = process.cwd()
@@ -179,27 +307,165 @@ export const getCwdInput = (): { relative: string; absolute: string } => {
   return { relative, absolute }
 }
 
-export const getUsername = (api: Gitlab) => {
-  return (
-    env.GITLAB_CI_USER_NAME ??
-    api.Users.showCurrentUser().then(currentUser => currentUser.username)
-  )
-}
+const usernameCache = new WeakMap<Gitlab, Promise<string>>()
 
-export function fileExists(filePath: string) {
-  return fs.access(filePath, fs.constants.F_OK).then(
-    () => true,
-    () => false,
+export const getUsername = (api: Gitlab) => {
+  const cached = usernameCache.get(api)
+  if (cached) {
+    return cached
+  }
+  const usernamePromise = Promise.resolve(
+    env.GITLAB_CI_USER_NAME ??
+      api.Users.showCurrentUser().then(currentUser => currentUser.username),
   )
+  usernameCache.set(api, usernamePromise)
+  return usernamePromise
 }
 
 export const cjsRequire =
   typeof require === 'undefined' ? createRequire(import.meta.url) : require
 
-export const FALSY_VALUES = new Set(['false', '0'])
+export function isErrorWithCode(err: unknown, code: string) {
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    'code' in err &&
+    err.code === code
+  )
+}
 
-export const TRUTHY_VALUES = new Set(['true', '1'])
+export async function logGitbeakerError(err: unknown) {
+  if (err instanceof GitbeakerRequestError && err.cause) {
+    const { description, request, response } = err.cause
+    core.error(description)
+    try {
+      core.error(`request: ${await request.text()}`)
+    } catch {
+      core.error("The error's request could not be used as plain text")
+    }
+    try {
+      core.error(`response: ${await response.text()}`)
+    } catch {
+      core.error("The error's response could not be used as plain text")
+    }
+  }
+}
 
-export const GITLAB_MAX_TAGS = 4
+export function throwOnRemovedCommitModeInput() {
+  for (const inputName of ['commit-mode', 'commitMode']) {
+    const value = getOptionalInput(inputName)
+    if (value === undefined) {
+      continue
+    }
 
-export const HTTP_STATUS_NOT_FOUND = 404
+    const envName = toInputEnvName(inputName)
+    const pushWithGitCliEnv = toInputEnvName('push-with-git-cli')
+    const migration =
+      value === 'git-cli'
+        ? `Replace it with "${pushWithGitCliEnv}=true".`
+        : `Set "${pushWithGitCliEnv}" to true for Git CLI pushes or false for GitLab API pushes.`
+    throw new Error(
+      `The "${envName}" environment variable has been replaced by "${pushWithGitCliEnv}". ${migration}`,
+    )
+  }
+}
+
+export function throwOnRenamedInputs(renames: Record<string, string>) {
+  const references: Record<string, string> = {}
+
+  for (const [oldInput, newInput] of Object.entries(renames)) {
+    if (getOptionalInput(oldInput)) {
+      references[oldInput] = newInput
+    }
+  }
+
+  if (Object.keys(references).length > 0) {
+    const list = Object.entries(references)
+      .map(
+        ([oldInput, newInput]) =>
+          `- "${toInputEnvName(oldInput)}" -> "${toInputEnvName(newInput)}"`,
+      )
+      .join('\n')
+    throw new Error(
+      `The following environment variables have been renamed:\n${list}\nPlease update your CI configuration.`,
+    )
+  }
+}
+
+const changesetsCliCompatibilityError =
+  'This version of changesets-gitlab is designed to work with Changesets CLI v3. ' +
+  'Changesets CLI v2 is not supported; use changesets-gitlab v0.14 or earlier instead.'
+
+export async function validateChangesetsCliVersion(cwd: string) {
+  const { rootPackage } = await getPackages(cwd)
+  const packageJson = rootPackage?.packageJson
+  const declaredVersion =
+    packageJson?.devDependencies?.['@changesets/cli'] ??
+    packageJson?.dependencies?.['@changesets/cli']
+
+  if (typeof declaredVersion === 'string') {
+    const range = declaredVersion.startsWith('workspace:')
+      ? declaredVersion.slice('workspace:'.length)
+      : declaredVersion
+
+    let isV2 = false
+
+    try {
+      isV2 = subset(range, '>=2.0.0-0 <3.0.0-0', {
+        includePrerelease: true,
+      })
+    } catch {
+      // it could be a non-semver protocol
+    }
+
+    if (isV2) {
+      throw new Error(changesetsCliCompatibilityError)
+    }
+  }
+
+  let cliPackageJson: { version?: string }
+
+  try {
+    cliPackageJson = cjsRequire(
+      cjsRequire.resolve('@changesets/cli/package.json', { paths: [cwd] }),
+    ) as { version?: string }
+  } catch {
+    return
+  }
+
+  if (
+    typeof cliPackageJson.version === 'string' &&
+    major(cliPackageJson.version) === 2
+  ) {
+    throw new Error(changesetsCliCompatibilityError)
+  }
+}
+
+function resolveChangesetsCli(cwd: string) {
+  return cjsRequire.resolve('@changesets/cli/bin.js', {
+    paths: [cwd],
+  })
+}
+
+interface ExecOptions extends Omit<ActionsExecOptions, 'env'> {
+  env?: Record<string, string | undefined>
+}
+
+export function execChangesetsCli(args: string[], options?: ExecOptions) {
+  return exec(
+    'node',
+    [resolveChangesetsCli(options?.cwd ?? process.cwd()), ...args],
+    options as ActionsExecOptions,
+  )
+}
+
+export function getExecOutputChangesetsCli(
+  args: string[],
+  options?: ExecOptions,
+) {
+  return getExecOutput(
+    'node',
+    [resolveChangesetsCli(options?.cwd ?? process.cwd()), ...args],
+    options as ActionsExecOptions,
+  )
+}

@@ -223,8 +223,7 @@ export async function runPublish({
       const pkg = packagesByName.get(event.packageName)
       if (pkg === undefined) {
         throw new Error(
-          `Package "${event.packageName}" not found.` +
-            'This is probably a bug in the action, please open an issue',
+          `Package "${event.packageName}" not found. This is probably a bug in the action, please open an issue.`,
         )
       }
       return { pkg, tag: event.tag }
@@ -232,15 +231,15 @@ export async function runPublish({
 
     if (tool.type === 'root' && packages.length === 0) {
       throw new Error(
-        'No package found.' +
-          'This is probably a bug in the action, please open an issue',
+        'No package found. This is probably a bug in the action, please open an issue.',
       )
     }
 
     if (createGitlabReleases || pushGitTags) {
+      const tags = releases.map(({ tag }) => tag)
       await (pushAllTags
-        ? gitlab.pushTags()
-        : Promise.all(releases.map(({ tag }) => gitlab.pushTag(tag))))
+        ? gitlab.pushTags(tags)
+        : Promise.all(tags.map(tag => gitlab.pushTag(tag))))
     }
 
     if (createGitlabReleases) {

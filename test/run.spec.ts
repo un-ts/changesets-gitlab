@@ -193,7 +193,7 @@ describe('runPublish', () => {
       publishedPackages: [{ name: 'pkg', version: '1.0.0' }],
       exitCode: 0,
     })
-    expect(pushTags).toHaveBeenCalledOnce()
+    expect(pushTags).toHaveBeenCalledWith(['pkg@1.1.0'])
     expect(create).toHaveBeenCalledWith(
       '1',
       expect.objectContaining({ tag_name: 'pkg@1.1.0' }),

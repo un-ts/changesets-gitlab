@@ -144,18 +144,10 @@ export class GitLab {
         await this.api.Tags.create(context.projectId, tag, context.sha)
         return
       }
-      // Check if the tag exists locally before attempting to push.
-      // In Changesets v3, the git-tag command may report tags that were
-      // "skipped (already exist)" on the remote but don't exist locally,
-      // causing `git push origin <tag>` to fail with "src refspec does not match".
-      const { exitCode } = await getExecOutput('git', ['tag', '-l', tag], {
-        cwd: this.cwd,
-        ignoreReturnCode: true,
-      })
-      if (exitCode !== 0) {
-        return
-      }
-      await exec('git', ['push', 'origin', tag], {
+      // The fully-qualified refspec keeps a tag coming from
+      // `CHANGESETS_OUTPUT` from being parsed as a `git push` option
+      // (e.g. `--upload-pack`).
+      await exec('git', ['push', 'origin', `refs/tags/${tag}`], {
         cwd: this.cwd,
         env: {
           ...process.env,
@@ -171,10 +163,15 @@ export class GitLab {
     }
   }
 
-  async pushTags() {
+  async pushTags(tags: string[]) {
+    if (tags.length === 0) {
+      return
+    }
+    // Push only the reported tags, in a single command, using fully-qualified
+    // refspecs so they cannot be interpreted as `git push` options.
     const { stderr, exitCode } = await getExecOutput(
       'git',
-      ['push', 'origin', '--tags'],
+      ['push', 'origin', ...tags.map(tag => `refs/tags/${tag}`)],
       {
         cwd: this.cwd,
         ignoreReturnCode: true,

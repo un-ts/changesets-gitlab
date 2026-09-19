@@ -50,15 +50,17 @@ async function getMode(cwd: string): Promise<ModeResult> {
     return { mode: hasNonEmptyChangesets ? 'version' : 'none' }
   }
 
-  const publishPlanPath =
-    getOptionalInput('publish-plan-path') ??
-    path.join(
-      os.tmpdir(),
-      `changeset-publish-plan-${Date.now()}`,
-      // we need a stable filename here (in a unique dirname) so the publish
-      // command can find this cleanly
-      'publish-plan.json',
-    )
+  const configuredPublishPlanPath = getOptionalInput('publish-plan-path')
+  const publishPlanPath = configuredPublishPlanPath
+    ? // resolve against `cwd`, the Changesets CLI writes the file relative to it
+      path.resolve(cwd, configuredPublishPlanPath)
+    : path.join(
+        os.tmpdir(),
+        `changeset-publish-plan-${Date.now()}`,
+        // we need a stable filename here (in a unique dirname) so the publish
+        // command can find this cleanly
+        'publish-plan.json',
+      )
   await execChangesetsCli(['publish-plan', '--output', publishPlanPath], {
     cwd,
     env: process.env,

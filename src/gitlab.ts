@@ -22,16 +22,13 @@ const switchToMaybeExistingBranch = async (
   branch: string,
   options: GitOptions,
 ) => {
-  const { stderr } = await getExecOutput('git', ['checkout', branch], {
+  const { exitCode } = await getExecOutput('git', ['checkout', branch], {
     ignoreReturnCode: true,
     ...options,
   })
-  const stderrString = stderr.toString()
-  const isCreatingBranch =
-    !stderrString.includes(`Switched to branch '${branch}'`) &&
-    // it could be a detached HEAD
-    !stderrString.includes(`Switched to a new branch '${branch}'`)
-  if (isCreatingBranch) {
+  // `git checkout <branch>` exits 0 when the branch exists (including when it
+  // is already checked out); only create it when it does not.
+  if (exitCode !== 0) {
     await exec('git', ['checkout', '-b', branch], options)
   }
 }
@@ -182,13 +179,23 @@ export class GitLab {
 
   async prepareBranch(branch: string, baseBranch: string) {
     await switchToMaybeExistingBranch(branch, { cwd: this.cwd })
-    await exec('git', ['fetch', 'origin', baseBranch], {
-      cwd: this.cwd,
-      env: {
-        ...process.env,
-        ...(await this.#getCliAuthEnv()),
-      } as Record<string, string>,
-    })
+    // Fetch through an explicit refspec so `baseBranch` cannot be interpreted
+    // as a `git fetch` option (e.g. `--upload-pack`).
+    await exec(
+      'git',
+      [
+        'fetch',
+        'origin',
+        `+refs/heads/${baseBranch}:refs/remotes/origin/${baseBranch}`,
+      ],
+      {
+        cwd: this.cwd,
+        env: {
+          ...process.env,
+          ...(await this.#getCliAuthEnv()),
+        } as Record<string, string>,
+      },
+    )
     await reset(`origin/${baseBranch}`, { cwd: this.cwd })
   }
 

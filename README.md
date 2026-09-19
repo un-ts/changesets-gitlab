@@ -61,10 +61,10 @@ The CLI exposes separate commands, mirroring the `changesets/action` sub-actions
 ```sh
 # Split the release across stages, using fixed paths so they can be shared
 export INPUT_PUBLISH_PLAN_PATH="$CI_PROJECT_DIR/.changeset-publish-plan/publish-plan.json"
-yarn changesets-gitlab select-mode
-yarn changesets-gitlab version
-yarn changesets-gitlab pack --publish-plan "$INPUT_PUBLISH_PLAN_PATH" --out-dir "$CI_PROJECT_DIR/.changeset-pack"
-yarn changesets-gitlab publish --from-pack-dir "$CI_PROJECT_DIR/.changeset-pack"
+changesets-gitlab select-mode
+changesets-gitlab version
+changesets-gitlab pack --publish-plan "$INPUT_PUBLISH_PLAN_PATH" --out-dir "$CI_PROJECT_DIR/.changeset-pack"
+changesets-gitlab publish --from-pack-dir "$CI_PROJECT_DIR/.changeset-pack"
 ```
 
 ### Outputs
@@ -118,20 +118,20 @@ comment:
   stage: comment
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-  script: yarn changesets-gitlab comment # comment automatically like https://github.com/changesets/bot
+  script: changesets-gitlab comment # comment automatically like https://github.com/changesets/bot
 
 release:
   image: node:lts-alpine
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  script: yarn changesets-gitlab
+  script: changesets-gitlab
 ```
 
 #### With Publishing
 
 npm authentication is left to npm itself (the CLI never touches `~/.npmrc`). Use one of:
 
-1. **Trusted Publishing / OIDC (preferred)**: configure npm Trusted Publishers for your GitLab pipeline (see the npm docs: <https://docs.npmjs.com/trusted-publishers#supported-cicd-providers>). The pipeline injects `NPM_ID_TOKEN`; no token or `.npmrc` is needed.
+1. **Trusted Publishing / OIDC (preferred)**: configure npm Trusted Publishers for your GitLab pipeline (see the npm docs: <https://docs.npmjs.com/trusted-publishers#supported-cicd-providers>) and request `NPM_ID_TOKEN` in the release job with `id_tokens` (as in the example below). No token or `.npmrc` is needed.
 2. **Classic automation token**: create an [npm automation token](https://docs.npmjs.com/creating-and-viewing-authentication-tokens) and expose it to the pipeline as `NODE_AUTH_TOKEN`:
 
    ```yml
@@ -160,13 +160,16 @@ comment:
   stage: comment
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-  script: yarn changesets-gitlab comment
+  script: changesets-gitlab comment
 
 release:
   image: node:lts-alpine
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  script: yarn changesets-gitlab
+  id_tokens:
+    NPM_ID_TOKEN:
+      aud: npm:registry.npmjs.org
+  script: changesets-gitlab
   variables:
     INPUT_PUBLISH_SCRIPT: yarn release
 ```
@@ -189,13 +192,13 @@ comment:
   stage: comment
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-  script: yarn changesets-gitlab comment
+  script: changesets-gitlab comment
 
 release:
   image: node:lts-alpine
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  script: yarn changesets-gitlab
+  script: changesets-gitlab
   variables:
     INPUT_VERSION_SCRIPT: yarn version
 ```
@@ -216,13 +219,13 @@ comment:
   stage: comment
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-  script: yarn changesets-gitlab comment
+  script: changesets-gitlab comment
 
 release:
   image: node:lts-alpine
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  script: yarn changesets-gitlab
+  script: changesets-gitlab
   variables:
     INPUT_VERSION_SCRIPT: yarn changeset version
 ```
@@ -234,7 +237,7 @@ release:
   image: node:lts-alpine
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  script: yarn changesets-gitlab
+  script: changesets-gitlab
   variables:
     YARN_ENABLE_IMMUTABLE_INSTALLS: 'false'
     INPUT_VERSION_SCRIPT: yarn update-versions

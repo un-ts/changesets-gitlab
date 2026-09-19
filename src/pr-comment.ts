@@ -112,6 +112,12 @@ export const prComment = async () => {
 
   const { CI_MERGE_REQUEST_IID: mrIid, GITLAB_COMMENT_TYPE: commentType } = env
 
+  if (commentType !== 'discussion' && commentType !== 'note') {
+    throw new Error(
+      `Invalid GITLAB_COMMENT_TYPE "${commentType}", expected "discussion" or "note"`,
+    )
+  }
+
   const body = getRequiredInput('body')
   const updateId = process.env.INPUT_UPDATE_ID ?? commentMarkerPrefix
 

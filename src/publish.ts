@@ -7,6 +7,8 @@ import {
   getCwdInput,
   getOptionalInput,
   setOutput,
+  throwOnRemovedCommitModeInput,
+  throwOnRenamedInputs,
   validateChangesetsCliVersion,
 } from './utils.js'
 
@@ -25,6 +27,8 @@ export const publish = async (
 ): Promise<void> => {
   const { absolute: cwd } = getCwdInput()
   await validateChangesetsCliVersion(cwd)
+  throwOnRemovedCommitModeInput()
+  throwOnRenamedInputs({ publish: 'publish-script' })
 
   const { GITLAB_TOKEN } = env
 
@@ -44,6 +48,7 @@ export const publish = async (
 
   if (!result.published) {
     setOutput('published', false)
+    setOutput('published-packages', [])
   }
 
   await handlePublishResult(result, getOptionalInput('published'))

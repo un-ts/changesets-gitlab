@@ -28,3 +28,7 @@ Sync with `changesets/action` v2 (structure, behaviour and fixes).
 - Warn when a custom publish script does not produce `CHANGESETS_OUTPUT`, and fail on malformed output
 - The empty-release-MR guard compares package versions, so it also works when the version command commits the changes
 - Tag push failures warn (the tag may already exist), publish failures fail the job, and the `gitlab[bot]` identity is only a fallback
+- Use fully-qualified refspecs for `git fetch`/`git push` so a branch or tag name cannot be interpreted as a git command option
+- Apply the input-migration guards to the split `version`/`publish` commands too, and forward `remove-source-branch` from `version`
+- Detect an already-checked-out branch by exit code, create the comment API lazily so a `changeset-release*` branch without `GITLAB_TOKEN` stays a no-op, and resolve `publish-plan-path` against `cwd`
+- Keep paths with spaces or non-ASCII characters intact when committing through the GitLab API (`-z` parsing)

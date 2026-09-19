@@ -176,12 +176,20 @@ async function getCommitActions(
   // needs `--full-name` to match; both are scoped to `cwd`.
   const { stdout: diffOutput } = await getExecOutput(
     'git',
-    ['diff', '--name-status', '--no-renames', baseCommit, '--', '.'],
+    ['diff', '--name-status', '--no-renames', '-z', baseCommit, '--', '.'],
     { cwd },
   )
   const { stdout: untrackedOutput } = await getExecOutput(
     'git',
-    ['ls-files', '--others', '--exclude-standard', '--full-name', '--', '.'],
+    [
+      'ls-files',
+      '--others',
+      '--exclude-standard',
+      '--full-name',
+      '-z',
+      '--',
+      '.',
+    ],
     { cwd },
   )
 
@@ -208,12 +216,13 @@ async function getCommitActions(
     }
   }
 
-  for (const line of diffOutput.split('\n')) {
-    if (!line) {
-      continue
-    }
-    const [status, filePath] = line.split('\t')
-    if (!filePath) {
+  // `-z` records are NUL-separated (`<status>\0<path>\0`), so paths are never
+  // quoted and paths containing tabs/newlines/non-ASCII characters stay intact.
+  const diffRecords = diffOutput.split('\0')
+  for (let i = 0; i < diffRecords.length; i += 2) {
+    const status = diffRecords[i]
+    const filePath = diffRecords[i + 1]
+    if (!status || !filePath) {
       continue
     }
     let action: CommitAction['action'] = 'update'
@@ -225,7 +234,7 @@ async function getCommitActions(
     await addAction(filePath, action)
   }
 
-  for (const filePath of untrackedOutput.split('\n')) {
+  for (const filePath of untrackedOutput.split('\0')) {
     if (filePath) {
       await addAction(filePath, 'create')
     }
@@ -315,7 +324,7 @@ export const getUsername = (api: Gitlab) => {
     return cached
   }
   const usernamePromise = Promise.resolve(
-    env.GITLAB_CI_USER_NAME ??
+    env.GITLAB_CI_USER_NAME ||
       api.Users.showCurrentUser().then(currentUser => currentUser.username),
   )
   usernameCache.set(api, usernamePromise)

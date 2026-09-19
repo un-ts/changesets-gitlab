@@ -151,6 +151,31 @@ describe('commitChangesSinceBase', () => {
     })
     expect(create).not.toHaveBeenCalled()
   })
+
+  test('keeps paths with spaces and non-ASCII characters intact', async () => {
+    const cwd = createRepo({ 'a.txt': 'a\n' })
+    fs.mkdirSync(path.join(cwd, 'nested'))
+    fs.writeFileSync(path.join(cwd, 'nested', 'héllo wörld.txt'), 'x\n')
+
+    const create = vi.fn().mockResolvedValue({})
+    await commitChangesSinceBase({
+      api: { Commits: { create } } as unknown as GitLabApi,
+      projectId: '1',
+      branch: 'changeset-release/main',
+      message: 'Version Packages',
+      base: { commit: 'HEAD' },
+      force: true,
+      cwd,
+    })
+
+    const call = create.mock.calls[0]
+    expect(call[3]).toEqual([
+      expect.objectContaining({
+        action: 'create',
+        filePath: 'nested/héllo wörld.txt',
+      }),
+    ])
+  })
 })
 
 describe('runPublish', () => {

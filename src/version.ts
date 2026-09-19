@@ -8,6 +8,7 @@ import {
   getOptionalInput,
   setOutput,
   throwOnRemovedCommitModeInput,
+  throwOnRenamedInputs,
   validateChangesetsCliVersion,
 } from './utils.js'
 
@@ -19,6 +20,12 @@ export const version = async (): Promise<void> => {
   const { absolute: cwd } = getCwdInput()
   await validateChangesetsCliVersion(cwd)
   throwOnRemovedCommitModeInput()
+  throwOnRenamedInputs({
+    version: 'version-script',
+    title: 'pr-title',
+    commit: 'commit-message',
+    target_branch: 'pr-base-branch',
+  })
 
   const gitlab = new GitLab({
     gitlabToken: env.GITLAB_TOKEN,
@@ -36,6 +43,7 @@ export const version = async (): Promise<void> => {
     hasPublishScript: true,
     prDraft: getPrDraftInput(),
     mrTargetBranch: getOptionalInput('pr-base-branch'),
+    removeSourceBranch: getBooleanInput('remove-source-branch'),
   })
 
   if (pullRequestNumber !== undefined) {

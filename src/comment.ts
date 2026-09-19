@@ -238,7 +238,7 @@ const hasChangesetBeenAdded = async (
 }
 
 export const getCommentStatus = async (
-  api: Gitlab = createApi(),
+  api?: Gitlab,
 ): Promise<{ body: string; hasChangeset: boolean } | undefined> => {
   const mrBranch = env.CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
   if (!mrBranch) {
@@ -255,6 +255,10 @@ export const getCommentStatus = async (
   if (mrBranch.startsWith('changeset-release')) {
     return
   }
+
+  // Create the API lazily so a `changeset-release*` branch without a token
+  // stays a no-op instead of failing in `env.GITLAB_TOKEN`.
+  api ??= createApi()
 
   const { relative: relativeCwd } = getCwdInput()
 

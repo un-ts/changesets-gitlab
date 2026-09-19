@@ -286,10 +286,13 @@ export interface RunVersionResult {
 
 const DRAFT_PREFIX_PATTERN = /^(?:Draft:|WIP:)\s*/i
 
-const withDraftPrefix = (title: string, draft: boolean) => {
-  const stripped = title.replace(DRAFT_PREFIX_PATTERN, '')
-  return draft ? `Draft: ${stripped}` : stripped
-}
+// GitLab has no native draft flag (GitHub does), it marks a draft merge request
+// with a `Draft:` title prefix. Mirror upstream's `pr-draft` semantics:
+// - `create`/`always` open a new merge request as draft
+// - only `always` converts an existing merge request back to draft; every other
+//   value (`create`, unset, ...) keeps the existing draft state
+const withDraftPrefix = (title: string, draft: boolean) =>
+  draft ? `Draft: ${title.replace(DRAFT_PREFIX_PATTERN, '')}` : title
 
 export async function runVersion({
   script,
@@ -308,7 +311,7 @@ export async function runVersion({
   const { api } = gitlab
   const { preState } = await readChangesetState(cwd)
 
-  await gitlab.prepareBranch(versionBranch, currentBranch)
+  await gitlab.prepareBranch(versionBranch)
 
   const labels = getOptionalInput('labels')
     ?.split(',')
@@ -401,10 +404,7 @@ ${releasesInfo}`
   core.debug(JSON.stringify(searchResult, null, 2))
   let pullRequestNumber: number
   if (searchResult.length === 0) {
-    const finalMrTitle = withDraftPrefix(
-      baseMrTitle,
-      prDraft === 'create' || prDraft === 'always',
-    )
+    const finalMrTitle = withDraftPrefix(baseMrTitle, prDraft !== undefined)
     core.info(
       `Creating merge request from ${versionBranch} to ${mrTargetBranch}`,
     )

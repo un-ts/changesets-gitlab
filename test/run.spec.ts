@@ -24,6 +24,8 @@ vi.mock('@actions/core', async importOriginal => ({
 
 const dirs: string[] = []
 
+type PrDraft = 'always' | 'create' | undefined
+
 function createRepo(files: Record<string, string> = {}) {
   const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'changesets-gitlab-run-'))
   dirs.push(cwd)
@@ -94,6 +96,16 @@ const simpleProject = {
   }),
   'CHANGELOG.md': '# pkg\n\n## 1.0.0\n\n### Minor Changes\n\n- Initial\n',
   '.changeset/config.json': '{}',
+}
+
+const bumpedProject = {
+  ...simpleProject,
+  'version.js': `const fs = require('node:fs')
+const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'))
+pkg.version = '1.1.0'
+fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2))
+fs.writeFileSync('CHANGELOG.md', '## 1.1.0\\n\\n### Minor Changes\\n\\n- Awesome feature\\n')
+`,
 }
 
 describe('commitChangesSinceBase', () => {
@@ -241,15 +253,7 @@ describe('runVersion', () => {
   })
 
   test('creates a merge request for bumped packages', async () => {
-    const cwd = createRepo({
-      ...simpleProject,
-      'version.js': `const fs = require('node:fs')
-const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'))
-pkg.version = '1.1.0'
-fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2))
-fs.writeFileSync('CHANGELOG.md', '## 1.1.0\\n\\n### Minor Changes\\n\\n- Awesome feature\\n')
-`,
-    })
+    const cwd = createRepo(bumpedProject)
 
     const mergeRequests = createMergeRequests()
     const result = await runVersion({
@@ -265,5 +269,88 @@ fs.writeFileSync('CHANGELOG.md', '## 1.1.0\\n\\n### Minor Changes\\n\\n- Awesome
     expect(call[1]).toBe('changeset-release/main')
     expect(call[2]).toBe('main')
     expect(call[3]).toBe('Version Packages')
+  })
+
+  const runVersionWithDraft = async (
+    prDraft: PrDraft,
+    existingTitle?: string,
+  ) => {
+    const cwd = createRepo(bumpedProject)
+    const mergeRequests = createMergeRequests()
+    if (existingTitle !== undefined) {
+      mergeRequests.all.mockResolvedValue([{ iid: 7, title: existingTitle }])
+    }
+    await runVersion({
+      script: 'node version.js',
+      gitlab: createGitLab(cwd, {}, { MergeRequests: mergeRequests }),
+      cwd,
+      prDraft,
+    })
+    return mergeRequests
+  }
+
+  const createDraftCases: Array<[PrDraft, string]> = [
+    [undefined, 'Version Packages'],
+    ['create', 'Draft: Version Packages'],
+    ['always', 'Draft: Version Packages'],
+  ]
+
+  test.each(createDraftCases)(
+    'creates a merge request with prDraft %s',
+    async (prDraft, expectedTitle) => {
+      const mergeRequests = await runVersionWithDraft(prDraft)
+      expect(mergeRequests.create).toHaveBeenCalledOnce()
+      expect(mergeRequests.create.mock.calls[0][3]).toBe(expectedTitle)
+    },
+  )
+
+  const updateDraftCases: Array<[PrDraft, string, string]> = [
+    [undefined, 'Version Packages', 'Version Packages'],
+    ['create', 'Version Packages', 'Version Packages'],
+    ['always', 'Version Packages', 'Draft: Version Packages'],
+    [undefined, 'Draft: Version Packages', 'Draft: Version Packages'],
+    ['create', 'WIP: Version Packages', 'Draft: Version Packages'],
+    ['always', 'Draft: Version Packages', 'Draft: Version Packages'],
+  ]
+
+  test.each(updateDraftCases)(
+    'updates an existing merge request with prDraft %s',
+    async (prDraft, existingTitle, expectedTitle) => {
+      const mergeRequests = await runVersionWithDraft(prDraft, existingTitle)
+      expect(mergeRequests.create).not.toHaveBeenCalled()
+      expect(mergeRequests.edit).toHaveBeenCalledOnce()
+      expect(mergeRequests.edit.mock.calls[0][2]).toEqual(
+        expect.objectContaining({ title: expectedTitle }),
+      )
+    },
+  )
+})
+
+describe('GitLab.prepareBranch', () => {
+  test('resets the version branch to the pipeline trigger commit', async () => {
+    const cwd = createRepo({ 'a.txt': 'a\n' })
+    const revParseHead = () =>
+      // eslint-disable-next-line sonarjs/no-os-command-from-path
+      execFileSync('git', ['rev-parse', 'HEAD'], { cwd }).toString().trim()
+    const triggerSha = revParseHead()
+    fs.writeFileSync(path.join(cwd, 'a.txt'), 'newer\n')
+    // eslint-disable-next-line sonarjs/no-os-command-from-path
+    execFileSync('git', ['commit', '-am', 'newer'], { cwd, stdio: 'pipe' })
+    expect(revParseHead()).not.toBe(triggerSha)
+
+    process.env.CI_COMMIT_SHA = triggerSha
+    vi.resetModules()
+    const { GitLab } = await import('../src/gitlab.js')
+    const gitlab = new GitLab({ gitlabToken: 'token', cwd })
+
+    await gitlab.prepareBranch('changeset-release/main')
+
+    expect(revParseHead()).toBe(triggerSha)
+    expect(
+      // eslint-disable-next-line sonarjs/no-os-command-from-path
+      execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd })
+        .toString()
+        .trim(),
+    ).toBe('changeset-release/main')
   })
 })

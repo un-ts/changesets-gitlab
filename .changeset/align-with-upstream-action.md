@@ -19,6 +19,9 @@ Sync with `changesets/action` v2 (structure, behaviour and fixes).
 **Changed**
 
 - Use the exact tags reported by `CHANGESETS_OUTPUT`, support the built-in `changeset publish` (`--from-pack-dir`) and run custom scripts and callbacks through `@actions/exec`
+- `getChangelogEntry` matches upstream (`1d54b9e`): parse with a regex and return the raw changelog slice instead of re-serializing it through `remark`, dropping the `remark`/`unified` dependencies
+- The split `version`/`publish` commands read `script` like the upstream sub-actions (falling back to `version-script`/`publish-script`)
+- `pr-draft` mirrors upstream: `create`/`always` open a new merge request as draft, and only `always` converts an existing one (GitLab marks drafts with a `Draft:` title prefix)
 - npm authentication is left to npm (Trusted Publishing/OIDC, otherwise `NODE_AUTH_TOKEN`); removed the `.npmrc`/`NPM_TOKEN` handling
 - Git CLI authentication uses command-scoped `http.extraHeader` instead of writing the token into `.git/config`; `DEBUG_GITLAB_CREDENTIAL` now only unsilences the auth remote lookup
 - All logging goes through `@actions/core` instead of `console.*`
@@ -29,6 +32,7 @@ Sync with `changesets/action` v2 (structure, behaviour and fixes).
 - The empty-release-MR guard compares package versions, so it also works when the version command commits the changes
 - Tag push failures warn (the tag may already exist), publish failures fail the job, and the `gitlab[bot]` identity is only a fallback
 - Use fully-qualified refspecs for `git fetch`/`git push` so a branch or tag name cannot be interpreted as a git command option
+- Point the merge request status comment links at the current Changesets FAQ (`https://changesets.dev/faq`)
 - Apply the input-migration guards to the split `version`/`publish` commands too, and forward `remove-source-branch` from `version`
 - Detect an already-checked-out branch by exit code, create the comment API lazily so a `changeset-release*` branch without `GITLAB_TOKEN` stays a no-op, and resolve `publish-plan-path` against `cwd`
 - Keep paths with spaces or non-ASCII characters intact when committing through the GitLab API (`-z` parsing)

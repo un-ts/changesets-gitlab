@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.16.1
+
+### Patch Changes
+
+- [#265](https://github.com/un-ts/changesets-gitlab/pull/265) [`4497447`](https://github.com/un-ts/changesets-gitlab/commit/4497447d1fa8f9d1b5ba4ea26762b19408aeae2b) Thanks [@utix](https://github.com/utix)! - Add `tslib` to `dependencies`. The compiled output imports `tslib` at runtime (via the `importHelpers` tsconfig option), but it was missing from `package.json`, causing `ERR_MODULE_NOT_FOUND: Cannot find package 'tslib'` when running via `npx`.
+
 ## 0.16.0
 
 ### Minor Changes

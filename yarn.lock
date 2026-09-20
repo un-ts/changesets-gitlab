@@ -5373,6 +5373,7 @@ __metadata:
     simple-git-hooks: "npm:^2.14.0"
     size-limit: "npm:^14.0.0"
     size-limit-preset-node-lib: "npm:^0.4.0"
+    tslib: "npm:^2.8.1"
     tsx: "npm:^4.23.13"
     type-coverage: "npm:^2.30.1"
     typescript: "npm:@typescript/typescript6@^6.0.2"

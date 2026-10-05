@@ -44,28 +44,29 @@ Always run `yarn lint` and `yarn test` before committing. CI runs `yarn run-s bu
 
 ## Project Structure
 
-| Path                                | Purpose                                                                     |
-| ----------------------------------- | --------------------------------------------------------------------------- |
-| `src/cli.ts`                        | CLI entry (`commander`); wires all commands                                 |
-| `src/main.ts`                       | Default `main` command: the whole release flow                              |
-| `src/select-mode.ts`                | `select-mode` command (decides version vs publish)                          |
-| `src/version.ts`                    | `version` command (split release)                                           |
-| `src/pack.ts`                       | `pack` command (tarballs from a publish plan)                               |
-| `src/publish.ts`                    | `publish` command (split release)                                           |
-| `src/comment.ts`                    | Shared MR changeset status/comment logic                                    |
-| `src/pr-status.ts`                  | `pr-status` command (upstream `/pr-status`)                                 |
-| `src/pr-comment.ts`                 | `pr-comment` command (upstream `/pr-comment`)                               |
-| `src/run.ts`                        | `runPublish` / `runVersion` (upstream `run.ts`)                             |
-| `src/gitlab.ts`                     | `GitLab` client: git + GitLab API (upstream `github.ts`)                    |
-| `src/api.ts`                        | Cached Gitbeaker client (`createApi`) and the `GitLabApi` type              |
-| `src/env.ts`                        | Environment/input access (`INPUT_*`, `GITLAB_*`, `CI_*`)                    |
-| `src/context.ts`                    | GitLab CI context (`projectId`, `ref`, `sha`, …)                            |
-| `src/utils.ts`                      | Input/output helpers, exec helpers, `commitChangesSinceBase`, `getUsername` |
-| `src/get-changed-packages.ts`       | Changed packages and changed-changeset detection                            |
-| `src/read-changeset-state.ts`       | Reads Changesets state (changesets, pre mode)                               |
-| `src/constants.ts` / `src/types.ts` | Boolean parsers and shared types                                            |
-| `src/index.ts`                      | Public exports                                                              |
-| `test/*.spec.ts`                    | Vitest specs (+ `fixtures/`, `__snapshots__/`)                              |
+| Path                                | Purpose                                                                                        |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `src/cli.ts`                        | CLI entry (`commander`); wires all commands                                                    |
+| `src/main.ts`                       | Default `main` command: the whole release flow                                                 |
+| `src/select-mode.ts`                | `select-mode` command (decides version vs publish)                                             |
+| `src/version.ts`                    | `version` command (split release)                                                              |
+| `src/pack.ts`                       | `pack` command (tarballs from a publish plan)                                                  |
+| `src/publish.ts`                    | `publish` command (split release)                                                              |
+| `src/comment.ts`                    | Shared MR changeset status/comment logic                                                       |
+| `src/pr-status.ts`                  | `pr-status` command (upstream `/pr-status`)                                                    |
+| `src/pr-comment.ts`                 | `pr-comment` command (upstream `/pr-comment`)                                                  |
+| `src/run.ts`                        | `runPublish` / `runVersion` (upstream `run.ts`)                                                |
+| `src/gitlab.ts`                     | `GitLab` client: git + GitLab API (upstream `github.ts`)                                       |
+| `src/api.ts`                        | Cached Gitbeaker client (`createApi`) and the `GitLabApi` type                                 |
+| `src/env.ts`                        | Environment/input access (`INPUT_*`, `GITLAB_*`, `CI_*`)                                       |
+| `src/context.ts`                    | GitLab CI context (`projectId`, `ref`, `sha`, …)                                               |
+| `src/utils.ts`                      | Input/output helpers, exec helpers, `commitChangesSinceBase`, `getUsername`                    |
+| `src/get-changed-packages.ts`       | Changed packages and changed-changeset detection                                               |
+| `src/read-changeset-state.ts`       | Reads Changesets state (changesets, pre mode)                                                  |
+| `src/constants.ts` / `src/types.ts` | Boolean parsers and shared types                                                               |
+| `src/index.ts`                      | Public exports                                                                                 |
+| `src/changelog/`                    | `changesets-gitlab/changelog` generator (`index`, `env`, `render-template`, `get-gitlab-info`) |
+| `test/*.spec.ts`                    | Vitest specs (+ `fixtures/`, `__snapshots__/`)                                                 |
 
 ## Upstream File Mapping
 
@@ -91,6 +92,7 @@ Notes:
 
 - There is no `action.yml` here. Upstream input/default changes land in `src/env.ts` / `src/utils.ts` and the user-facing contract in `README.md`; sub-action entry changes land in the matching `src/*.ts` command module and `src/cli.ts`.
 - `src/index.ts` in this repo is a library barrel and does **not** correspond to upstream's `src/index.ts` — that role belongs to `src/main.ts`.
+- The `changesets-gitlab/changelog` subpath is not part of `changesets/action`; it mirrors `@changesets/changelog-github` (and its `@changesets/get-github-info` dependency) from the `changesets/changesets` repo. `src/changelog/index.ts` / `render-template.ts` map to `changelog-github`, while `src/changelog/env.ts` / `get-gitlab-info.ts` map to `get-github-info`; change it only for GitLab-specific reasons.
 - When syncing, diff `src/run.ts`, `src/utils.ts` and `src/read-changeset-state.ts` first (they are near-copies of upstream), then re-apply the GitLab-specific parts in `src/gitlab.ts`, `src/api.ts`, `src/env.ts`, `src/context.ts` and `src/comment.ts`.
 
 ## Conventions

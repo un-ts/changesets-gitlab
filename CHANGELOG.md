@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.16.2
+
+### Patch Changes
+
+- [#269](https://github.com/un-ts/changesets-gitlab/pull/269) [`5cfee82`](https://github.com/un-ts/changesets-gitlab/commit/5cfee826ef40166fb523b47b2ddc1843fa2aded8) Thanks [@i1stG](https://github.com/i1stG)! - **Fixed** Forward the `GITLAB_TOKEN` authentication to the Changesets CLI and to custom version/publish scripts. The CLI runs `git fetch` itself (for example to deepen a shallow clone) and no longer fails with `could not read Username for 'https://…'` when the CI remote URL is not authenticated ([#268](https://github.com/un-ts/changesets-gitlab/issues/268)).
+
 ## 0.16.1
 
 ### Patch Changes

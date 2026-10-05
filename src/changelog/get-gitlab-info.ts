@@ -10,6 +10,18 @@ import { readEnv, type ChangelogConfig } from './env.js'
 
 const HTTP_STATUS_NOT_FOUND = 404
 
+const VALID_REPO_NAME_REGEX = /^[\w.-]+(?:\/[\w.-]+)+$/
+
+// Mirrors `validateRepoName` in `@changesets/get-github-info`, widened for
+// GitLab project paths that can contain subgroups.
+const validateRepoName = (repo: string) => {
+  if (!VALID_REPO_NAME_REGEX.test(repo)) {
+    throw new Error(
+      `Please pass a valid GitLab project path in the form of "group/project". Received: ${JSON.stringify(repo)}.`,
+    )
+  }
+}
+
 export interface UserInfo {
   name: string
   username?: string
@@ -110,6 +122,7 @@ export const getMergeRequestInfo = async (
   config: ChangelogConfig,
   mrIid: number,
 ): Promise<MergeRequestInfo | undefined> => {
+  validateRepoName(config.repo)
   try {
     const mr = await getApi(config.serverUrl).MergeRequests.show(
       config.repo,
@@ -159,6 +172,7 @@ export const getCommitInfo = async (
   config: ChangelogConfig,
   sha: string,
 ): Promise<CommitInfo | undefined> => {
+  validateRepoName(config.repo)
   const gitlab = getApi(config.serverUrl)
 
   let commit: ExpandedCommitSchema

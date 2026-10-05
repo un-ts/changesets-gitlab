@@ -234,6 +234,12 @@ describe('changelog', () => {
     ).rejects.toThrow('Please provide a repo')
   })
 
+  test('rejects an invalid project path', async () => {
+    await expect(
+      changelog.getReleaseLine(createChangeset(), 'patch', { repo: 'project' }),
+    ).rejects.toThrow('valid GitLab project path')
+  })
+
   test('requires a token when fetching information', async () => {
     delete process.env.GITLAB_TOKEN
 

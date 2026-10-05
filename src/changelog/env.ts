@@ -1,3 +1,5 @@
+import { env } from '../env.ts'
+
 export interface ChangelogOptions {
   repo?: string
   disableThanks: boolean
@@ -15,17 +17,13 @@ export interface ChangelogEnv {
   token?: string
 }
 
-const DEFAULT_SERVER_URL = 'https://gitlab.com'
-
 // GitLab CI predefines `CI_SERVER_URL` and `CI_PROJECT_PATH`; `GITLAB_HOST`
-// and `GITLAB_TOKEN` are this tool's own overrides.
+// and `GITLAB_TOKEN` are this tool's own overrides. Reuse the CLI's host
+// resolution so `.env`/`GITLAB_HOST`/`CI_SERVER_URL` are handled in one place;
+// `env.GITLAB_TOKEN` is avoided because its getter calls `core.setFailed`.
 export const readEnv = (): ChangelogEnv => ({
   repo: process.env.CI_PROJECT_PATH,
-  serverUrl: (
-    process.env.GITLAB_HOST ??
-    process.env.CI_SERVER_URL ??
-    DEFAULT_SERVER_URL
-  ).replace(/\/$/, ''),
+  serverUrl: env.GITLAB_HOST.replace(/\/$/, ''),
   token: process.env.GITLAB_TOKEN,
 })
 
@@ -36,7 +34,7 @@ export const parseOptions = (
   return {
     repo:
       typeof record.repo === 'string' && record.repo ? record.repo : undefined,
-    disableThanks: record.disableThanks === true,
+    disableThanks: Boolean(record.disableThanks),
     template:
       typeof record.template === 'string' && record.template
         ? record.template
@@ -46,9 +44,9 @@ export const parseOptions = (
 
 export const resolveConfig = (
   options: ChangelogOptions,
-  env: ChangelogEnv,
+  changelogEnv: ChangelogEnv,
 ): ChangelogConfig => {
-  const repo = options.repo || env.repo
+  const repo = options.repo || changelogEnv.repo
   if (!repo) {
     throw new Error(
       'Please provide a repo to this changelog generator like this:\n' +
@@ -56,5 +54,5 @@ export const resolveConfig = (
         'or set the CI_PROJECT_PATH environment variable.',
     )
   }
-  return { repo, serverUrl: env.serverUrl }
+  return { repo, serverUrl: changelogEnv.serverUrl }
 }

@@ -4,22 +4,30 @@ import type {
 } from '@changesets/types'
 import { GitbeakerRequestError } from '@gitbeaker/rest'
 
-const SERVER_URL = 'https://gitlab.example.com'
-const REPO = 'group/project'
-const COMMIT_SHA = 'abcdef1234567890'
-const MR_IID = 123
+const { mockApi, SERVER_URL, REPO } = vi.hoisted(() => {
+  const SERVER_URL = 'https://gitlab.example.com'
+  const REPO = 'group/project'
+  // `src/env.ts` captures the host at module load, so set it before importing.
+  process.env.GITLAB_HOST = SERVER_URL
+  process.env.CI_PROJECT_PATH = REPO
+  process.env.GITLAB_TOKEN = 'glpat-token'
+  return {
+    mockApi: {
+      Commits: {
+        show: vi.fn(),
+        allMergeRequests: vi.fn(),
+      },
+      MergeRequests: {
+        show: vi.fn(),
+      },
+    },
+    SERVER_URL,
+    REPO,
+  }
+})
 
-const { mockApi } = vi.hoisted(() => ({
-  mockApi: {
-    Commits: {
-      show: vi.fn(),
-      allMergeRequests: vi.fn(),
-    },
-    MergeRequests: {
-      show: vi.fn(),
-    },
-  },
-}))
+const MR_IID = 123
+const COMMIT_SHA = 'abcdef1234567890'
 
 vi.mock('../src/api.ts', () => ({
   createApi: () => mockApi,
@@ -75,7 +83,6 @@ const originalEnv = { ...process.env }
 beforeEach(() => {
   vi.clearAllMocks()
   process.env.GITLAB_TOKEN = 'glpat-token'
-  process.env.GITLAB_HOST = SERVER_URL
   process.env.CI_PROJECT_PATH = REPO
 
   mockApi.Commits.show.mockResolvedValue(commit)
@@ -173,6 +180,51 @@ describe('changelog', () => {
     expect(line).toBe(`\n\n- fix the thing ([!123](${mrUrl}))\n`)
   })
 
+  test('renders a commit-only ref token when there is no merge request', async () => {
+    mockApi.Commits.allMergeRequests.mockResolvedValue([])
+
+    const line = await changelog.getReleaseLine(createChangeset(), 'patch', {
+      repo: REPO,
+      template: '{ref}',
+    })
+
+    expect(line).toBe(`([\`abcdef1\`](${commitUrl}))\n`)
+  })
+
+  test('renders an empty ref token when there is no commit or merge request', async () => {
+    const line = await changelog.getReleaseLine(
+      createChangeset({ commit: undefined }),
+      'patch',
+      { repo: REPO, template: '{ref}' },
+    )
+
+    expect(line).toBe('\n')
+  })
+
+  test('keeps an out-of-range mr prefix in the summary', async () => {
+    const summary = 'mr: 99999999999999999999\nfix the thing'
+    const line = await changelog.getReleaseLine(
+      createChangeset({ commit: undefined, summary }),
+      'patch',
+      { repo: REPO },
+    )
+
+    expect(mockApi.MergeRequests.show).not.toHaveBeenCalled()
+    expect(line).toContain('mr: 99999999999999999999')
+  })
+
+  test('ignores a missing merge request from the summary', async () => {
+    mockApi.MergeRequests.show.mockRejectedValue(notFoundError())
+
+    const line = await changelog.getReleaseLine(
+      createChangeset({ commit: undefined, summary: 'mr: 123\nfix the thing' }),
+      'patch',
+      { repo: REPO },
+    )
+
+    expect(line).toBe('\n\n- fix the thing\n')
+  })
+
   test('rejects unknown template tokens', async () => {
     await expect(
       changelog.getReleaseLine(createChangeset(), 'patch', {
@@ -206,6 +258,39 @@ describe('changelog', () => {
     })
 
     expect(line).toBe('\n\n- fix the thing\n')
+  })
+
+  test('falls back to the commit when the merge request lookup fails', async () => {
+    mockApi.Commits.allMergeRequests.mockRejectedValue(notFoundError())
+
+    const line = await changelog.getReleaseLine(createChangeset(), 'patch', {
+      repo: REPO,
+    })
+
+    expect(line).toBe(`\n\n- [\`abcdef1\`](${commitUrl}) - fix the thing\n`)
+  })
+
+  test('picks the earliest merged request for a commit', async () => {
+    const earlier = {
+      ...mergeRequest,
+      iid: 1,
+      web_url: `${SERVER_URL}/${REPO}/-/merge_requests/1`,
+      merged_at: '2024-01-01T00:00:00.000Z',
+    }
+    const later = {
+      ...mergeRequest,
+      iid: 2,
+      web_url: `${SERVER_URL}/${REPO}/-/merge_requests/2`,
+      merged_at: '2024-02-01T00:00:00.000Z',
+    }
+    mockApi.Commits.allMergeRequests.mockResolvedValue([later, earlier])
+
+    const line = await changelog.getReleaseLine(createChangeset(), 'patch', {
+      repo: REPO,
+    })
+
+    expect(line).toContain(`[!1](${earlier.web_url})`)
+    expect(line).not.toContain('[!2]')
   })
 
   test('builds dependency release lines', async () => {

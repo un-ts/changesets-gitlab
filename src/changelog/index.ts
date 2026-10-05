@@ -20,8 +20,9 @@ import {
 } from './render-template.js'
 
 // Mirrors `@changesets/changelog-github`, but keeps GitLab's `!iid` merge
-// request references and `/-/` URLs. Existing Markdown links are matched first
-// so refs inside them are left untouched.
+// request references and `/-/` URLs, and adds `mr:`/`merge request:` prefixes
+// and an `{mr}` template token. Existing Markdown links are matched first so
+// refs inside them are left untouched.
 const REF_REGEX = /\[[^[\]]*\]\([^()]*\)|\B#([1-9]\d*)\b|\B!([1-9]\d*)\b/g
 
 const MR_PREFIX_REGEX =
@@ -50,12 +51,13 @@ const parseSummary = (summary: string) => {
   const parsed: ParsedSummary = { users: [] }
 
   const lines = summary
-    .replace(MR_PREFIX_REGEX, (_, mr: string) => {
+    .replace(MR_PREFIX_REGEX, (match, mr: string) => {
       const num = Number(mr)
-      if (!Number.isNaN(num)) {
+      if (Number.isSafeInteger(num) && num > 0) {
         parsed.mr = num
+        return ''
       }
-      return ''
+      return match
     })
     .replace(COMMIT_PREFIX_REGEX, (_, commit: string) => {
       parsed.commit = commit

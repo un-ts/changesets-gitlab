@@ -4,7 +4,7 @@ import {
   type MergeRequestSchema,
 } from '@gitbeaker/rest'
 
-import { createApi, type GitLabApi } from '../api.ts'
+import { createApi } from '../api.ts'
 
 import { readEnv, type ChangelogConfig } from './env.js'
 
@@ -41,8 +41,6 @@ export interface MergeRequestInfo {
   commit?: CommitLink
 }
 
-let api: GitLabApi | undefined
-
 const getApi = (serverUrl: string) => {
   const token = readEnv().token
   if (!token) {
@@ -50,9 +48,9 @@ const getApi = (serverUrl: string) => {
       `Please create a GitLab personal access token at ${serverUrl}/-/user_settings/personal_access_tokens with the \`read_api\` scope and add it as the \`GITLAB_TOKEN\` environment variable`,
     )
   }
-  // `createApi` caches the client and applies the same `GITLAB_HOST` fallback.
-  api ??= createApi(token)
-  return api
+  // `createApi` caches clients per token, so pick the one for the current token
+  // each time instead of pinning the first one.
+  return createApi(token)
 }
 
 const isNotFoundError = (err: unknown) =>

@@ -20,8 +20,8 @@
       "default": "./lib/index.js"
     },
     "./changelog": {
-      "types": "./lib/changelog.d.ts",
-      "default": "./lib/changelog.js"
+      "types": "./lib/changelog/index.d.ts",
+      "default": "./lib/changelog/index.js"
     },
     "./package.json": "./package.json"
   },

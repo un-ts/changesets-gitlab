@@ -25,7 +25,7 @@ vi.mock('../src/api.ts', () => ({
   createApi: () => mockApi,
 }))
 
-const changelogModule = await import('../src/changelog.js')
+const changelogModule = await import('../src/changelog/index.js')
 const changelog = changelogModule.default
 
 const commitUrl = `${SERVER_URL}/${REPO}/-/commit/${COMMIT_SHA}`

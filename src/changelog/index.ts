@@ -51,13 +51,12 @@ const parseSummary = (summary: string) => {
   const parsed: ParsedSummary = { users: [] }
 
   const lines = summary
-    .replace(MR_PREFIX_REGEX, (match, mr: string) => {
+    .replace(MR_PREFIX_REGEX, (_, mr: string) => {
       const num = Number(mr)
-      if (Number.isSafeInteger(num) && num > 0) {
+      if (!Number.isNaN(num)) {
         parsed.mr = num
-        return ''
       }
-      return match
+      return ''
     })
     .replace(COMMIT_PREFIX_REGEX, (_, commit: string) => {
       parsed.commit = commit
@@ -96,7 +95,7 @@ const getReleaseLine = async (
   options: Record<string, unknown> | null,
 ) => {
   const parsedOptions = parseOptions(options)
-  const config = resolveConfig(parsedOptions, readEnv())
+  const config = resolveConfig(options, readEnv())
 
   const { parsed, lines } = parseSummary(changeset.summary)
   const [firstLine, ...futureLines] = lines
@@ -151,8 +150,7 @@ const getDependencyReleaseLine = async (
   dependenciesUpdated: ModCompWithPackage[],
   options: Record<string, unknown> | null,
 ) => {
-  const parsedOptions = parseOptions(options)
-  const config = resolveConfig(parsedOptions, readEnv())
+  const config = resolveConfig(options, readEnv())
 
   if (dependenciesUpdated.length === 0) {
     return ''

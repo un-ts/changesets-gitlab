@@ -205,18 +205,6 @@ describe('changelog', () => {
     expect(line).toBe('\n')
   })
 
-  test('keeps an out-of-range mr prefix in the summary', async () => {
-    const summary = 'mr: 99999999999999999999\nfix the thing'
-    const line = await changelog.getReleaseLine(
-      createChangeset({ commit: undefined, summary }),
-      'patch',
-      { repo: REPO },
-    )
-
-    expect(mockApi.MergeRequests.show).not.toHaveBeenCalled()
-    expect(line).toContain('mr: 99999999999999999999')
-  })
-
   test('ignores a missing merge request from the summary', async () => {
     mockApi.MergeRequests.show.mockRejectedValue(notFoundError())
 

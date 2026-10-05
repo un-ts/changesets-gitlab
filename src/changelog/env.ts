@@ -1,7 +1,6 @@
 import { env } from '../env.ts'
 
 export interface ChangelogOptions {
-  repo?: string
   disableThanks: boolean
   template?: string
 }
@@ -32,8 +31,6 @@ export const parseOptions = (
 ): ChangelogOptions => {
   const record = options ?? {}
   return {
-    repo:
-      typeof record.repo === 'string' && record.repo ? record.repo : undefined,
     disableThanks: Boolean(record.disableThanks),
     template:
       typeof record.template === 'string' && record.template
@@ -42,11 +39,21 @@ export const parseOptions = (
   }
 }
 
-export const resolveConfig = (
-  options: ChangelogOptions,
+// Mirrors `getRepo` in `@changesets/changelog-github`: an explicit `repo`
+// option wins (even when empty), otherwise fall back to the env variable.
+export const getRepo = (
+  options: Record<string, unknown> | null,
   changelogEnv: ChangelogEnv,
-): ChangelogConfig => {
-  const repo = options.repo || changelogEnv.repo
+) => {
+  let repo: string | undefined
+  if (options && 'repo' in options) {
+    repo =
+      typeof options.repo === 'string' && options.repo
+        ? options.repo
+        : undefined
+  } else {
+    repo = changelogEnv.repo
+  }
   if (!repo) {
     throw new Error(
       'Please provide a repo to this changelog generator like this:\n' +
@@ -54,5 +61,13 @@ export const resolveConfig = (
         'or set the CI_PROJECT_PATH environment variable.',
     )
   }
-  return { repo, serverUrl: changelogEnv.serverUrl }
+  return repo
 }
+
+export const resolveConfig = (
+  options: Record<string, unknown> | null,
+  changelogEnv: ChangelogEnv,
+): ChangelogConfig => ({
+  repo: getRepo(options, changelogEnv),
+  serverUrl: changelogEnv.serverUrl,
+})

@@ -93,6 +93,7 @@ Notes:
 - There is no `action.yml` here. Upstream input/default changes land in `src/env.ts` / `src/utils.ts` and the user-facing contract in `README.md`; sub-action entry changes land in the matching `src/*.ts` command module and `src/cli.ts`.
 - `src/index.ts` in this repo is a library barrel and does **not** correspond to upstream's `src/index.ts` — that role belongs to `src/main.ts`.
 - The `changesets-gitlab/changelog` subpath is not part of `changesets/action`; it mirrors `@changesets/changelog-github` (and its `@changesets/get-github-info` dependency) from the `changesets/changesets` repo. `src/changelog/index.ts` / `render-template.ts` map to `changelog-github` (with the GitLab-specific env/repo handling in `src/changelog/env.ts`), while `src/changelog/get-gitlab-info.ts` maps to `get-github-info`; change it only for GitLab-specific reasons.
+- Keep `src/changelog/` aligned with upstream except for the GitLab-specific parts: `mr:`/`merge request:` summary prefixes, `!iid` references and `/-/` URLs, the `{mr}` template token, the commit-author name fallback, and `CI_PROJECT_PATH`/`CI_SERVER_URL`/`GITLAB_HOST` env. Don't change unrelated parsing/selection behavior (e.g. the merge request sort) to "fix" it — upstream defines it.
 - When syncing, diff `src/run.ts`, `src/utils.ts` and `src/read-changeset-state.ts` first (they are near-copies of upstream), then re-apply the GitLab-specific parts in `src/gitlab.ts`, `src/api.ts`, `src/env.ts`, `src/context.ts` and `src/comment.ts`.
 
 ## Conventions

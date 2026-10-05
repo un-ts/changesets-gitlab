@@ -217,6 +217,13 @@ export class GitLab {
   // Public so `runVersion`/`runPublish` can forward it to the Changesets CLI
   // (and custom scripts) as well: those run `git fetch` themselves and would
   // otherwise fall back to the unauthenticated CI remote URL.
+  //
+  // Diverges from `changesets/action`, which keeps this helper private and only
+  // passes `GITHUB_TOKEN` to the Changesets CLI because `actions/checkout`
+  // persists an `http.extraHeader` credential in the repository config. GitLab
+  // CI cannot push with its `CI_JOB_TOKEN`, so we expose this env here (and
+  // leave it uncached: it depends on the remote config and the ambient
+  // `GIT_CONFIG_*` of each command).
   async getCliAuthEnv(): Promise<Record<string, string>> {
     const username =
       env.GITLAB_TOKEN_TYPE === 'oauth' ? 'oauth2' : await getUsername(this.api)

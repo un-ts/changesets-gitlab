@@ -21,6 +21,12 @@ GitLab CI cli for [changesets](https://changesets.dev), like its [GitHub Action]
 - `GITLAB_TOKEN` with permission to push, publish to the package registry and use the merge request API (the `CI_JOB_TOKEN` is not sufficient)
 - A branch pipeline on the default branch for releasing, and a merge request pipeline for the `comment` command
 
+### Git authentication
+
+Every Git CLI operation is authenticated with `GITLAB_TOKEN`, including the ones run by the Changesets CLI and custom version/publish scripts (it runs `git fetch` itself, e.g. to deepen a shallow clone). This differs from [`changesets/action`](https://github.com/changesets/action), where `actions/checkout` persists an `http.extraHeader` credential in the repository config and the action only needs to forward `GITHUB_TOKEN` to the CLI.
+
+GitLab CI checks out with a `CI_JOB_TOKEN` that cannot push, and `changesets-gitlab` deliberately does not leave credentials in the repository config. Instead it installs command-scoped `http.extraHeader` overrides built from `GITLAB_TOKEN` for its own commands and forwards them to the Changesets CLI and custom scripts. Set `DEBUG_GITLAB_CREDENTIAL=1` to log the remote URL when debugging git authentication.
+
 ### Inputs
 
 > Note: environment variables are case-sensitive. Input names follow the same kebab-case as [`changesets/action`](https://github.com/changesets/action); because GitLab CI/CD variable names cannot contain hyphens, they are set through the underscore-normalized `INPUT_*` variable (`publish-script` is `INPUT_PUBLISH_SCRIPT`). Boolean inputs accept `true`/`false` (any YAML spelling) and GitLab-style `1`/`0`.

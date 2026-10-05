@@ -301,6 +301,7 @@ A changeset summary can also point at a specific merge request, commit or author
 
 ```md
 ---
+'my-package': patch
 ---
 
 mr: 123

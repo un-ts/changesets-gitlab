@@ -81,6 +81,7 @@ const createGitLab = (
       ...api,
     },
     ensureGitUser: vi.fn(),
+    getGitEnv: vi.fn().mockResolvedValue({ ...process.env }),
     prepareBranch: vi.fn(),
     pushChanges: vi.fn(),
     pushTag: vi.fn(),
@@ -236,6 +237,35 @@ describe('runPublish', () => {
       expect.objectContaining({ tag_name: 'pkg@1.1.0' }),
     )
   })
+
+  test('forwards the GitLab CLI auth environment to the publish script', async () => {
+    const cwd = createRepo({
+      ...simpleProject,
+      'dump-env.js': `require('node:fs').writeFileSync('env.json', JSON.stringify(process.env))\n`,
+    })
+    const getGitEnv = vi.fn().mockResolvedValue({
+      ...process.env,
+      GIT_CONFIG_COUNT: '2',
+      GIT_CONFIG_KEY_0: 'http.https://gitlab.example.com/.extraheader',
+      GIT_CONFIG_VALUE_0: '',
+      GIT_CONFIG_KEY_1: 'http.https://gitlab.example.com/.extraheader',
+      GIT_CONFIG_VALUE_1: 'AUTHORIZATION: basic test',
+    })
+    await runPublish({
+      script: 'node dump-env.js',
+      gitlab: createGitLab(cwd, { getGitEnv }),
+      createGitlabReleases: true,
+      pushGitTags: true,
+      cwd,
+    })
+
+    expect(getGitEnv).toHaveBeenCalledOnce()
+    const captured = JSON.parse(
+      fs.readFileSync(path.join(cwd, 'env.json'), 'utf8'),
+    ) as Record<string, string>
+    expect(captured.GIT_CONFIG_COUNT).toBe('2')
+    expect(captured.GIT_CONFIG_VALUE_1).toBe('AUTHORIZATION: basic test')
+  })
 })
 
 describe('runVersion', () => {
@@ -250,6 +280,32 @@ describe('runVersion', () => {
 
     expect(result).toEqual({})
     expect(mergeRequests.all).not.toHaveBeenCalled()
+  })
+
+  test('forwards the GitLab CLI auth environment to the version script', async () => {
+    const cwd = createRepo({
+      ...simpleProject,
+      'dump-env.js': `require('node:fs').writeFileSync('env.json', JSON.stringify(process.env))\n`,
+    })
+    const getGitEnv = vi.fn().mockResolvedValue({
+      ...process.env,
+      GIT_CONFIG_COUNT: '2',
+      GIT_CONFIG_KEY_0: 'http.https://gitlab.example.com/.extraheader',
+      GIT_CONFIG_VALUE_0: '',
+      GIT_CONFIG_KEY_1: 'http.https://gitlab.example.com/.extraheader',
+      GIT_CONFIG_VALUE_1: 'AUTHORIZATION: basic test',
+    })
+    await runVersion({
+      script: 'node dump-env.js',
+      gitlab: createGitLab(cwd, { getGitEnv }),
+      cwd,
+    })
+
+    expect(getGitEnv).toHaveBeenCalledOnce()
+    const captured = JSON.parse(
+      fs.readFileSync(path.join(cwd, 'env.json'), 'utf8'),
+    ) as Record<string, string>
+    expect(captured.GIT_CONFIG_VALUE_1).toBe('AUTHORIZATION: basic test')
   })
 
   test('creates a merge request for bumped packages', async () => {

@@ -76,6 +76,7 @@ export class GitLab {
   readonly pushWithGitCli: boolean
   readonly serverUrl: string
   readonly #gitlabToken: string
+  #gitEnv?: Promise<Record<string, string>>
 
   constructor(options: {
     gitlabToken: string
@@ -158,13 +159,7 @@ export class GitLab {
       await exec(
         'git',
         ['push', 'origin', ...tags.map(tag => `refs/tags/${tag}`)],
-        {
-          cwd: this.cwd,
-          env: {
-            ...process.env,
-            ...(await this.#getCliAuthEnv()),
-          } as Record<string, string>,
-        },
+        { cwd: this.cwd, env: await this.getGitEnv() },
       )
     } catch (err) {
       const tagList = tags.map(tag => `"${tag}"`).join(', ')
@@ -199,13 +194,7 @@ export class GitLab {
       await this.ensureGitUser()
       await commitAll(message, { cwd: this.cwd })
     }
-    await push(branch, {
-      cwd: this.cwd,
-      env: {
-        ...process.env,
-        ...(await this.#getCliAuthEnv()),
-      } as Record<string, string>,
-    })
+    await push(branch, { cwd: this.cwd, env: await this.getGitEnv() })
   }
 
   // Make the `GITLAB_TOKEN` authoritative for Git CLI operations without
@@ -213,6 +202,29 @@ export class GitLab {
   // `origin` URL, so install command-scoped `http.extraHeader` overrides for
   // every push destination. libcurl ignores the URL userinfo once an
   // `Authorization` header is supplied, so this replaces the job token.
+  //
+  // Public so `runVersion`/`runPublish` can forward it to the Changesets CLI
+  // (and custom scripts) as well: those run `git fetch` themselves and would
+  // otherwise fall back to the unauthenticated CI remote URL.
+  //
+  // Diverges from `changesets/action`, which keeps this helper private and only
+  // passes `GITHUB_TOKEN` to the Changesets CLI because `actions/checkout`
+  // persists an `http.extraHeader` credential in the repository config. GitLab
+  // CI cannot push with its `CI_JOB_TOKEN`, so we expose this env for
+  // `runVersion`/`runPublish` to forward to the Changesets CLI and custom
+  // scripts.
+  //
+  // Unlike upstream, the result is cached for the instance lifetime: the CLI is
+  // a short-lived, single-shot CI process, so the token, server URL and remote
+  // configuration cannot change while it runs. Caching the promise also dedupes
+  // concurrent tag pushes.
+  getGitEnv(): Promise<Record<string, string>> {
+    this.#gitEnv ??= this.#getCliAuthEnv().then(
+      authEnv => ({ ...process.env, ...authEnv }) as Record<string, string>,
+    )
+    return this.#gitEnv
+  }
+
   async #getCliAuthEnv(): Promise<Record<string, string>> {
     const username =
       env.GITLAB_TOKEN_TYPE === 'oauth' ? 'oauth2' : await getUsername(this.api)

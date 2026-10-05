@@ -1,5 +1,17 @@
 # changesets-gitlab
 
+## 0.17.0
+
+### Minor Changes
+
+- [#272](https://github.com/un-ts/changesets-gitlab/pull/272) [`c39c30d`](https://github.com/un-ts/changesets-gitlab/commit/c39c30d6ca0f2ba0cb87dfdd23327f2781b67a42) Thanks [@i1stG](https://github.com/i1stG)! - **Added** the `changesets-gitlab/changelog` changelog generator for [Changesets](https://changesets.dev/guide/customize-changelog-format). It links each entry to the corresponding GitLab merge request, commit and author, linkifies `[#123](https://github.com/un-ts/changesets-gitlab/issues/123)` issue and `!123` merge request references, and supports the `repo`, `disableThanks` and `template` options like [`@changesets/changelog-github`](https://github.com/changesets/changesets/tree/main/packages/changelog-github).
+
+  ```json
+  {
+    "changelog": ["changesets-gitlab/changelog", { "repo": "group/project" }]
+  }
+  ```
+
 ## 0.16.2
 
 ### Patch Changes

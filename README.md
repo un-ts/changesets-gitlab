@@ -288,14 +288,14 @@ It needs a `GITLAB_TOKEN` with the `read_api` scope (the same token the CLI uses
 
 The `template` option supports these tokens:
 
-| Token       | Description                                                                                                                    | Example              |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------- |
-| `{summary}` | The first line of the changeset Markdown content.                                                                              | `fix the thing`      |
-| `{ref}`     | Link to either the merge request or commit (if the changes were pushed directly).                                              | `([!123](url))`      |
-| `{mr}`      | Link to the merge request if available.                                                                                        | `[!123](url)`        |
-| `{pull}`    | Alias of `{mr}`, kept for `@changesets/changelog-github` compatibility.                                                        | `[!123](url)`        |
-| `{commit}`  | Link to the commit.                                                                                                            | ``[`abc1234`](url)`` |
-| `{authors}` | Link to the GitLab user profile of the merge request author. Direct pushes without an associated merge request have no author. | `[@ghost](url)`      |
+| Token       | Description                                                                                                                                              | Example              |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| `{summary}` | The first line of the changeset Markdown content.                                                                                                        | `fix the thing`      |
+| `{ref}`     | Link to either the merge request or commit (if the changes were pushed directly).                                                                        | `([!123](url))`      |
+| `{mr}`      | Link to the merge request if available.                                                                                                                  | `[!123](url)`        |
+| `{pull}`    | Alias of `{mr}`, kept for `@changesets/changelog-github` compatibility.                                                                                  | `[!123](url)`        |
+| `{commit}`  | Link to the commit.                                                                                                                                      | ``[`abc1234`](url)`` |
+| `{authors}` | Link to the GitLab user profile of the merge request author, falling back to the commit author/committer name (unlinked) when there is no merge request. | `[@ghost](url)`      |
 
 A changeset summary can also point at a specific merge request, commit or author with the same prefixes used by `@changesets/changelog-github`, extended with `mr`/`merge request`:
 

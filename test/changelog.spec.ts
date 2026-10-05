@@ -57,6 +57,8 @@ const commit = {
   id: COMMIT_SHA,
   short_id: 'abcdef1',
   web_url: commitUrl,
+  author_name: 'Ada Lovelace',
+  committer_name: 'GitLab Bot',
 }
 
 const createChangeset = (
@@ -112,7 +114,9 @@ describe('changelog', () => {
       repo: REPO,
     })
 
-    expect(line).toBe(`\n\n- [\`abcdef1\`](${commitUrl}) - fix the thing\n`)
+    expect(line).toBe(
+      `\n\n- [\`abcdef1\`](${commitUrl}) Thanks Ada Lovelace! - fix the thing\n`,
+    )
   })
 
   test('linkifies issue and merge request references', async () => {
@@ -267,7 +271,31 @@ describe('changelog', () => {
       repo: REPO,
     })
 
-    expect(line).toBe(`\n\n- [\`abcdef1\`](${commitUrl}) - fix the thing\n`)
+    expect(line).toBe(
+      `\n\n- [\`abcdef1\`](${commitUrl}) Thanks Ada Lovelace! - fix the thing\n`,
+    )
+  })
+
+  test('uses the committer name when the commit author name is empty', async () => {
+    mockApi.Commits.show.mockResolvedValue({ ...commit, author_name: '' })
+    mockApi.Commits.allMergeRequests.mockResolvedValue([])
+
+    const line = await changelog.getReleaseLine(createChangeset(), 'patch', {
+      repo: REPO,
+    })
+
+    expect(line).toContain('Thanks GitLab Bot!')
+  })
+
+  test('renders the commit author in the authors token when there is no merge request', async () => {
+    mockApi.Commits.allMergeRequests.mockResolvedValue([])
+
+    const line = await changelog.getReleaseLine(createChangeset(), 'patch', {
+      repo: REPO,
+      template: '{authors}',
+    })
+
+    expect(line).toBe('Ada Lovelace\n')
   })
 
   test('picks the earliest merged request for a commit', async () => {

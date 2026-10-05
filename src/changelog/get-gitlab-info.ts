@@ -11,9 +11,9 @@ import { readEnv, type ChangelogConfig } from './env.js'
 const HTTP_STATUS_NOT_FOUND = 404
 
 export interface UserInfo {
-  username: string
   name: string
-  url: string
+  username?: string
+  url?: string
   markdownLink: string
 }
 
@@ -75,6 +75,15 @@ const toUser = (
         markdownLink: `[@${author.username}](${author.web_url})`,
       }
     : undefined
+
+// GitLab exposes the commit author as a name/email pair with no user link, so
+// fall back to the (unlinked) name when the commit has no merge request.
+const toCommitAuthor = (
+  commit: Pick<ExpandedCommitSchema, 'author_name' | 'committer_name'>,
+): UserInfo | undefined => {
+  const name = commit.author_name || commit.committer_name
+  return name ? { name, markdownLink: name } : undefined
+}
 
 const toCommitLink = (
   { serverUrl, repo }: ChangelogConfig,
@@ -180,7 +189,7 @@ export const getCommitInfo = async (
       url: commit.web_url,
       markdownLink: `[\`${sha.slice(0, 7)}\`](${commit.web_url})`,
     },
-    author: toUser(mr?.author),
+    author: toUser(mr?.author) ?? toCommitAuthor(commit),
     mr: mr ? toMergeRequestLink(mr) : undefined,
   }
 }

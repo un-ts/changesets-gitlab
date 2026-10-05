@@ -292,6 +292,21 @@ describe('changelog', () => {
     expect(line).toBe('Ada Lovelace\n')
   })
 
+  test('escapes markdown in the commit author fallback', async () => {
+    mockApi.Commits.show.mockResolvedValue({
+      ...commit,
+      author_name: '[x](https://evil.example)',
+    })
+    mockApi.Commits.allMergeRequests.mockResolvedValue([])
+
+    const line = await changelog.getReleaseLine(createChangeset(), 'patch', {
+      repo: REPO,
+    })
+
+    expect(line).not.toContain('[x](https://evil.example)')
+    expect(line).toContain(String.raw`Thanks \[x\]`)
+  })
+
   test('picks the earliest merged request for a commit', async () => {
     const earlier = {
       ...mergeRequest,

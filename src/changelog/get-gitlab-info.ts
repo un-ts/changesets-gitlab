@@ -90,11 +90,17 @@ const toUser = (
 
 // GitLab exposes the commit author as a name/email pair with no user link, so
 // fall back to the (unlinked) name when the commit has no merge request.
+// Escape Markdown because the name is contributor-controlled and gets rendered
+// into `CHANGELOG.md`.
+const MARKDOWN_ESCAPE_REGEX = /[\\`*_{}[\]()#+.!<>|~-]/g
+const escapeMarkdown = (text: string) =>
+  text.replaceAll(MARKDOWN_ESCAPE_REGEX, String.raw`\$&`)
+
 const toCommitAuthor = (
   commit: Pick<ExpandedCommitSchema, 'author_name' | 'committer_name'>,
 ): UserInfo | undefined => {
   const name = commit.author_name || commit.committer_name
-  return name ? { name, markdownLink: name } : undefined
+  return name ? { name, markdownLink: escapeMarkdown(name) } : undefined
 }
 
 const toCommitLink = (

@@ -3877,10 +3877,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/web@npm:^0.0.356":
-  version: 0.0.356
-  resolution: "@types/web@npm:0.0.356"
-  checksum: 10c0/d60b4b18cfcd7320cfcf6ea9e06e086df8612daa489443f5a6bef3eb28acfca88aea2b6288606b79fe2e54c097bf182d81a78ceaebb1fabe36b4af7e7c7e352a
+"@types/web@npm:^0.0.357":
+  version: 0.0.357
+  resolution: "@types/web@npm:0.0.357"
+  checksum: 10c0/173e5c58be7413e12eb194db4bf0804eca0c8d25890a53a9e0086c519c26ddd8351c8ce6a5cef9ef3fef6c4cd1e66d22fcad191b7f72b15039c6652ed4563e46
   languageName: node
   linkType: hard
 
@@ -5353,12 +5353,12 @@ __metadata:
     "@manypkg/get-packages": "npm:^3.1.0"
     "@types/global-agent": "npm:^3.0.0"
     "@types/micromatch": "npm:^4.0.10"
-    "@types/web": "npm:^0.0.356"
+    "@types/web": "npm:^0.0.357"
     "@typescript/native": "npm:typescript@^7.0.2"
     "@vitest/coverage-istanbul": "npm:^5.0.1"
     clean-pkg-json: "npm:^2.0.0"
     commander: "npm:^15.0.0"
-    dotenv: "npm:^17.4.2"
+    dotenv: "npm:^18.0.0"
     eslint: "npm:^10.10.0"
     global-agent: "npm:^4.1.3"
     global-directory: "npm:^5.0.0"
@@ -5880,10 +5880,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv@npm:^17.4.2":
-  version: 17.4.2
-  resolution: "dotenv@npm:17.4.2"
-  checksum: 10c0/164f8e77a646c8446867d5b588d26ea6005c8ea7c5eb41cf926f6113d23f2191355f6e0cfd95ea9bab98394a5b0a3f1e51a8399711b666fe55cc7b0bd745f942
+"dotenv@npm:^18.0.0":
+  version: 18.0.5
+  resolution: "dotenv@npm:18.0.5"
+  bin:
+    dotenv: dist/index.cjs
+  checksum: 10c0/fade137f063f3d3483459b71c6ed0f98f18189fa52b14c9f192e57df6b76719340aa6d9a1d194e4fa0e025deb5af9d545efcc3a28f09230af815518f0b9c0785
   languageName: node
   linkType: hard
 

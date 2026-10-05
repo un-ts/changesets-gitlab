@@ -178,6 +178,10 @@ export async function runPublish({
       ignoreReturnCode: true,
       env: {
         ...process.env,
+        // The Changesets CLI runs `git` itself (e.g. fetching tags), so it
+        // needs the `GITLAB_TOKEN` auth that the tool otherwise only applies
+        // to its own commands.
+        ...(await gitlab.getCliAuthEnv()),
         CHANGESETS_OUTPUT: outputFile,
       },
     }
@@ -319,9 +323,17 @@ export async function runVersion({
 
   const versionsByDirectory = await getVersionsByDirectory(cwd)
 
+  // The Changesets CLI (and any custom version script) may run `git fetch`
+  // itself, e.g. to deepen a shallow clone, so forward the same GitLab auth the
+  // tool uses for its own commands instead of relying on the CI remote URL.
+  const env = {
+    ...process.env,
+    ...(await gitlab.getCliAuthEnv()),
+  } as Record<string, string>
+
   await (script
-    ? exec(script, undefined, { cwd })
-    : execChangesetsCli(['version'], { cwd }))
+    ? exec(script, undefined, { cwd, env })
+    : execChangesetsCli(['version'], { cwd, env }))
 
   const changedPackages = await getChangedPackages(cwd, versionsByDirectory)
 

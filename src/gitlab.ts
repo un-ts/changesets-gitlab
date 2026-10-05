@@ -162,7 +162,7 @@ export class GitLab {
           cwd: this.cwd,
           env: {
             ...process.env,
-            ...(await this.#getCliAuthEnv()),
+            ...(await this.getCliAuthEnv()),
           } as Record<string, string>,
         },
       )
@@ -203,7 +203,7 @@ export class GitLab {
       cwd: this.cwd,
       env: {
         ...process.env,
-        ...(await this.#getCliAuthEnv()),
+        ...(await this.getCliAuthEnv()),
       } as Record<string, string>,
     })
   }
@@ -213,7 +213,11 @@ export class GitLab {
   // `origin` URL, so install command-scoped `http.extraHeader` overrides for
   // every push destination. libcurl ignores the URL userinfo once an
   // `Authorization` header is supplied, so this replaces the job token.
-  async #getCliAuthEnv(): Promise<Record<string, string>> {
+  //
+  // Public so `runVersion`/`runPublish` can forward it to the Changesets CLI
+  // (and custom scripts) as well: those run `git fetch` themselves and would
+  // otherwise fall back to the unauthenticated CI remote URL.
+  async getCliAuthEnv(): Promise<Record<string, string>> {
     const username =
       env.GITLAB_TOKEN_TYPE === 'oauth' ? 'oauth2' : await getUsername(this.api)
     const basic = Buffer.from(`${username}:${this.#gitlabToken}`).toString(

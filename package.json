@@ -19,6 +19,10 @@
       "types": "./lib/index.d.ts",
       "default": "./lib/index.js"
     },
+    "./changelog": {
+      "types": "./lib/changelog.d.ts",
+      "default": "./lib/changelog.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [

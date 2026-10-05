@@ -266,6 +266,50 @@ And your `update-versions` script would be:
 }
 ```
 
+## Changelog generator
+
+The package also exposes a [changelog generator](https://changesets.dev/guide/customize-changelog-format) at the `changesets-gitlab/changelog` subpath. It links every changelog entry to the corresponding GitLab merge request, commit and author, and it linkifies `#123` issue and `!123` merge request references. It mirrors [`@changesets/changelog-github`](https://github.com/changesets/changesets/tree/main/packages/changelog-github), but adapted to GitLab.
+
+It needs a `GITLAB_TOKEN` with the `read_api` scope (the same token the CLI uses is enough) and it uses `CI_PROJECT_PATH`/`CI_SERVER_URL` when running in GitLab CI.
+
+```json
+{
+  "changelog": ["changesets-gitlab/changelog", { "repo": "group/project" }]
+}
+```
+
+### Options
+
+- `repo` - The `<group>/<project>` path of the GitLab project. Defaults to `CI_PROJECT_PATH`.
+- `disableThanks` - Set `true` to drop the `"Thanks [@user]!"` attribution from each line.
+- `template` - **Experimental.** A custom format for a single changelog line. See the tokens below.
+
+### Tokens
+
+The `template` option supports these tokens:
+
+| Token       | Description                                                                           | Example              |
+| ----------- | ------------------------------------------------------------------------------------- | -------------------- |
+| `{summary}` | The first line of the changeset Markdown content.                                     | `fix the thing`      |
+| `{ref}`     | Link to either the merge request or commit (if the changes were pushed directly).     | `([!123](url))`      |
+| `{mr}`      | Link to the merge request if available.                                               | `[!123](url)`        |
+| `{pull}`    | Alias of `{mr}`, kept for `@changesets/changelog-github` compatibility.               | `[!123](url)`        |
+| `{commit}`  | Link to the commit.                                                                   | ``[`abc1234`](url)`` |
+| `{authors}` | Link to the GitLab user profile of the main author of the commit (and merge request). | `[@ghost](url)`      |
+
+A changeset summary can also point at a specific merge request, commit or author with the same prefixes used by `@changesets/changelog-github`, extended with `mr`/`merge request`:
+
+```md
+---
+---
+
+mr: 123
+commit: abc1234
+author: @ghost
+
+fix the thing
+```
+
 ## Sponsors
 
 | 1stG                                                                                                                               | RxTS                                                                                                                               | UnTS                                                                                                                               |

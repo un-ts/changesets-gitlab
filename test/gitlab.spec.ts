@@ -20,7 +20,7 @@ function createRepo() {
   return cwd
 }
 
-describe('GitLab.getCliAuthEnv', () => {
+describe('GitLab.getGitEnv', () => {
   test('installs a command-scoped Authorization header for the GitLab host', async () => {
     const cwd = createRepo()
     process.env.GITLAB_HOST = 'https://gitlab.example.com'
@@ -33,7 +33,7 @@ describe('GitLab.getCliAuthEnv', () => {
       const { GitLab } = await import('../src/gitlab.js')
       const gitlab = new GitLab({ gitlabToken: 'glpat-token', cwd })
 
-      const result = await gitlab.getCliAuthEnv()
+      const result = await gitlab.getGitEnv()
 
       expect(result.GIT_CONFIG_COUNT).toBe('4')
       const values = Object.entries(result)
@@ -63,7 +63,7 @@ describe('GitLab.getCliAuthEnv', () => {
       ).toHaveLength(2)
 
       // Computed once and reused for the lifetime of the instance.
-      expect(await gitlab.getCliAuthEnv()).toBe(result)
+      expect(await gitlab.getGitEnv()).toBe(result)
     } finally {
       fs.rmSync(cwd, { recursive: true, force: true })
     }

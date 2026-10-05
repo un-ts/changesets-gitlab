@@ -76,7 +76,7 @@ export class GitLab {
   readonly pushWithGitCli: boolean
   readonly serverUrl: string
   readonly #gitlabToken: string
-  #cliAuthEnv?: Promise<Record<string, string>>
+  #gitEnv?: Promise<Record<string, string>>
 
   constructor(options: {
     gitlabToken: string
@@ -159,13 +159,7 @@ export class GitLab {
       await exec(
         'git',
         ['push', 'origin', ...tags.map(tag => `refs/tags/${tag}`)],
-        {
-          cwd: this.cwd,
-          env: {
-            ...process.env,
-            ...(await this.getCliAuthEnv()),
-          } as Record<string, string>,
-        },
+        { cwd: this.cwd, env: await this.getGitEnv() },
       )
     } catch (err) {
       const tagList = tags.map(tag => `"${tag}"`).join(', ')
@@ -200,13 +194,7 @@ export class GitLab {
       await this.ensureGitUser()
       await commitAll(message, { cwd: this.cwd })
     }
-    await push(branch, {
-      cwd: this.cwd,
-      env: {
-        ...process.env,
-        ...(await this.getCliAuthEnv()),
-      } as Record<string, string>,
-    })
+    await push(branch, { cwd: this.cwd, env: await this.getGitEnv() })
   }
 
   // Make the `GITLAB_TOKEN` authoritative for Git CLI operations without
@@ -230,16 +218,14 @@ export class GitLab {
   // a short-lived, single-shot CI process, so the token, server URL and remote
   // configuration cannot change while it runs. Caching the promise also dedupes
   // concurrent tag pushes.
-  async getCliAuthEnv(): Promise<Record<string, string>> {
-    this.#cliAuthEnv ??= this.#computeCliAuthEnv().catch((err: unknown) => {
-      // Do not cache a transient failure (e.g. a flaky `git remote` call).
-      this.#cliAuthEnv = undefined
-      throw err
-    })
-    return this.#cliAuthEnv
+  getGitEnv(): Promise<Record<string, string>> {
+    this.#gitEnv ??= this.#getCliAuthEnv().then(
+      authEnv => ({ ...process.env, ...authEnv }) as Record<string, string>,
+    )
+    return this.#gitEnv
   }
 
-  async #computeCliAuthEnv(): Promise<Record<string, string>> {
+  async #getCliAuthEnv(): Promise<Record<string, string>> {
     const username =
       env.GITLAB_TOKEN_TYPE === 'oauth' ? 'oauth2' : await getUsername(this.api)
     const basic = Buffer.from(`${username}:${this.#gitlabToken}`).toString(

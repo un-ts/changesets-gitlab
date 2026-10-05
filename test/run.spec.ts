@@ -81,7 +81,7 @@ const createGitLab = (
       ...api,
     },
     ensureGitUser: vi.fn(),
-    getCliAuthEnv: vi.fn().mockResolvedValue({}),
+    getGitEnv: vi.fn().mockResolvedValue({ ...process.env }),
     prepareBranch: vi.fn(),
     pushChanges: vi.fn(),
     pushTag: vi.fn(),
@@ -243,7 +243,8 @@ describe('runPublish', () => {
       ...simpleProject,
       'dump-env.js': `require('node:fs').writeFileSync('env.json', JSON.stringify(process.env))\n`,
     })
-    const getCliAuthEnv = vi.fn().mockResolvedValue({
+    const getGitEnv = vi.fn().mockResolvedValue({
+      ...process.env,
       GIT_CONFIG_COUNT: '2',
       GIT_CONFIG_KEY_0: 'http.https://gitlab.example.com/.extraheader',
       GIT_CONFIG_VALUE_0: '',
@@ -252,13 +253,13 @@ describe('runPublish', () => {
     })
     await runPublish({
       script: 'node dump-env.js',
-      gitlab: createGitLab(cwd, { getCliAuthEnv }),
+      gitlab: createGitLab(cwd, { getGitEnv }),
       createGitlabReleases: true,
       pushGitTags: true,
       cwd,
     })
 
-    expect(getCliAuthEnv).toHaveBeenCalledOnce()
+    expect(getGitEnv).toHaveBeenCalledOnce()
     const captured = JSON.parse(
       fs.readFileSync(path.join(cwd, 'env.json'), 'utf8'),
     ) as Record<string, string>
@@ -286,7 +287,8 @@ describe('runVersion', () => {
       ...simpleProject,
       'dump-env.js': `require('node:fs').writeFileSync('env.json', JSON.stringify(process.env))\n`,
     })
-    const getCliAuthEnv = vi.fn().mockResolvedValue({
+    const getGitEnv = vi.fn().mockResolvedValue({
+      ...process.env,
       GIT_CONFIG_COUNT: '2',
       GIT_CONFIG_KEY_0: 'http.https://gitlab.example.com/.extraheader',
       GIT_CONFIG_VALUE_0: '',
@@ -295,11 +297,11 @@ describe('runVersion', () => {
     })
     await runVersion({
       script: 'node dump-env.js',
-      gitlab: createGitLab(cwd, { getCliAuthEnv }),
+      gitlab: createGitLab(cwd, { getGitEnv }),
       cwd,
     })
 
-    expect(getCliAuthEnv).toHaveBeenCalledOnce()
+    expect(getGitEnv).toHaveBeenCalledOnce()
     const captured = JSON.parse(
       fs.readFileSync(path.join(cwd, 'env.json'), 'utf8'),
     ) as Record<string, string>

@@ -177,12 +177,11 @@ export async function runPublish({
       cwd,
       ignoreReturnCode: true,
       env: {
-        ...process.env,
         // The Changesets CLI runs `git` itself (e.g. fetching tags), so it
         // needs the `GITLAB_TOKEN` auth that the tool otherwise only applies
         // to its own commands. Upstream only forwards `GITHUB_TOKEN` because
         // GitHub checkouts persist git credentials; GitLab does not.
-        ...(await gitlab.getCliAuthEnv()),
+        ...(await gitlab.getGitEnv()),
         CHANGESETS_OUTPUT: outputFile,
       },
     }
@@ -330,10 +329,7 @@ export async function runVersion({
   // Upstream only forwards `GITHUB_TOKEN` because GitHub checkouts persist git
   // credentials; GitLab does not, so the command-scoped `http.extraHeader` is
   // required.
-  const env = {
-    ...process.env,
-    ...(await gitlab.getCliAuthEnv()),
-  } as Record<string, string>
+  const env = await gitlab.getGitEnv()
 
   await (script
     ? exec(script, undefined, { cwd, env })

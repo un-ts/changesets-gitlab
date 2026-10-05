@@ -76,6 +76,7 @@ export class GitLab {
   readonly pushWithGitCli: boolean
   readonly serverUrl: string
   readonly #gitlabToken: string
+  #cliAuthEnv?: Promise<Record<string, string>>
 
   constructor(options: {
     gitlabToken: string
@@ -221,10 +222,24 @@ export class GitLab {
   // Diverges from `changesets/action`, which keeps this helper private and only
   // passes `GITHUB_TOKEN` to the Changesets CLI because `actions/checkout`
   // persists an `http.extraHeader` credential in the repository config. GitLab
-  // CI cannot push with its `CI_JOB_TOKEN`, so we expose this env here (and
-  // leave it uncached: it depends on the remote config and the ambient
-  // `GIT_CONFIG_*` of each command).
+  // CI cannot push with its `CI_JOB_TOKEN`, so we expose this env for
+  // `runVersion`/`runPublish` to forward to the Changesets CLI and custom
+  // scripts.
+  //
+  // Unlike upstream, the result is cached for the instance lifetime: the CLI is
+  // a short-lived, single-shot CI process, so the token, server URL and remote
+  // configuration cannot change while it runs. Caching the promise also dedupes
+  // concurrent tag pushes.
   async getCliAuthEnv(): Promise<Record<string, string>> {
+    this.#cliAuthEnv ??= this.#computeCliAuthEnv().catch((err: unknown) => {
+      // Do not cache a transient failure (e.g. a flaky `git remote` call).
+      this.#cliAuthEnv = undefined
+      throw err
+    })
+    return this.#cliAuthEnv
+  }
+
+  async #computeCliAuthEnv(): Promise<Record<string, string>> {
     const username =
       env.GITLAB_TOKEN_TYPE === 'oauth' ? 'oauth2' : await getUsername(this.api)
     const basic = Buffer.from(`${username}:${this.#gitlabToken}`).toString(

@@ -61,6 +61,9 @@ describe('GitLab.getCliAuthEnv', () => {
               'http.https://gitlab.example.com/group/proj.git.extraheader',
         ),
       ).toHaveLength(2)
+
+      // Computed once and reused for the lifetime of the instance.
+      expect(await gitlab.getCliAuthEnv()).toBe(result)
     } finally {
       fs.rmSync(cwd, { recursive: true, force: true })
     }

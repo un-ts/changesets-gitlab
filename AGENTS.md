@@ -109,7 +109,7 @@ Notes:
 - Recurring ESLint rules to design around:
   - `sonarjs/cognitive-complexity` (max 15): extract a helper instead of nesting further.
   - `unicorn-x/no-negated-condition`, `no-negated-condition`, `unicorn-x/prefer-ternary`: prefer an early `return` over `if (!x) { … } else { … }`.
-- `lib/index.js` is budgeted at 150 B (brotlied); keep the public entry tiny. `lib/cli.js` is not part of the budget.
+- `lib/index.js` is budgeted at 11 kB (brotlied); keep the public entry tiny. `lib/cli.js` is not part of the budget.
 
 ## Testing
 

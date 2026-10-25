@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.17.1
+
+### Patch Changes
+
+- [#277](https://github.com/un-ts/changesets-gitlab/pull/277) [`27db5ad`](https://github.com/un-ts/changesets-gitlab/commit/27db5adf8fc6b4ab3014b4938039d2c6010e481f) Thanks [@JounQin](https://github.com/JounQin)! - **Fixed** Discover the root `package.json` in a multi-package workspace that includes `.` in its `workspaces`/`packages` globs. A changeset for the root package no longer fails in the comment command with `Found changeset … for package … which is not in the workspace` ([#276](https://github.com/un-ts/changesets-gitlab/issues/276)).
+
 ## 0.17.0
 
 ### Minor Changes

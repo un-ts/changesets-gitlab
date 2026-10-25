@@ -86,7 +86,10 @@ export const getChangedPackages = async ({
   const changedFiles = await changedFilesPromise
 
   for (const item of tree) {
-    if (item.endsWith('/package.json')) {
+    // Check the basename instead of a `/package.json` suffix so the root
+    // `package.json` is discovered as well.
+    // @see https://github.com/changesets/bot/pull/94
+    if (path.basename(item) === 'package.json') {
       const dirPath = path.dirname(item)
       potentialWorkspaceDirectories.push(dirPath)
     } else if (item === 'pnpm-workspace.yaml') {

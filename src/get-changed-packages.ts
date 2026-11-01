@@ -6,12 +6,7 @@ import { assembleReleasePlan } from '@changesets/assemble-release-plan'
 import { validateConfig as parseConfig } from '@changesets/config'
 import { parseChangesetFile as parseChangeset } from '@changesets/parse'
 import { shouldSkipPackage } from '@changesets/should-skip-package'
-import type {
-  PackageJSON,
-  PreState,
-  NewChangeset,
-  WrittenConfig,
-} from '@changesets/types'
+import type { PackageJSON, PreState, NewChangeset, WrittenConfig } from '@changesets/types'
 import type { Package, Packages, Tool } from '@manypkg/get-packages'
 import micromatch from 'micromatch'
 import { parse } from 'yaml'
@@ -53,9 +48,7 @@ export const getChangedPackages = async ({
   }
 
   async function getPackage(pkgPath: string): Promise<Package> {
-    const jsonContent = await fetchJsonFile<PackageJSON>(
-      `${pkgPath}/package.json`,
-    )
+    const jsonContent = await fetchJsonFile<PackageJSON>(`${pkgPath}/package.json`)
     return {
       packageJson: jsonContent,
       dir: pkgPath,
@@ -165,10 +158,7 @@ export const getChangedPackages = async ({
   }
 
   if (tool) {
-    if (
-      !Array.isArray(tool.globs) ||
-      !tool.globs.every(x => typeof x === 'string')
-    ) {
+    if (!Array.isArray(tool.globs) || !tool.globs.every(x => typeof x === 'string')) {
       throw new Error('globs are not valid: ' + JSON.stringify(tool.globs))
     }
 
@@ -185,9 +175,7 @@ export const getChangedPackages = async ({
   const config = await configPromise.then(rawConfig => {
     const result = parseConfig(rawConfig, packages)
     if (result.errors) {
-      throw new Error(
-        `Failed to parse changeset config: ${result.errors.join(', ')}`,
-      )
+      throw new Error(`Failed to parse changeset config: ${result.errors.join(', ')}`)
     }
     return result.config
   })
@@ -205,9 +193,7 @@ export const getChangedPackages = async ({
         pkg =>
           (packages.tool.type === 'root' ||
             changedFiles.some(
-              changedFile =>
-                changedFile === pkg.dir ||
-                changedFile.startsWith(`${pkg.dir}/`),
+              changedFile => changedFile === pkg.dir || changedFile.startsWith(`${pkg.dir}/`),
             )) &&
           // Reuse the same predicate Changesets uses to decide whether a
           // package is versionable: it skips ignored packages, private packages

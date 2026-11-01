@@ -34,25 +34,18 @@ const run = async () => {
 
   program
     .command('select-mode')
-    .description(
-      'Decide whether to version or publish in the current repository state',
-    )
+    .description('Decide whether to version or publish in the current repository state')
     .action(selectMode)
 
   program
     .command('version')
-    .description(
-      'Version packages and open or update the release merge request',
-    )
+    .description('Version packages and open or update the release merge request')
     .action(version)
 
   program
     .command('pack')
     .description('Pack publishable packages into tarballs')
-    .option(
-      '--publish-plan <path>',
-      'Path to a publish plan from `select-mode`',
-    )
+    .option('--publish-plan <path>', 'Path to a publish plan from `select-mode`')
     .option('--out-dir <dir>', 'Directory to write the packed tarballs to')
     .action(pack)
 

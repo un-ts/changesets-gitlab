@@ -26,31 +26,20 @@ export const readEnv = (): ChangelogEnv => ({
   token: process.env.GITLAB_TOKEN,
 })
 
-export const parseOptions = (
-  options: Record<string, unknown> | null,
-): ChangelogOptions => {
+export const parseOptions = (options: Record<string, unknown> | null): ChangelogOptions => {
   const record = options ?? {}
   return {
     disableThanks: Boolean(record.disableThanks),
-    template:
-      typeof record.template === 'string' && record.template
-        ? record.template
-        : undefined,
+    template: typeof record.template === 'string' && record.template ? record.template : undefined,
   }
 }
 
 // Mirrors `getRepo` in `@changesets/changelog-github`: an explicit `repo`
 // option wins (even when empty), otherwise fall back to the env variable.
-export const getRepo = (
-  options: Record<string, unknown> | null,
-  changelogEnv: ChangelogEnv,
-) => {
+export const getRepo = (options: Record<string, unknown> | null, changelogEnv: ChangelogEnv) => {
   let repo: string | undefined
   if (options && 'repo' in options) {
-    repo =
-      typeof options.repo === 'string' && options.repo
-        ? options.repo
-        : undefined
+    repo = typeof options.repo === 'string' && options.repo ? options.repo : undefined
   } else {
     repo = changelogEnv.repo
   }

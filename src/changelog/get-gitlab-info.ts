@@ -66,8 +66,7 @@ const getApi = (serverUrl: string) => {
 }
 
 const isNotFoundError = (err: unknown) =>
-  err instanceof GitbeakerRequestError &&
-  err.cause?.response.status === HTTP_STATUS_NOT_FOUND
+  err instanceof GitbeakerRequestError && err.cause?.response.status === HTTP_STATUS_NOT_FOUND
 
 const toUser = (
   author:
@@ -93,8 +92,7 @@ const toUser = (
 // Escape Markdown because the name is contributor-controlled and gets rendered
 // into `CHANGELOG.md`.
 const MARKDOWN_ESCAPE_REGEX = /[\\`*_{}[\]()#+.!<>|~-]/g
-const escapeMarkdown = (text: string) =>
-  text.replaceAll(MARKDOWN_ESCAPE_REGEX, String.raw`\$&`)
+const escapeMarkdown = (text: string) => text.replaceAll(MARKDOWN_ESCAPE_REGEX, String.raw`\$&`)
 
 const toCommitAuthor = (
   commit: Pick<ExpandedCommitSchema, 'author_name' | 'committer_name'>,
@@ -103,10 +101,7 @@ const toCommitAuthor = (
   return name ? { name, markdownLink: escapeMarkdown(name) } : undefined
 }
 
-const toCommitLink = (
-  { serverUrl, repo }: ChangelogConfig,
-  sha: string,
-): CommitLink => {
+const toCommitLink = ({ serverUrl, repo }: ChangelogConfig, sha: string): CommitLink => {
   const url = `${serverUrl}/${repo}/-/commit/${sha}`
   return {
     sha,
@@ -115,10 +110,7 @@ const toCommitLink = (
   }
 }
 
-const toMergeRequestLink = (mr: {
-  iid: number
-  web_url: string
-}): MergeRequestLink => ({
+const toMergeRequestLink = (mr: { iid: number; web_url: string }): MergeRequestLink => ({
   iid: mr.iid,
   url: mr.web_url,
   markdownLink: `[!${mr.iid}](${mr.web_url})`,
@@ -130,10 +122,7 @@ export const getMergeRequestInfo = async (
 ): Promise<MergeRequestInfo | undefined> => {
   validateRepoName(config.repo)
   try {
-    const mr = await getApi(config.serverUrl).MergeRequests.show(
-      config.repo,
-      mrIid,
-    )
+    const mr = await getApi(config.serverUrl).MergeRequests.show(config.repo, mrIid)
     const mergeCommit = mr.merge_commit_sha || mr.squash_commit_sha
     return {
       mr: toMergeRequestLink(mr),
@@ -148,10 +137,7 @@ export const getMergeRequestInfo = async (
   }
 }
 
-const compareMergeRequests = (
-  a: { merged_at: string | null },
-  b: { merged_at: string | null },
-) => {
+const compareMergeRequests = (a: { merged_at: string | null }, b: { merged_at: string | null }) => {
   if (a.merged_at == null && b.merged_at == null) {
     return 0
   }

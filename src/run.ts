@@ -95,9 +95,7 @@ interface ChangesetsOutputEvent {
   packageName: string
 }
 
-function isChangesetsOutputEvent(
-  value: unknown,
-): value is ChangesetsOutputEvent {
+function isChangesetsOutputEvent(value: unknown): value is ChangesetsOutputEvent {
   return (
     typeof value === 'object' &&
     value !== null &&
@@ -112,17 +110,14 @@ function isChangesetsOutputEvent(
 
 class ChangesetsOutputReadError extends Error {}
 
-async function readChangesetsOutput(
-  outputPath: string,
-): Promise<ChangesetsOutputEvent[]> {
+async function readChangesetsOutput(outputPath: string): Promise<ChangesetsOutputEvent[]> {
   let rawOutput: string
   try {
     rawOutput = await fs.readFile(outputPath, 'utf8')
   } catch (err) {
-    throw new ChangesetsOutputReadError(
-      `Failed to read changesets output at ${outputPath}`,
-      { cause: err },
-    )
+    throw new ChangesetsOutputReadError(`Failed to read changesets output at ${outputPath}`, {
+      cause: err,
+    })
   }
 
   const events: ChangesetsOutputEvent[] = []
@@ -165,10 +160,7 @@ export async function runPublish({
 
   // Changesets v3 uses a shared output file (via CHANGESETS_OUTPUT env var)
   // to report published packages as NDJSON events.
-  const outputFile = path.join(
-    os.tmpdir(),
-    `changesets-output-${randomUUID()}.ndjson`,
-  )
+  const outputFile = path.join(os.tmpdir(), `changesets-output-${randomUUID()}.ndjson`)
 
   let changesetPublishExitCode: number
 
@@ -202,10 +194,7 @@ export async function runPublish({
     const pushAllTags =
       gitlab.pushWithGitCli &&
       (packages.length <= GITLAB_MAX_TAGS ||
-        (await api.FeatureFlags.show(
-          context.projectId,
-          'git_push_create_all_pipelines',
-        )
+        (await api.FeatureFlags.show(context.projectId, 'git_push_create_all_pipelines')
           .then(({ active }) => active)
           .catch(() => false)))
 
@@ -247,9 +236,7 @@ export async function runPublish({
     }
     if (createGitlabReleases) {
       await Promise.all(
-        releases.map(({ pkg, tag }) =>
-          limit(() => createRelease(api, { pkg, tagName: tag })),
-        ),
+        releases.map(({ pkg, tag }) => limit(() => createRelease(api, { pkg, tagName: tag }))),
       )
     }
 
@@ -351,21 +338,13 @@ export async function runVersion({
   const mrBodyPromise = (async () => {
     const changedPackagesInfo = await Promise.all(
       changedPackages.map(async pkg => {
-        const changelogContents = await fs.readFile(
-          path.join(pkg.dir, 'CHANGELOG.md'),
-          'utf8',
-        )
+        const changelogContents = await fs.readFile(path.join(pkg.dir, 'CHANGELOG.md'), 'utf8')
 
-        const entry = getChangelogEntry(
-          changelogContents,
-          pkg.packageJson.version,
-        )
+        const entry = getChangelogEntry(changelogContents, pkg.packageJson.version)
         return {
           highestLevel: entry.highestLevel,
           private: !!pkg.packageJson.private,
-          content:
-            `## ${pkg.packageJson.name}@${pkg.packageJson.version}\n\n` +
-            entry.content,
+          content: `## ${pkg.packageJson.name}@${pkg.packageJson.version}\n\n` + entry.content,
         }
       }),
     )
@@ -417,9 +396,7 @@ ${releasesInfo}`
   let pullRequestNumber: number
   if (searchResult.length === 0) {
     const finalMrTitle = withDraftPrefix(baseMrTitle, prDraft !== undefined)
-    core.info(
-      `Creating merge request from ${versionBranch} to ${mrTargetBranch}`,
-    )
+    core.info(`Creating merge request from ${versionBranch} to ${mrTargetBranch}`)
     const mergeRequest = await api.MergeRequests.create(
       context.projectId,
       versionBranch,

@@ -40,12 +40,10 @@ describe('GitLab.getGitEnv', () => {
       const authValues = values
         .filter(([key]) => key.startsWith('GIT_CONFIG_VALUE_'))
         .map(([, value]) => value)
-      const expectedHeader = `AUTHORIZATION: basic ${Buffer.from(
-        'bot:glpat-token',
-      ).toString('base64')}`
-      expect(authValues.filter(value => value === expectedHeader)).toHaveLength(
-        2,
-      )
+      const expectedHeader = `AUTHORIZATION: basic ${Buffer.from('bot:glpat-token').toString(
+        'base64',
+      )}`
+      expect(authValues.filter(value => value === expectedHeader)).toHaveLength(2)
       expect(
         values.filter(
           ([key, value]) =>
@@ -57,8 +55,7 @@ describe('GitLab.getGitEnv', () => {
         values.filter(
           ([key, value]) =>
             key.startsWith('GIT_CONFIG_KEY_') &&
-            value ===
-              'http.https://gitlab.example.com/group/proj.git.extraheader',
+            value === 'http.https://gitlab.example.com/group/proj.git.extraheader',
         ),
       ).toHaveLength(2)
 

@@ -18,10 +18,7 @@ const push = async (branch: string, options: GitOptions) => {
   await exec('git', ['push', 'origin', `HEAD:${branch}`, '--force'], options)
 }
 
-const switchToMaybeExistingBranch = async (
-  branch: string,
-  options: GitOptions,
-) => {
+const switchToMaybeExistingBranch = async (branch: string, options: GitOptions) => {
   const { exitCode } = await getExecOutput('git', ['checkout', branch], {
     ignoreReturnCode: true,
     ...options,
@@ -43,11 +40,7 @@ const commitAll = async (message: string, options: GitOptions) => {
 }
 
 const checkIfClean = async (options: GitOptions): Promise<boolean> => {
-  const { stdout } = await getExecOutput(
-    'git',
-    ['status', '--porcelain'],
-    options,
-  )
+  const { stdout } = await getExecOutput('git', ['status', '--porcelain'], options)
   return stdout.length === 0
 }
 
@@ -124,13 +117,9 @@ export class GitLab {
       return
     }
     core.info('Setting git user to gitlab[bot]')
-    await exec(
-      'git',
-      ['config', 'user.name', env.GITLAB_CI_USER_NAME || env.GITLAB_USER_NAME],
-      {
-        cwd: this.cwd,
-      },
-    )
+    await exec('git', ['config', 'user.name', env.GITLAB_CI_USER_NAME || env.GITLAB_USER_NAME], {
+      cwd: this.cwd,
+    })
     await exec('git', ['config', 'user.email', env.GITLAB_CI_USER_EMAIL], {
       cwd: this.cwd,
     })
@@ -147,20 +136,17 @@ export class GitLab {
     try {
       if (!this.pushWithGitCli) {
         await Promise.all(
-          tags.map(tag =>
-            this.api.Tags.create(context.projectId, tag, context.sha),
-          ),
+          tags.map(tag => this.api.Tags.create(context.projectId, tag, context.sha)),
         )
         return
       }
       // Push only the reported tags, in a single command, using
       // fully-qualified refspecs so they cannot be interpreted as `git push`
       // options.
-      await exec(
-        'git',
-        ['push', 'origin', ...tags.map(tag => `refs/tags/${tag}`)],
-        { cwd: this.cwd, env: await this.getGitEnv() },
-      )
+      await exec('git', ['push', 'origin', ...tags.map(tag => `refs/tags/${tag}`)], {
+        cwd: this.cwd,
+        env: await this.getGitEnv(),
+      })
     } catch (err) {
       const tagList = tags.map(tag => `"${tag}"`).join(', ')
       const isSingleTag = tags.length === 1
@@ -226,19 +212,14 @@ export class GitLab {
   }
 
   async #getCliAuthEnv(): Promise<Record<string, string>> {
-    const username =
-      env.GITLAB_TOKEN_TYPE === 'oauth' ? 'oauth2' : await getUsername(this.api)
-    const basic = Buffer.from(`${username}:${this.#gitlabToken}`).toString(
-      'base64',
-    )
+    const username = env.GITLAB_TOKEN_TYPE === 'oauth' ? 'oauth2' : await getUsername(this.api)
+    const basic = Buffer.from(`${username}:${this.#gitlabToken}`).toString('base64')
 
     // The environment may already contain command-scoped Git config. Append
     // our KEY_n/VALUE_n entries so those existing settings stay active.
     const gitConfigCount = Number(process.env.GIT_CONFIG_COUNT ?? 0)
     if (!Number.isInteger(gitConfigCount) || gitConfigCount < 0) {
-      throw new Error(
-        `Invalid GIT_CONFIG_COUNT value: ${process.env.GIT_CONFIG_COUNT}`,
-      )
+      throw new Error(`Invalid GIT_CONFIG_COUNT value: ${process.env.GIT_CONFIG_COUNT}`)
     }
 
     // `git push origin` prefers remote.origin.pushurl over the fetch URL and

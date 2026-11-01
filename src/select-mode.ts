@@ -14,9 +14,7 @@ import {
 } from './utils.js'
 
 type ModeResult =
-  | { mode: 'none' }
-  | { mode: 'publish'; publishPlanPath: string }
-  | { mode: 'version' }
+  { mode: 'none' } | { mode: 'publish'; publishPlanPath: string } | { mode: 'version' }
 
 type PublishPlan = unknown[]
 
@@ -44,9 +42,7 @@ async function getMode(cwd: string): Promise<ModeResult> {
   const { changesets } = await readChangesetState(cwd)
 
   if (changesets.length > 0) {
-    const hasNonEmptyChangesets = changesets.some(
-      changeset => changeset.releases.length > 0,
-    )
+    const hasNonEmptyChangesets = changesets.some(changeset => changeset.releases.length > 0)
     return { mode: hasNonEmptyChangesets ? 'version' : 'none' }
   }
 

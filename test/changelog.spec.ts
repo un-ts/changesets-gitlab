@@ -1,7 +1,4 @@
-import type {
-  ModCompWithPackage,
-  NewChangesetWithCommit,
-} from '@changesets/types'
+import type { ModCompWithPackage, NewChangesetWithCommit } from '@changesets/types'
 import { GitbeakerRequestError } from '@gitbeaker/rest'
 
 const { mockApi, SERVER_URL, REPO } = vi.hoisted(() => {
@@ -114,9 +111,7 @@ describe('changelog', () => {
       repo: REPO,
     })
 
-    expect(line).toBe(
-      `\n\n- [\`abcdef1\`](${commitUrl}) Thanks Ada Lovelace! - fix the thing\n`,
-    )
+    expect(line).toBe(`\n\n- [\`abcdef1\`](${commitUrl}) Thanks Ada Lovelace! - fix the thing\n`)
   })
 
   test('linkifies issue and merge request references', async () => {
@@ -154,9 +149,7 @@ describe('changelog', () => {
       { repo: REPO },
     )
 
-    expect(line).toContain(
-      `[\`deadbee\`](${SERVER_URL}/${REPO}/-/commit/deadbeef)`,
-    )
+    expect(line).toContain(`[\`deadbee\`](${SERVER_URL}/${REPO}/-/commit/deadbeef)`)
   })
 
   test('links authors from the summary and honors disableThanks', async () => {
@@ -196,11 +189,10 @@ describe('changelog', () => {
   })
 
   test('renders an empty ref token when there is no commit or merge request', async () => {
-    const line = await changelog.getReleaseLine(
-      createChangeset({ commit: undefined }),
-      'patch',
-      { repo: REPO, template: '{ref}' },
-    )
+    const line = await changelog.getReleaseLine(createChangeset({ commit: undefined }), 'patch', {
+      repo: REPO,
+      template: '{ref}',
+    })
 
     expect(line).toBe('\n')
   })
@@ -229,9 +221,9 @@ describe('changelog', () => {
   test('requires a repo', async () => {
     delete process.env.CI_PROJECT_PATH
 
-    await expect(
-      changelog.getReleaseLine(createChangeset(), 'patch', {}),
-    ).rejects.toThrow('Please provide a repo')
+    await expect(changelog.getReleaseLine(createChangeset(), 'patch', {})).rejects.toThrow(
+      'Please provide a repo',
+    )
   })
 
   test('rejects an invalid project path', async () => {
@@ -265,9 +257,7 @@ describe('changelog', () => {
       repo: REPO,
     })
 
-    expect(line).toBe(
-      `\n\n- [\`abcdef1\`](${commitUrl}) Thanks Ada Lovelace! - fix the thing\n`,
-    )
+    expect(line).toBe(`\n\n- [\`abcdef1\`](${commitUrl}) Thanks Ada Lovelace! - fix the thing\n`)
   })
 
   test('uses the committer name when the commit author name is empty', async () => {
@@ -331,9 +321,7 @@ describe('changelog', () => {
   })
 
   test('builds dependency release lines', async () => {
-    const dependenciesUpdated = [
-      { name: 'dep', newVersion: '1.2.3' },
-    ] as ModCompWithPackage[]
+    const dependenciesUpdated = [{ name: 'dep', newVersion: '1.2.3' }] as ModCompWithPackage[]
 
     const line = await changelog.getDependencyReleaseLine(
       [createChangeset()],
@@ -341,9 +329,7 @@ describe('changelog', () => {
       { repo: REPO },
     )
 
-    expect(line).toBe(
-      `- Updated dependencies [[\`abcdef1\`](${commitUrl})]:\n  - dep@1.2.3`,
-    )
+    expect(line).toBe(`- Updated dependencies [[\`abcdef1\`](${commitUrl})]:\n  - dep@1.2.3`)
   })
 
   test('returns an empty dependency release line when nothing changed', async () => {

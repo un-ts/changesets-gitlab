@@ -13,11 +13,7 @@ import {
   type ChangelogOptions,
 } from './env.js'
 import { getCommitInfo, getMergeRequestInfo } from './get-gitlab-info.js'
-import {
-  buildReleaseLineTokens,
-  renderTemplate,
-  type ReleaseLineLinks,
-} from './render-template.js'
+import { buildReleaseLineTokens, renderTemplate, type ReleaseLineLinks } from './render-template.js'
 
 // Mirrors `@changesets/changelog-github`, but keeps GitLab's `!iid` merge
 // request references and `/-/` URLs, and adds `mr:`/`merge request:` prefixes
@@ -87,9 +83,7 @@ const getUsers = (
     return null
   }
   if (parsed.users.length > 0) {
-    return parsed.users
-      .map(user => `[@${user}](${serverUrl}/${user})`)
-      .join(', ')
+    return parsed.users.map(user => `[@${user}](${serverUrl}/${user})`).join(', ')
   }
   return links.user ?? null
 }
@@ -131,9 +125,7 @@ const getReleaseLine = async (
   })
 
   const summaryLinked = linkifyRefs(firstLine, config)
-  const continuation = futureLines
-    .map(line => `  ${linkifyRefs(line, config)}`)
-    .join('\n')
+  const continuation = futureLines.map(line => `  ${linkifyRefs(line, config)}`).join('\n')
 
   if (parsedOptions.template) {
     const tokens = buildReleaseLineTokens({ summaryLinked, links, users })
@@ -170,15 +162,11 @@ const getDependencyReleaseLine = async (
       return info?.commit.markdownLink ?? `\`${changeset.commit.slice(0, 7)}\``
     }),
   )
-  const commitLinks = commitLinkResults.filter(
-    (link): link is string => link != null,
-  )
+  const commitLinks = commitLinkResults.filter((link): link is string => link != null)
 
   return [
     `- Updated dependencies [${commitLinks.join(', ')}]:`,
-    ...dependenciesUpdated.map(
-      dependency => `  - ${dependency.name}@${dependency.newVersion}`,
-    ),
+    ...dependenciesUpdated.map(dependency => `  - ${dependency.name}@${dependency.newVersion}`),
   ].join('\n')
 }
 

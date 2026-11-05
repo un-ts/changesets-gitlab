@@ -37,9 +37,7 @@ async function findComment(
       continue
     }
 
-    const note = discussionOrNote.notes?.find(note =>
-      note.body.includes(marker),
-    )
+    const note = discussionOrNote.notes?.find(note => note.body.includes(marker))
     if (note) {
       return { discussionId: discussionOrNote.id, noteId: note.id }
     }
@@ -53,19 +51,11 @@ async function createComment(
   body: string,
 ): Promise<number | string> {
   if (commentType === 'discussion') {
-    const discussion = await api.MergeRequestDiscussions.create(
-      context.projectId,
-      mrIid,
-      body,
-    )
+    const discussion = await api.MergeRequestDiscussions.create(context.projectId, mrIid, body)
     return discussion.notes?.[0]?.id ?? discussion.id
   }
 
-  const note = await api.MergeRequestNotes.create(
-    context.projectId,
-    mrIid,
-    body,
-  )
+  const note = await api.MergeRequestNotes.create(context.projectId, mrIid, body)
   return note.id
 }
 
@@ -86,12 +76,7 @@ async function updateComment(
     return note.id
   }
 
-  const note = await api.MergeRequestNotes.edit(
-    context.projectId,
-    mrIid,
-    existing.noteId,
-    { body },
-  )
+  const note = await api.MergeRequestNotes.edit(context.projectId, mrIid, existing.noteId, { body })
   return note.id
 }
 
@@ -105,17 +90,13 @@ async function updateComment(
 export const prComment = async () => {
   const mrBranch = env.CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
   if (!mrBranch) {
-    throw new Error(
-      'This command should only be run on a merge request pipeline',
-    )
+    throw new Error('This command should only be run on a merge request pipeline')
   }
 
   const { CI_MERGE_REQUEST_IID: mrIid, GITLAB_COMMENT_TYPE: commentType } = env
 
   if (commentType !== 'discussion' && commentType !== 'note') {
-    throw new Error(
-      `Invalid GITLAB_COMMENT_TYPE "${commentType}", expected "discussion" or "note"`,
-    )
+    throw new Error(`Invalid GITLAB_COMMENT_TYPE "${commentType}", expected "discussion" or "note"`)
   }
 
   const body = getRequiredInput('body')

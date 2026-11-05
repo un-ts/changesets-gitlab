@@ -25,10 +25,7 @@ const files = new Map([
     }),
   ],
   ['pnpm-workspace.yaml', "packages:\n  - 'packages/*'\n"],
-  [
-    'packages/ui-kit/package.json',
-    JSON.stringify({ name: '@example/ui-kit', version: '1.0.0' }),
-  ],
+  ['packages/ui-kit/package.json', JSON.stringify({ name: '@example/ui-kit', version: '1.0.0' })],
   [
     'packages/ui-kit-storybook/package.json',
     JSON.stringify({
@@ -64,8 +61,7 @@ describe('getChangedPackages', () => {
     }
     mocks.readFile.mockImplementation((path: string) => {
       // A real filesystem resolves `./package.json` to `package.json`.
-      const contents =
-        overridden.get(path) ?? overridden.get(path.replace(/^\.\//, ''))
+      const contents = overridden.get(path) ?? overridden.get(path.replace(/^\.\//, ''))
       if (contents === undefined) {
         throw new Error(`Unexpected path: ${path}`)
       }
@@ -96,8 +92,7 @@ describe('getChangedPackages', () => {
         version: '1.0.0',
       }),
       'pnpm-workspace.yaml': "packages:\n  - '.'\n  - 'packages/*'\n",
-      '.changeset/root-change.md':
-        '---\n"root-package": patch\n---\n\nroot change\n',
+      '.changeset/root-change.md': '---\n"root-package": patch\n---\n\nroot change\n',
     })
 
     mocks.getAllFiles.mockResolvedValue([
@@ -113,9 +108,9 @@ describe('getChangedPackages', () => {
       changedFiles: ['package.json', '.changeset/root-change.md'],
     })
 
-    expect(
-      result.releasePlan.releases.map(({ name, type }) => ({ name, type })),
-    ).toEqual([{ name: 'root-package', type: 'patch' }])
+    expect(result.releasePlan.releases.map(({ name, type }) => ({ name, type }))).toEqual([
+      { name: 'root-package', type: 'patch' },
+    ])
   })
 
   test('falls back to the root package when pnpm-workspace.yaml has no packages field', async () => {

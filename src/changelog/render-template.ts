@@ -1,13 +1,6 @@
 const TOKEN_REGEX = /\{(\w+)\}/g
 
-const RELEASE_LINE_TOKENS = [
-  'summary',
-  'ref',
-  'pull',
-  'mr',
-  'commit',
-  'authors',
-] as const
+const RELEASE_LINE_TOKENS = ['summary', 'ref', 'pull', 'mr', 'commit', 'authors'] as const
 
 export interface ReleaseLineLinks {
   commit?: string

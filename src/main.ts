@@ -16,10 +16,7 @@ import {
   validateChangesetsCliVersion,
 } from './utils.js'
 
-export const main = async ({
-  published,
-  onlyChangesets,
-}: MainCommandOptions = {}) => {
+export const main = async ({ published, onlyChangesets }: MainCommandOptions = {}) => {
   const { GITLAB_TOKEN } = env
 
   const { absolute: cwd } = getCwdInput()
@@ -47,9 +44,7 @@ export const main = async ({
 
   const publishScript = getOptionalInput('publish-script')
   const hasChangesets = changesets.length > 0
-  const hasNonEmptyChangesets = changesets.some(
-    changeset => changeset.releases.length > 0,
-  )
+  const hasNonEmptyChangesets = changesets.some(changeset => changeset.releases.length > 0)
   const hasPublishScript = !!publishScript
 
   setOutput('published', false)
@@ -64,9 +59,7 @@ export const main = async ({
       return
     }
     case !hasChangesets && hasPublishScript: {
-      core.info(
-        'No changesets found. Attempting to publish any unpublished packages to npm',
-      )
+      core.info('No changesets found. Attempting to publish any unpublished packages to npm')
 
       const result = await runPublish({
         script: publishScript,
@@ -130,10 +123,7 @@ export function getPublishFlags() {
 // blocks in `changesets/action`'s `src/index.ts`. As well as the
 // GitHub-compatible outputs it runs the optional post-publish command with
 // `PUBLISHED`/`PUBLISHED_PACKAGES` set, which is a GitLab-only feature.
-export async function handlePublishResult(
-  result: PublishResult,
-  published?: string,
-) {
+export async function handlePublishResult(result: PublishResult, published?: string) {
   if (result.published) {
     setOutput('published', true)
     setOutput('published-packages', result.publishedPackages)

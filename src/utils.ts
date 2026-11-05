@@ -5,16 +5,8 @@ import os from 'node:os'
 import path from 'node:path'
 
 import * as core from '@actions/core'
-import {
-  exec,
-  getExecOutput,
-  type ExecOptions as ActionsExecOptions,
-} from '@actions/exec'
-import {
-  type CommitAction,
-  type Gitlab,
-  GitbeakerRequestError,
-} from '@gitbeaker/rest'
+import { exec, getExecOutput, type ExecOptions as ActionsExecOptions } from '@actions/exec'
+import { type CommitAction, type Gitlab, GitbeakerRequestError } from '@gitbeaker/rest'
 import type { Package } from '@manypkg/get-packages'
 import { getPackages } from '@manypkg/get-packages'
 import globalDirectory from 'global-directory'
@@ -37,10 +29,7 @@ export async function getVersionsByDirectory(cwd: string) {
   return new Map(packages.map(x => [x.dir, x.packageJson.version]))
 }
 
-export async function getChangedPackages(
-  cwd: string,
-  previousVersions: Map<string, string>,
-) {
+export async function getChangedPackages(cwd: string, previousVersions: Map<string, string>) {
   const { packages } = await getPackages(cwd)
   const changedPackages = new Set<Package>()
 
@@ -128,9 +117,7 @@ export async function getAllFiles(dir: string, base = dir): Promise<string[]> {
     // eslint-disable-next-line @typescript-eslint/await-thenable
     direntList.map(dirent => {
       const res = path.resolve(dir, dirent.name)
-      return dirent.isDirectory()
-        ? getAllFiles(res, base)
-        : [path.relative(base, res)]
+      return dirent.isDirectory() ? getAllFiles(res, base) : [path.relative(base, res)]
     }),
   )
   return files.flat()
@@ -166,15 +153,8 @@ export async function commitChangesSinceBase({
   })
 }
 
-async function getCommitActions(
-  cwd: string,
-  baseCommit: string,
-): Promise<CommitAction[]> {
-  const { stdout: gitRoot } = await getExecOutput(
-    'git',
-    ['rev-parse', '--show-toplevel'],
-    { cwd },
-  )
+async function getCommitActions(cwd: string, baseCommit: string): Promise<CommitAction[]> {
+  const { stdout: gitRoot } = await getExecOutput('git', ['rev-parse', '--show-toplevel'], { cwd })
   // `git diff` paths are relative to the repository root, while `ls-files`
   // needs `--full-name` to match; both are scoped to `cwd`.
   const { stdout: diffOutput } = await getExecOutput(
@@ -184,15 +164,7 @@ async function getCommitActions(
   )
   const { stdout: untrackedOutput } = await getExecOutput(
     'git',
-    [
-      'ls-files',
-      '--others',
-      '--exclude-standard',
-      '--full-name',
-      '-z',
-      '--',
-      '.',
-    ],
+    ['ls-files', '--others', '--exclude-standard', '--full-name', '-z', '--', '.'],
     { cwd },
   )
 
@@ -200,10 +172,7 @@ async function getCommitActions(
   const actions: CommitAction[] = []
   const seen = new Set<string>()
 
-  const addAction = async (
-    filePath: string,
-    action: CommitAction['action'],
-  ) => {
+  const addAction = async (filePath: string, action: CommitAction['action']) => {
     if (seen.has(filePath)) {
       return
     }
@@ -211,10 +180,7 @@ async function getCommitActions(
     if (action === 'delete') {
       actions.push({ action, filePath })
     } else {
-      const content = await fs.readFile(
-        path.resolve(rootDir, filePath),
-        'base64',
-      )
+      const content = await fs.readFile(path.resolve(rootDir, filePath), 'base64')
       actions.push({ action, filePath, content, encoding: 'base64' })
     }
   }
@@ -251,8 +217,7 @@ async function getCommitActions(
 // `INPUT_*` variables.
 const normalizeInputName = (name: string) => name.replaceAll('-', '_')
 
-const toInputEnvName = (name: string) =>
-  `INPUT_${normalizeInputName(name).toUpperCase()}`
+const toInputEnvName = (name: string) => `INPUT_${normalizeInputName(name).toUpperCase()}`
 
 export const getOptionalInput = (name: string) =>
   core.getInput(normalizeInputName(name)) || undefined
@@ -309,11 +274,7 @@ export const getCwdInput = (): { relative: string; absolute: string } => {
   }
   const absolute = path.resolve(CWD, input)
   const relative = path.relative(CWD, absolute)
-  if (
-    relative === '..' ||
-    relative.startsWith(`..${path.sep}`) ||
-    path.isAbsolute(relative)
-  ) {
+  if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
     throw new Error(`Invalid cwd input: "${input}"`)
   }
   return { relative, absolute }
@@ -337,12 +298,7 @@ export const getUsername = (api: Gitlab) => {
 export const require = createRequire(import.meta.url)
 
 export function isErrorWithCode(err: unknown, code: string) {
-  return (
-    typeof err === 'object' &&
-    err !== null &&
-    'code' in err &&
-    err.code === code
-  )
+  return typeof err === 'object' && err !== null && 'code' in err && err.code === code
 }
 
 export async function logGitbeakerError(err: unknown) {
@@ -453,17 +409,14 @@ export async function validateChangesetsCliVersion(cwd: string) {
   let cliPackageJson: { version?: string }
 
   try {
-    cliPackageJson = require(
-      resolveChangesetsCliFile('@changesets/cli/package.json', cwd),
-    ) as { version?: string }
+    cliPackageJson = require(resolveChangesetsCliFile('@changesets/cli/package.json', cwd)) as {
+      version?: string
+    }
   } catch {
     return
   }
 
-  if (
-    typeof cliPackageJson.version === 'string' &&
-    major(cliPackageJson.version) === 2
-  ) {
+  if (typeof cliPackageJson.version === 'string' && major(cliPackageJson.version) === 2) {
     throw new Error(changesetsCliCompatibilityError)
   }
 }
@@ -484,10 +437,7 @@ export function execChangesetsCli(args: string[], options?: ExecOptions) {
   )
 }
 
-export function getExecOutputChangesetsCli(
-  args: string[],
-  options?: ExecOptions,
-) {
+export function getExecOutputChangesetsCli(args: string[], options?: ExecOptions) {
   return getExecOutput(
     'node',
     [resolveChangesetsCli(options?.cwd ?? process.cwd()), ...args],

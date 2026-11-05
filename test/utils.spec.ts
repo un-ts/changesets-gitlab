@@ -236,10 +236,7 @@ describe('utils', () => {
     test('appends further outputs to the same file', () => {
       setOutput('has-changesets', true)
       setOutput('pr-number', '42')
-      const outputs = fs.readFileSync(
-        path.join(home, '.changesets-gitlab.outputs'),
-        'utf8',
-      )
+      const outputs = fs.readFileSync(path.join(home, '.changesets-gitlab.outputs'), 'utf8')
       expect(outputs).toContain('has-changesets<<ghadelimiter_')
       expect(outputs).toContain('pr-number<<ghadelimiter_')
     })
@@ -247,9 +244,7 @@ describe('utils', () => {
     test('opts out when GITHUB_OUTPUT is explicitly empty', () => {
       process.env.GITHUB_OUTPUT = ''
       setOutput('has-changesets', true)
-      expect(fs.existsSync(path.join(home, '.changesets-gitlab.outputs'))).toBe(
-        false,
-      )
+      expect(fs.existsSync(path.join(home, '.changesets-gitlab.outputs'))).toBe(false)
       expect(process.env.GITHUB_OUTPUT).toBe('')
     })
   })
@@ -260,9 +255,7 @@ describe('utils', () => {
     })
 
     test('does not throw when no old input is set', () => {
-      expect(() =>
-        throwOnRenamedInputs({ publish: 'publish-script' }),
-      ).not.toThrow()
+      expect(() => throwOnRenamedInputs({ publish: 'publish-script' })).not.toThrow()
     })
 
     test('throws and lists the replacement when an old input is set', () => {
@@ -288,9 +281,7 @@ describe('utils', () => {
     test('falls back to the globally installed `@changesets/cli`', () => {
       // Use a cwd outside the repository so the lookup cannot walk up into
       // the repository's own `node_modules`.
-      const cwd = fs.mkdtempSync(
-        path.join(os.tmpdir(), 'changesets-gitlab-cwd-'),
-      )
+      const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'changesets-gitlab-cwd-'))
       try {
         expect(resolveChangesetsCliFile('@changesets/cli/bin.js', cwd)).toBe(
           path.join(globalPackagesDir, '@changesets/cli/bin.js'),

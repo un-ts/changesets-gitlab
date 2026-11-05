@@ -204,9 +204,7 @@ describe('runPublish', () => {
 
     expect(result).toEqual({ published: false, exitCode: 0 })
     expect(core.warning).toHaveBeenCalledWith(
-      expect.stringContaining(
-        'GitLab releases and git tags cannot be created without this output',
-      ),
+      expect.stringContaining('GitLab releases and git tags cannot be created without this output'),
     )
   })
 
@@ -232,10 +230,7 @@ describe('runPublish', () => {
       exitCode: 0,
     })
     expect(pushTags).toHaveBeenCalledWith(['pkg@1.1.0'])
-    expect(create).toHaveBeenCalledWith(
-      '1',
-      expect.objectContaining({ tag_name: 'pkg@1.1.0' }),
-    )
+    expect(create).toHaveBeenCalledWith('1', expect.objectContaining({ tag_name: 'pkg@1.1.0' }))
   })
 
   test('forwards the GitLab CLI auth environment to the publish script', async () => {
@@ -260,9 +255,10 @@ describe('runPublish', () => {
     })
 
     expect(getGitEnv).toHaveBeenCalledOnce()
-    const captured = JSON.parse(
-      fs.readFileSync(path.join(cwd, 'env.json'), 'utf8'),
-    ) as Record<string, string>
+    const captured = JSON.parse(fs.readFileSync(path.join(cwd, 'env.json'), 'utf8')) as Record<
+      string,
+      string
+    >
     expect(captured.GIT_CONFIG_COUNT).toBe('2')
     expect(captured.GIT_CONFIG_VALUE_1).toBe('AUTHORIZATION: basic test')
   })
@@ -302,9 +298,10 @@ describe('runVersion', () => {
     })
 
     expect(getGitEnv).toHaveBeenCalledOnce()
-    const captured = JSON.parse(
-      fs.readFileSync(path.join(cwd, 'env.json'), 'utf8'),
-    ) as Record<string, string>
+    const captured = JSON.parse(fs.readFileSync(path.join(cwd, 'env.json'), 'utf8')) as Record<
+      string,
+      string
+    >
     expect(captured.GIT_CONFIG_VALUE_1).toBe('AUTHORIZATION: basic test')
   })
 
@@ -327,10 +324,7 @@ describe('runVersion', () => {
     expect(call[3]).toBe('Version Packages')
   })
 
-  const runVersionWithDraft = async (
-    prDraft: PrDraft,
-    existingTitle?: string,
-  ) => {
+  const runVersionWithDraft = async (prDraft: PrDraft, existingTitle?: string) => {
     const cwd = createRepo(bumpedProject)
     const mergeRequests = createMergeRequests()
     if (existingTitle !== undefined) {
@@ -406,9 +400,7 @@ describe('GitLab.prepareBranch', () => {
       expect(revParseHead()).toBe(triggerSha)
       expect(
         // eslint-disable-next-line sonarjs/no-os-command-from-path
-        execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd })
-          .toString()
-          .trim(),
+        execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd }).toString().trim(),
       ).toBe('changeset-release/main')
     } finally {
       if (originalSha === undefined) {

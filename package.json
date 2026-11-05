@@ -77,14 +77,14 @@
     "yaml": "^2.9.1"
   },
   "devDependencies": {
-    "@1stg/common-config": "^16.0.0",
+    "@1stg/common-config": "^17.0.0",
     "@changesets/changelog-github": "^1.0.1",
     "@changesets/cli": "^3.0.3",
     "@commitlint/cli": "^21.2.4",
     "@types/global-agent": "^3.0.0",
     "@types/micromatch": "^4.0.10",
     "@types/semver": "^7.8.0",
-    "@types/web": "^0.0.359",
+    "@types/web": "^0.0.360",
     "@typescript/native": "npm:typescript@^7.0.2",
     "@vitest/coverage-istanbul": "^5.0.5",
     "clean-pkg-json": "^2.0.0",
@@ -100,7 +100,7 @@
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "vite": "^8.3.4",
     "vitest": "^5.0.5",
-    "yarn-berry-deduplicate": "^7.1.0"
+    "yarn-berry-deduplicate": "^8.0.0"
   },
   "resolutions": {
     "prettier": "^3.9.10"

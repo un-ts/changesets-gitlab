@@ -62,6 +62,7 @@ const changesetDiff = {
 
 const existingDiscussion = {
   id: EXISTING_DISCUSSION_ID,
+  individual_note: false,
   notes: [
     {
       id: 11,
@@ -165,6 +166,17 @@ describe('comment', () => {
     expect(editCall[2]).toBe(EXISTING_DISCUSSION_ID)
     expect(editCall[3]).toBe(existingDiscussion.notes[0].id)
     expect(JSON.stringify(editCall[4])).toContain('No Changeset found')
+  })
+
+  test('updates an individual note without reopening it when no changeset exists', async () => {
+    mockApi.MergeRequestDiscussions.all.mockResolvedValue([
+      { ...existingDiscussion, individual_note: true },
+    ])
+
+    await comment()
+
+    expect(mockApi.MergeRequestDiscussions.resolve).not.toHaveBeenCalled()
+    expect(mockApi.MergeRequestDiscussions.editNote).toHaveBeenCalledOnce()
   })
 
   test('does not resolve a new discussion when auto-resolve is disabled', async () => {

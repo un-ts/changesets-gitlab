@@ -162,7 +162,11 @@ async function getNoteInfo(
   mrIid: number,
   commentType: LooseString<'discussion'>,
   random?: boolean,
-): Promise<{ discussionId: string; noteId: number } | null | undefined>
+): Promise<
+  | { discussionId: string; individualNote: boolean; noteId: number }
+  | null
+  | undefined
+>
 async function getNoteInfo(
   api: Gitlab,
   mrIid: number,
@@ -175,7 +179,7 @@ async function getNoteInfo(
   commentType: LooseString<'discussion' | 'note'>,
   random?: boolean,
 ): Promise<
-  | { discussionId: string; noteId: number }
+  | { discussionId: string; individualNote: boolean; noteId: number }
   | { noteId: number }
   | null
   | undefined
@@ -207,6 +211,7 @@ async function getNoteInfo(
     if (changesetBotNote) {
       return {
         discussionId: discussionOrNote.id,
+        individualNote: discussionOrNote.individual_note,
         noteId: changesetBotNote.id,
       }
     }
@@ -348,6 +353,14 @@ ${newChangesetTemplate}
   return { body: prComment, hasChangeset }
 }
 
+// Individual notes cannot be reopened. GitLab rejects `resolved: false` and
+// the comment update never runs.
+const shouldResolveDiscussion = (
+  autoResolve: boolean,
+  hasChangeset: boolean,
+  individualNote: boolean,
+) => autoResolve && (hasChangeset || !individualNote)
+
 export const comment = async () => {
   const mrBranch = env.CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
   if (!mrBranch) {
@@ -382,7 +395,13 @@ export const comment = async () => {
         )
 
         if (noteInfo) {
-          if (autoResolve) {
+          if (
+            shouldResolveDiscussion(
+              autoResolve,
+              hasChangeset,
+              noteInfo.individualNote,
+            )
+          ) {
             await api.MergeRequestDiscussions.resolve(
               context.projectId,
               mrIid,

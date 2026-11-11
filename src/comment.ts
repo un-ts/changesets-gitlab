@@ -377,16 +377,17 @@ export const comment = async () => {
 
     switch (commentType) {
       case 'discussion': {
+        const autoResolve = TRUTHY_VALUES.has(
+          env.GITLAB_COMMENT_DISCUSSION_AUTO_RESOLVE || '1',
+        )
+
         if (noteInfo) {
-          if (
-            hasChangeset &&
-            TRUTHY_VALUES.has(env.GITLAB_COMMENT_DISCUSSION_AUTO_RESOLVE || '1')
-          ) {
+          if (autoResolve) {
             await api.MergeRequestDiscussions.resolve(
               context.projectId,
               mrIid,
               noteInfo.discussionId,
-              true,
+              hasChangeset,
             )
           }
 
@@ -401,11 +402,22 @@ export const comment = async () => {
           )
         }
 
-        return api.MergeRequestDiscussions.create(
+        const discussion = await api.MergeRequestDiscussions.create(
           context.projectId,
           mrIid,
           prComment,
         )
+
+        if (hasChangeset && autoResolve) {
+          await api.MergeRequestDiscussions.resolve(
+            context.projectId,
+            mrIid,
+            discussion.id,
+            true,
+          )
+        }
+
+        return discussion
       }
       case 'note': {
         if (noteInfo) {

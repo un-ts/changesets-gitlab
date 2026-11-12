@@ -353,13 +353,7 @@ ${newChangesetTemplate}
   return { body: prComment, hasChangeset }
 }
 
-// Individual notes are never resolvable: GitLab rejects both resolving and
-// reopening them, and the comment update never runs.
-const shouldResolveDiscussion = (
-  autoResolve: boolean,
-  individualNote: boolean,
-) => autoResolve && !individualNote
-
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export const comment = async () => {
   const mrBranch = env.CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
   if (!mrBranch) {
@@ -394,7 +388,9 @@ export const comment = async () => {
         )
 
         if (noteInfo) {
-          if (shouldResolveDiscussion(autoResolve, noteInfo.individualNote)) {
+          // Individual notes are never resolvable: GitLab rejects both
+          // resolving and reopening them, and the comment update never runs.
+          if (autoResolve && !noteInfo.individualNote) {
             await api.MergeRequestDiscussions.resolve(
               context.projectId,
               mrIid,

@@ -76,6 +76,7 @@ const originalEnv = { ...process.env }
 
 beforeEach(() => {
   vi.clearAllMocks()
+  vi.unstubAllEnvs()
 
   mockApi.MergeRequests.allDiffs.mockResolvedValue([])
   mockApi.MergeRequestDiscussions.all.mockResolvedValue([])
@@ -179,8 +180,23 @@ describe('comment', () => {
     expect(mockApi.MergeRequestDiscussions.editNote).toHaveBeenCalledOnce()
   })
 
+  test('updates an individual note without resolving it when a changeset is present', async () => {
+    mockApi.MergeRequests.allDiffs.mockResolvedValue([changesetDiff])
+    mockApi.MergeRequestDiscussions.all.mockResolvedValue([
+      { ...existingDiscussion, individual_note: true },
+    ])
+
+    await comment()
+
+    expect(mockApi.MergeRequestDiscussions.resolve).not.toHaveBeenCalled()
+    expect(mockApi.MergeRequestDiscussions.editNote).toHaveBeenCalledOnce()
+    expect(
+      JSON.stringify(mockApi.MergeRequestDiscussions.editNote.mock.calls[0]),
+    ).toContain('Changeset detected')
+  })
+
   test('does not resolve a new discussion when auto-resolve is disabled', async () => {
-    process.env.GITLAB_COMMENT_DISCUSSION_AUTO_RESOLVE = 'false'
+    vi.stubEnv('GITLAB_COMMENT_DISCUSSION_AUTO_RESOLVE', 'false')
     vi.resetModules()
     const { comment: commentWithoutAutoResolve } =
       await import('../src/comment.js')
@@ -193,7 +209,7 @@ describe('comment', () => {
   })
 
   test('does not reopen an existing discussion when auto-resolve is disabled', async () => {
-    process.env.GITLAB_COMMENT_DISCUSSION_AUTO_RESOLVE = 'false'
+    vi.stubEnv('GITLAB_COMMENT_DISCUSSION_AUTO_RESOLVE', 'false')
     vi.resetModules()
     const { comment: commentWithoutAutoResolve } =
       await import('../src/comment.js')
@@ -206,7 +222,7 @@ describe('comment', () => {
   })
 
   test('posts a note instead of a discussion when the comment type is note', async () => {
-    process.env.GITLAB_COMMENT_TYPE = 'note'
+    vi.stubEnv('GITLAB_COMMENT_TYPE', 'note')
     vi.resetModules()
     const { comment: commentAsNote } = await import('../src/comment.js')
     mockApi.MergeRequests.allDiffs.mockResolvedValue([changesetDiff])

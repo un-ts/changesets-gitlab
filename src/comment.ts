@@ -353,13 +353,12 @@ ${newChangesetTemplate}
   return { body: prComment, hasChangeset }
 }
 
-// Individual notes cannot be reopened. GitLab rejects `resolved: false` and
-// the comment update never runs.
+// Individual notes are never resolvable: GitLab rejects both resolving and
+// reopening them, and the comment update never runs.
 const shouldResolveDiscussion = (
   autoResolve: boolean,
-  hasChangeset: boolean,
   individualNote: boolean,
-) => autoResolve && (hasChangeset || !individualNote)
+) => autoResolve && !individualNote
 
 export const comment = async () => {
   const mrBranch = env.CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
@@ -395,13 +394,7 @@ export const comment = async () => {
         )
 
         if (noteInfo) {
-          if (
-            shouldResolveDiscussion(
-              autoResolve,
-              hasChangeset,
-              noteInfo.individualNote,
-            )
-          ) {
+          if (shouldResolveDiscussion(autoResolve, noteInfo.individualNote)) {
             await api.MergeRequestDiscussions.resolve(
               context.projectId,
               mrIid,

@@ -162,7 +162,11 @@ async function getNoteInfo(
   mrIid: number,
   commentType: LooseString<'discussion'>,
   random?: boolean,
-): Promise<{ discussionId: string; noteId: number } | null | undefined>
+): Promise<
+  | { discussionId: string; individualNote: boolean; noteId: number }
+  | null
+  | undefined
+>
 async function getNoteInfo(
   api: Gitlab,
   mrIid: number,
@@ -175,7 +179,7 @@ async function getNoteInfo(
   commentType: LooseString<'discussion' | 'note'>,
   random?: boolean,
 ): Promise<
-  | { discussionId: string; noteId: number }
+  | { discussionId: string; individualNote: boolean; noteId: number }
   | { noteId: number }
   | null
   | undefined
@@ -207,6 +211,7 @@ async function getNoteInfo(
     if (changesetBotNote) {
       return {
         discussionId: discussionOrNote.id,
+        individualNote: discussionOrNote.individual_note,
         noteId: changesetBotNote.id,
       }
     }
@@ -348,6 +353,7 @@ ${newChangesetTemplate}
   return { body: prComment, hasChangeset }
 }
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export const comment = async () => {
   const mrBranch = env.CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
   if (!mrBranch) {
@@ -377,16 +383,19 @@ export const comment = async () => {
 
     switch (commentType) {
       case 'discussion': {
+        const autoResolve = TRUTHY_VALUES.has(
+          env.GITLAB_COMMENT_DISCUSSION_AUTO_RESOLVE || '1',
+        )
+
         if (noteInfo) {
-          if (
-            hasChangeset &&
-            TRUTHY_VALUES.has(env.GITLAB_COMMENT_DISCUSSION_AUTO_RESOLVE || '1')
-          ) {
+          // Individual notes are never resolvable: GitLab rejects both
+          // resolving and reopening them, and the comment update never runs.
+          if (autoResolve && !noteInfo.individualNote) {
             await api.MergeRequestDiscussions.resolve(
               context.projectId,
               mrIid,
               noteInfo.discussionId,
-              true,
+              hasChangeset,
             )
           }
 
@@ -401,11 +410,22 @@ export const comment = async () => {
           )
         }
 
-        return api.MergeRequestDiscussions.create(
+        const discussion = await api.MergeRequestDiscussions.create(
           context.projectId,
           mrIid,
           prComment,
         )
+
+        if (hasChangeset && autoResolve) {
+          await api.MergeRequestDiscussions.resolve(
+            context.projectId,
+            mrIid,
+            discussion.id,
+            true,
+          )
+        }
+
+        return discussion
       }
       case 'note': {
         if (noteInfo) {

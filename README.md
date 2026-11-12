@@ -109,7 +109,7 @@ GITLAB_TOKEN_TYPE                      # optional, type of the provided token in
 GITLAB_CI_USER_NAME                    # optional, username with accessibility to push, used in pairs of the above token (if it was personal access token). If not set read it from the Gitlab API
 GITLAB_CI_USER_EMAIL                   # optional, default `gitlab[bot]@users.noreply.gitlab.com`
 GITLAB_COMMENT_TYPE                    # optional, type of the comment. defaults to `discussion`. can be set to `note` to not create a discussion instead of a thread
-GITLAB_COMMENT_DISCUSSION_AUTO_RESOLVE # optional, automatically resolve added discussion when changeset is present, if you want to always resolve the discussion, you should actually use `GITLAB_COMMENT_TYPE=note` instead, default `true`
+GITLAB_COMMENT_DISCUSSION_AUTO_RESOLVE # optional, resolve the discussion when a changeset is present (including the run that creates it) and reopen it when the changeset is removed. To avoid a resolvable thread, use `GITLAB_COMMENT_TYPE=note` instead. Default `true`
 GITLAB_COMMENT_CUSTOM_LINKS            # optional, override the links content referenced in the cli bot comment, use {{ addChangesetUrl }} placeholder for the dynamic URL to add a changeset
 GITLAB_ADD_CHANGESET_MESSAGE           # optional, default commit message for adding changesets on GitLab Web UI
 DEBUG_GITLAB_CREDENTIAL                # optional, set to `1`/`true` to echo the remote URL when debugging git authentication; WARNING: the remote URL may contain credentials

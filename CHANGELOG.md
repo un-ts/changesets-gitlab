@@ -1,5 +1,11 @@
 # changesets-gitlab
 
+## 0.17.2
+
+### Patch Changes
+
+- [#281](https://github.com/un-ts/changesets-gitlab/pull/281) [`1f9ad64`](https://github.com/un-ts/changesets-gitlab/commit/1f9ad64db08de5c069b3b0122e76e8d5b0e0a922) Thanks [@bartschriever](https://github.com/bartschriever)! - **Fixed** Close the merge request discussion on the same run that finds a changeset, including the run that creates the discussion, and reopen it when the changeset is removed.
+
 ## 0.17.1
 
 ### Patch Changes
